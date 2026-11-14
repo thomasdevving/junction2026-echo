@@ -53,7 +53,7 @@ The comparison is like with like: the chef's reference and the learner's frame a
 ## Evidence on Hand
 
 - Monitor C mockup (design reference, outside the repo).
-- Fixture recipe and placeholder step images in `../ai/fixtures/`.
+- Fixture recipe in `../ai/fixtures/`: the real chef narration and step stills from the glasses take (2026-11-14).
 - No user testing yet; no measured accuracy or latency numbers yet. Do not fabricate either.
 
 ## Product Principles

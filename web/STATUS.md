@@ -181,11 +181,15 @@ Backup recording: none yet.
 ## Repository checks (WEB-05.6, 2026-11-14 01:20)
 
 - Secret scan: `git log --all -p | grep -n -i -E "service_role|api[_-]?key\s*=|AIza|secret"` over all branches. Every hit is code that reads a key, an empty `.example` value, or a test placeholder (`dev-key`, `replace-me`, `secret-demo`). No real key, no `AIza`, no `service_role` value. **Clean.** Re-run before the final submission.
-- Committed images: only the 12 generated step placeholders (`ai/fixtures/images/`, `ios/Echo/Resources/Fixtures/images/`, made by `ai/scripts/make_placeholders.py`). No faces or bystanders. `ai/eval/frames/` and `web/pitch/` hold no images yet.
+- Committed images: the 12 generated step placeholders were replaced on 2026-11-15 by real stills from the chef's glasses take (`ai/fixtures/images/`, `ios/Echo/Resources/Fixtures/images/`; hands and table only, no faces or bystanders). `ai/eval/frames/` and `web/pitch/` hold no images yet.
+
+## Real chef take in the copy (2026-11-15)
+
+Homepage text no longer says the lesson uses placeholder images; it says the lesson and its reference images come from the chef's glasses take, which went through upload, extraction and review into a published lesson. `pitch/run-sheet.md` beat 6 and `PRODUCT.md` updated: the demo question is now **"Where should the cheese go?"**, which the real narration answers. `node --test "web/tests/*.test.mjs"`: 41 passed.
 
 ## Needs from other tracks
 
-- WEB-02.5: iOS/AI owners to provide one consented real chef take, uploaded in Chef mode or identified as the MP4 fallback, so extraction and human review can be measured on real material.
+- WEB-02.5: real chef take now exists (recorded in Chef mode through the glasses 2026-11-14, processed on production into published recipe `ee755841`). Still to do: a chef reviewing that lesson on this page with the review time recorded.
 - WEB-04 final: AI owner to publish AI-07 measured results (set sizes, verdict/false-approval counts, ablation and watcher results, model IDs, date and conditions); iOS owner to publish IOS-06 real-device model/firmware, what actually ran and its limitations. Finalization is blocked until these exist.
 - WEB-03.6: iOS owner to run one real session while the monitor is attached; compare the reconstructed lens to the phone preview and record observed delay/mismatches. A human should also check the monitor from three metres away.
 

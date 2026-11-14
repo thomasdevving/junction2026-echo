@@ -39,7 +39,7 @@
 | 3 | Keeps working | ⚠ "Filling piled up" / "Spread it to the edges" + reference + one spoken sentence (icon and words: the lens has no amber or green) | "Nobody asked. The glasses compared this view with the chef's and spoke first." |
 | 4 | Spreads the filling out in an even layer to the edges | Warning clears | "One instruction, in the chef's words." |
 | 5 | Pinches, or says "check" | "Checking…" → ✓ "Looks right" + chime | "Now they ask, and it passes." |
-| 6 | Asks aloud: **"Why spread it to the edges?"** ⟨confirm against the real chef transcript: the current fixture narration is a placeholder⟩ | Caption + spoken answer | "The answer comes from the chef's own narration." |
+| 6 | Asks aloud: **"Where should the cheese go?"** (the real chef narration answers it: "don't put it in the middle like this, it should reach the edges, or greater") | Caption + spoken answer | "The answer comes from the chef's own narration." |
 | 7 | Covers the bread with a hand, then checks | "Can't tell — look at the board" | "When it can't see, it says so instead of guessing." |
 | 8 | — | — | Evidence slide: measured numbers only, pilot, what's next |
 
