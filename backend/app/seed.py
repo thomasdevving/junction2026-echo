@@ -7,6 +7,7 @@ import logging
 import os
 import tempfile
 import uuid
+from contextlib import nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -56,14 +57,20 @@ def step_from_spec(recipe_id: str, spec: dict[str, Any], step_id: str | None = N
 def default_take(fixture_dir: Path) -> Path | None:
     """The chef take the fixture was made from.
 
-    $ECHO_REAL_TAKE, else <ai>/footage/chef-take-sandwich.mp4; None when neither exists."""
+    $ECHO_REAL_TAKE, else <ai>/footage/chef-take-sandwich.mp4; None when neither exists.
+    A set but wrong $ECHO_REAL_TAKE raises FileNotFoundError instead of silently dropping clips."""
     env = os.environ.get("ECHO_REAL_TAKE")
-    path = Path(env) if env else fixture_dir.parent / "footage" / "chef-take-sandwich.mp4"
+    if env:
+        if not Path(env).is_file():
+            raise FileNotFoundError(f"ECHO_REAL_TAKE is set but is not a file: {env}")
+        return Path(env)
+    path = fixture_dir.parent / "footage" / "chef-take-sandwich.mp4"
     return path if path.is_file() else None
 
 
 async def _put_clip(store: Store, recipe_id: str, step: Step, video: Path, workdir: Path) -> None:
     """Cut the step's clip window from the take and upload it; a failure leaves clip_path None."""
+    from app.errors import ApiError
     from app.media.ffmpeg import FfmpegError, extract_clip
 
     if step.clip_start_s is None or step.clip_end_s is None:
@@ -74,7 +81,7 @@ async def _put_clip(store: Store, recipe_id: str, step: Step, video: Path, workd
         path = clip_path(recipe_id, step.idx)
         await store.put_blob("media", path, out.read_bytes(), "video/mp4")
         step.clip_path = path
-    except (FfmpegError, OSError) as exc:
+    except (FfmpegError, ApiError, OSError) as exc:
         log.warning("seed clip for step %d failed: %s", step.idx, exc)
 
 
@@ -106,21 +113,19 @@ async def write_fixture_recipe(
         )
     )
     steps: list[Step] = []
-    workdir = tempfile.TemporaryDirectory(prefix="echo-seed-") if video else None
-    for spec in draft.steps:
-        step = step_from_spec(
-            recipe.id, spec.model_dump(mode="json"), seed_step_id(recipe.id, spec.idx)
-        )
-        image = fixture_dir / "images" / f"step-{spec.idx}.jpg"
-        if image.is_file():
-            path = ref_image_path(recipe.id, spec.idx)
-            await store.put_blob("media", path, image.read_bytes(), "image/jpeg")
-            step.ref_image_path = path
-        if video and workdir:
-            await _put_clip(store, recipe.id, step, video, Path(workdir.name))
-        steps.append(step)
-    if workdir:
-        workdir.cleanup()
+    with tempfile.TemporaryDirectory(prefix="echo-seed-") if video else nullcontext() as workdir:
+        for spec in draft.steps:
+            step = step_from_spec(
+                recipe.id, spec.model_dump(mode="json"), seed_step_id(recipe.id, spec.idx)
+            )
+            image = fixture_dir / "images" / f"step-{spec.idx}.jpg"
+            if image.is_file():
+                path = ref_image_path(recipe.id, spec.idx)
+                await store.put_blob("media", path, image.read_bytes(), "image/jpeg")
+                step.ref_image_path = path
+            if video and workdir:
+                await _put_clip(store, recipe.id, step, video, Path(workdir))
+            steps.append(step)
     stored = await store.replace_steps(recipe.id, steps)
     refcache.invalidate_recipe(recipe.id)
     recipe = await store.update_recipe(recipe.id, status=status) or recipe

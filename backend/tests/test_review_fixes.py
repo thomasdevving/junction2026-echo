@@ -127,3 +127,30 @@ async def test_seed_cuts_step_clips_from_the_chef_take(tmp_path, take_mp4):
         assert blob and blob[4:8] == b"ftyp"
     _, plain = await write_fixture_recipe(MemoryStore(tmp_path / "b"), draft, fixture_dir, "review")
     assert not any(s.clip_path for s in plain)
+
+
+@requires_ai
+@requires_ffmpeg
+async def test_seed_clip_failure_leaves_clip_none(tmp_path):
+    """An unreadable take does not abort the seed: stills are stored, clip_path stays None."""
+    from echo_ai import config as ai_config
+
+    from app.seed import load_draft, write_fixture_recipe
+    from app.store.memory import MemoryStore
+
+    bad = tmp_path / "not-a-video.mp4"
+    bad.write_bytes(b"not a video")
+    fixture_dir = ai_config.fixture_dir()
+    draft = load_draft(fixture_dir)
+    _, steps = await write_fixture_recipe(
+        MemoryStore(tmp_path / "s"), draft, fixture_dir, "review", bad
+    )
+    assert all(s.ref_image_path for s in steps) and not any(s.clip_path for s in steps)
+
+
+def test_default_take_rejects_a_wrong_env_path(tmp_path, monkeypatch):
+    from app.seed import default_take
+
+    monkeypatch.setenv("ECHO_REAL_TAKE", str(tmp_path / "missing.mp4"))
+    with pytest.raises(FileNotFoundError):
+        default_take(tmp_path)

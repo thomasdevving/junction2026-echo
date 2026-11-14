@@ -78,7 +78,8 @@ async def run(fixture_dir: Path, publish: bool, replace: bool, video: Path | Non
         print(f"warning: steps without a reference image: {missing}", file=sys.stderr)
     no_clip = [s.idx for s in steps if video and s.clip_start_s is not None and not s.clip_path]
     if no_clip:
-        print(f"warning: steps whose clip failed: {no_clip}", file=sys.stderr)
+        print(f"error: steps whose clip failed: {no_clip}", file=sys.stderr)
+        return 1
     return 0
 
 
@@ -87,17 +88,22 @@ def main() -> int:
     ap.add_argument("--fixture", type=Path, default=None, help="folder with sushi_recipe.json")
     ap.add_argument("--publish", action="store_true", help="status published (default review)")
     ap.add_argument("--replace", action="store_true", help="delete an existing recipe first")
-    ap.add_argument(
+    clips = ap.add_mutually_exclusive_group()
+    clips.add_argument(
         "--video",
         type=Path,
         default=None,
         help="chef take to cut step clips from (default: $ECHO_REAL_TAKE or "
         "ai/footage/chef-take-sandwich.mp4)",
     )
-    ap.add_argument("--no-clips", action="store_true", help="upload stills only")
+    clips.add_argument("--no-clips", action="store_true", help="upload stills only")
     args = ap.parse_args()
     fixture_dir = (args.fixture or default_fixture_dir()).resolve()
-    video = None if args.no_clips else (args.video or default_take(fixture_dir))
+    try:
+        video = None if args.no_clips else (args.video or default_take(fixture_dir))
+    except FileNotFoundError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
     if video is not None and not video.is_file():
         print(f"video not found: {video}", file=sys.stderr)
         return 2
