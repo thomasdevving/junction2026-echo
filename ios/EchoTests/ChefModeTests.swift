@@ -612,3 +612,27 @@ struct TakeCaptureStartupTests {
         #expect(steps == ["mic on", "camera"])
     }
 }
+
+// MARK: - Take size (HTTP 413 from storage, 2026-11-14)
+
+@Suite("Take size")
+struct TakeSizeTests {
+    /// A 2-minute take at the old 6 Mbit/s was ~90 MB and was refused (413). A normal lesson
+    /// must fit under the storage plan's ~50 MB per file.
+    @Test func aFourAndAHalfMinuteLessonFitsUnder50MB() {
+        #expect(TakeWriter.bitRate(width: 720, height: 1280) == TakeWriter.videoBitRateAt720p)
+        #expect(TakeWriter.estimatedBytes(seconds: 270) < 50_000_000)
+        #expect(TakeWriter.estimatedBytes(seconds: 120) < 25_000_000)
+    }
+
+    @Test func smallFramesKeepAUsableFloor() {
+        #expect(TakeWriter.bitRate(width: 360, height: 640) == 800_000)
+    }
+
+    @Test func a413SaysWhatToDo() {
+        let text = UploadError.http(status: 413, body: "Payload too large").errorDescription ?? ""
+        #expect(text.contains("too large"))
+        #expect(text.contains("50 MB"))
+        #expect(!(UploadError.http(status: 500, body: "x").errorDescription ?? "").contains("50 MB"))
+    }
+}

@@ -177,9 +177,19 @@ final class TakeWriter: @unchecked Sendable {
         }
     }
 
-    /// ~6 Mbit/s at 720×1280, scaled by pixel count (enough for Gemini to read hands and food).
+    /// ~1.3 Mbit/s at 720×1280, scaled by pixel count. With 96 kbit/s audio that is ~10.5 MB a
+    /// minute, so a ~4.5-minute lesson stays under Supabase's free-plan upload limit (~50 MB per
+    /// file). The earlier 6 Mbit/s (~45 MB a minute) made a 2-minute take fail with HTTP 413
+    /// (2026-11-14). Still enough for Gemini to read hands and food in good light.
+    static let videoBitRateAt720p = 1_300_000
+
     static func bitRate(width: Int, height: Int) -> Int {
-        max(1_500_000, Int(Double(width * height) / Double(720 * 1280) * 6_000_000))
+        max(800_000, Int(Double(width * height) / Double(720 * 1280) * Double(videoBitRateAt720p)))
+    }
+
+    /// Rough file size for a take of `seconds` at 720×1280 (video + 96 kbit/s audio).
+    static func estimatedBytes(seconds: Double) -> Int {
+        Int(Double(videoBitRateAt720p + 96_000) / 8 * seconds)
     }
 }
 

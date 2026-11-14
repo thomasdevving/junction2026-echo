@@ -23,6 +23,8 @@ enum UploadError: Error, Equatable, LocalizedError {
 
     var errorDescription: String? {
         switch self {
+        case .http(413, _):
+            "The video is too large for the server's storage (HTTP 413). The free storage plan takes about 50 MB per file, roughly 4.5 minutes of recording. Record a shorter take, or ask the backend owner to raise the storage upload limit."
         case .http(let status, let body): "Upload failed (\(status)) \(body.prefix(120))"
         case .missingLocation: "The upload server did not say where to send the video"
         case .notHTTP: "Not an HTTP response"
