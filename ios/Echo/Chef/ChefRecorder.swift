@@ -14,6 +14,26 @@ protocol TakeCapturing: AnyObject {
     func stop() async throws -> TakeCaptureResult
 }
 
+/// The start-up order for a take: microphone first (so the first frames have sound), then the
+/// camera. If the camera fails, the microphone is stopped before the error is passed on, so a
+/// failed start never leaves the mic recording (privacy: the orange indicator would stay on).
+@MainActor
+enum TakeCaptureStartup {
+    static func run(
+        startMic: () async throws -> Void,
+        stopMic: () -> Void,
+        startCamera: () async throws -> Void
+    ) async throws {
+        try await startMic()
+        do {
+            try await startCamera()
+        } catch {
+            stopMic()
+            throw error
+        }
+    }
+}
+
 struct TakeCaptureResult: Equatable, Sendable {
     var durationS: Double
     var width: Int

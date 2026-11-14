@@ -567,3 +567,48 @@ struct TakeWriterTests {
         await #expect(throws: TakeWriter.WriterError.noVideo) { _ = try await writer.finish() }
     }
 }
+
+// MARK: - Start-up order (privacy: no mic left running after a failed start)
+
+@MainActor
+@Suite("Take capture start-up")
+struct TakeCaptureStartupTests {
+    struct CameraFailed: Error, Equatable {}
+    struct MicFailed: Error, Equatable {}
+
+    /// The bug from the code review: the camera fails (e.g. permission denied) after the mic
+    /// started. The mic must be stopped and the camera error passed on.
+    @Test func cameraFailureStopsTheMic() async {
+        var steps: [String] = []
+        await #expect(throws: CameraFailed()) {
+            try await TakeCaptureStartup.run(
+                startMic: { steps.append("mic on") },
+                stopMic: { steps.append("mic off") },
+                startCamera: {
+                    steps.append("camera")
+                    throw CameraFailed()
+                })
+        }
+        #expect(steps == ["mic on", "camera", "mic off"])
+    }
+
+    @Test func micFailureNeverStartsTheCamera() async {
+        var steps: [String] = []
+        await #expect(throws: MicFailed()) {
+            try await TakeCaptureStartup.run(
+                startMic: { throw MicFailed() },
+                stopMic: { steps.append("mic off") },
+                startCamera: { steps.append("camera") })
+        }
+        #expect(steps.isEmpty)
+    }
+
+    @Test func successLeavesTheMicRunning() async throws {
+        var steps: [String] = []
+        try await TakeCaptureStartup.run(
+            startMic: { steps.append("mic on") },
+            stopMic: { steps.append("mic off") },
+            startCamera: { steps.append("camera") })
+        #expect(steps == ["mic on", "camera"])
+    }
+}

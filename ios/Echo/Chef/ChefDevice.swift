@@ -24,24 +24,29 @@ final class AVTakeCapture: TakeCapturing {
     func start(writingTo url: URL) async throws {
         try Self.configureAudioSession()
         let writer = TakeWriter(url: url)
-        self.writer = writer
         let mic = MicCapture { sample in writer.appendAudio(sample) }
-        try await mic.start()
-        self.mic = mic
         let deliver: @Sendable (CVPixelBuffer) -> Void = { pixels in
             writer.appendVideo(pixels, at: TakeWriter.hostNow())
         }
-        switch source {
-        case .glasses:
-            guard await glasses.startCookAlong() else {
-                mic.stop()
-                throw FrameSourceError.configurationFailed("The glasses camera did not start.")
-            }
-            glasses.frameTap.set(deliver)
-        case .phone:
-            try await phone.start()
-            phone.frameTap.set(deliver)
-        }
+        // If the camera fails after the mic started, the mic must not keep recording: the
+        // recorder only stops a take that reached `recording`, so nothing else would stop it.
+        try await TakeCaptureStartup.run(
+            startMic: { try await mic.start() },
+            stopMic: { mic.stop() },
+            startCamera: { [self] in
+                switch source {
+                case .glasses:
+                    guard await glasses.startCookAlong() else {
+                        throw FrameSourceError.configurationFailed("The glasses camera did not start.")
+                    }
+                    glasses.frameTap.set(deliver)
+                case .phone:
+                    try await phone.start()
+                    phone.frameTap.set(deliver)
+                }
+            })
+        self.writer = writer
+        self.mic = mic
     }
 
     func stop() async throws -> TakeCaptureResult {
