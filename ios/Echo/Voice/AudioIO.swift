@@ -84,7 +84,10 @@ final class AudioIO: LiveAudio {
         guard isRunning, let buffer = Self.floatBuffer(fromPCM16: pcm24k, format: playbackFormat) else { return }
         pendingBuffers += 1
         let gen = generation
-        player.scheduleBuffer(buffer, completionCallbackType: .dataPlayedBack) { [weak self] _ in
+        // `@Sendable`: AVFoundation calls this on its own audio thread. A closure written inside
+        // this @MainActor class would otherwise be main-actor isolated, and Swift 6 traps at runtime
+        // when it is called off the main thread (device crashes 2026-11-14).
+        player.scheduleBuffer(buffer, completionCallbackType: .dataPlayedBack) { @Sendable [weak self] _ in
             Task { @MainActor in self?.bufferFinished(generation: gen) }
         }
         if !player.isPlaying { player.play() }
@@ -132,7 +135,9 @@ final class AudioIO: LiveAudio {
         }
         // ~100 ms per tap callback at the hardware rate.
         let bufferSize = AVAudioFrameCount(max(256, inputFormat.sampleRate / 10))
-        input.installTap(onBus: 0, bufferSize: bufferSize, format: inputFormat) { buffer, _ in
+        // `@Sendable`: the tap runs on the real-time audio thread (see `scheduleBuffer` above). This
+        // closure being main-actor isolated crashed Echo a few seconds into a cook-along with voice on.
+        input.installTap(onBus: 0, bufferSize: bufferSize, format: inputFormat) { @Sendable buffer, _ in
             resampler.process(buffer)
         }
     }
@@ -173,7 +178,7 @@ final class AudioIO: LiveAudio {
         #if os(iOS)
             observers.append(center.addObserver(forName: AVAudioSession.routeChangeNotification, object: nil, queue: nil, using: rebuild))
             observers.append(
-                center.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: nil) { [weak self] note in
+                center.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: nil) { @Sendable [weak self] note in
                     let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
                     guard raw == AVAudioSession.InterruptionType.ended.rawValue else { return }
                     Task { @MainActor in self?.rebuildEngine() }
