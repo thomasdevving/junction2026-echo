@@ -94,16 +94,16 @@ def test_check_errors(client, auth):
 
 
 def test_ai_errors_map_to_envelope(client, auth, monkeypatch):
-    import ghostchef_ai
+    import echo_ai
 
     async def boom(*a, **k):
-        raise ghostchef_ai.AITimeout("Gemini did not answer within 8 s")
+        raise echo_ai.AITimeout("Gemini did not answer within 8 s")
 
     async def quota(*a, **k):
-        raise ghostchef_ai.AIQuotaError("quota")
+        raise echo_ai.AIQuotaError("quota")
 
-    monkeypatch.setattr(ghostchef_ai, "check_frame", boom)
-    monkeypatch.setattr(ghostchef_ai, "watch_frame", quota)
+    monkeypatch.setattr(echo_ai, "check_frame", boom)
+    monkeypatch.setattr(echo_ai, "watch_frame", quota)
     req = rid()
     r = post_frame(client, auth, "check", big_jpeg(), request_id=req)
     assert r.status_code == 504

@@ -32,7 +32,7 @@ def reset() -> None:
 
 
 def raise_if_injected(request: Request, settings: Settings, g: ModuleType) -> None:
-    """Raises the configured ghostchef_ai error instead of calling the model.
+    """Raises the configured echo_ai error instead of calling the model.
 
     Needs FAULT_INJECT_ENABLED=1, a FAULT_INJECT value and the request header `X-Fault: 1`;
     otherwise it does nothing.

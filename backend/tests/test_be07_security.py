@@ -142,7 +142,7 @@ def test_upload_path_traversal_refused_even_with_a_valid_token(client):
 
 
 def _format(msg: str, *args, exc: BaseException | None = None) -> dict:
-    record = logging.LogRecord("ghostchef.t", logging.ERROR, __file__, 1, msg, args, None)
+    record = logging.LogRecord("echo.t", logging.ERROR, __file__, 1, msg, args, None)
     if exc is not None:
         try:
             raise exc

@@ -4,7 +4,7 @@
 |---|---|
 | **Track** | `backend/` |
 | **Gate** | G0 — the iOS and web tracks are waiting for this. **Push after task 5** so they can start, then finish the rest. |
-| **Depends on** | AI-01 on `main` (the `ghostchef_ai` package in fake mode and the fixture). If it is not there yet, do tasks 1–3 and check again. |
+| **Depends on** | AI-01 on `main` (the `echo_ai` package in fake mode and the fixture). If it is not there yet, do tasks 1–3 and check again. |
 | **Unblocks** | IOS-01, WEB-01, and every later batch |
 | **Size** | Large |
 | **Model** | Opus 5.5 |
@@ -18,14 +18,14 @@ A running FastAPI server that implements **every endpoint in the contract with r
 
 - [../../docs/API-CONTRACT.md](../../docs/API-CONTRACT.md) — all of it; you implement §1–§5 and consume §7–§8
 - [../README.md](../README.md) — layout, configuration table, rules
-- `ai/src/ghostchef_ai/__init__.py` and `ai/fixtures/` once AI-01 is on `main`
+- `ai/src/echo_ai/__init__.py` and `ai/fixtures/` once AI-01 is on `main`
 
 ## Tasks
 
 ### BE-01.1 Project scaffold
 
 **Do**
-- `backend/pyproject.toml`: project `ghostchef-backend`, `requires-python = ">=3.11"`. Dependencies: `fastapi`, `uvicorn[standard]`, `pydantic>=2`, `pydantic-settings`, `python-multipart`, `httpx`, `pillow`. Dev group: `pytest`, `pytest-asyncio`, `ruff`. Do **not** list `ghostchef-ai` as a dependency; it is installed with `pip install -e ../ai` (documented in the README).
+- `backend/pyproject.toml`: project `echo-backend`, `requires-python = ">=3.11"`. Dependencies: `fastapi`, `uvicorn[standard]`, `pydantic>=2`, `pydantic-settings`, `python-multipart`, `httpx`, `pillow`. Dev group: `pytest`, `pytest-asyncio`, `ruff`. Do **not** list `echo-ai` as a dependency; it is installed with `pip install -e ../ai` (documented in the README).
 - pytest config: `asyncio_mode = "auto"`. ruff line length 100.
 - `backend/.env.example` with every variable from the README's configuration table.
 - `app/config.py`: a `Settings` class reading those variables, cached with `lru_cache`.
@@ -37,8 +37,8 @@ A running FastAPI server that implements **every endpoint in the contract with r
 **Do**
 - `app/main.py::create_app()`: CORS from settings (allow headers `X-Demo-Key`, `Content-Type`); include routers; mount `WEB_DIR` at `/app` with `StaticFiles(html=True)` **only if the directory exists**.
 - `app/auth.py`: dependency that compares `X-Demo-Key` with the setting using `hmac.compare_digest`; applied to every router except health.
-- `app/errors.py`: `ApiError(status, code, message, retryable=False, request_id=None)`; exception handlers that render the envelope from API-CONTRACT §1.1 for `ApiError`, for FastAPI's `RequestValidationError` (→ `422 validation_error`), for `ghostchef_ai` errors (`AITimeout → 504`, `AIQuotaError → 429`, `AIUnavailable` / `AIInvalidOutput → 503`), and a catch-all (→ `500 internal`, message without internals).
-- `GET /health` → `{status, contract_version: "2.0", ai_mode, storage}`. `ai_mode` comes from `ghostchef_ai.config.is_fake()`.
+- `app/errors.py`: `ApiError(status, code, message, retryable=False, request_id=None)`; exception handlers that render the envelope from API-CONTRACT §1.1 for `ApiError`, for FastAPI's `RequestValidationError` (→ `422 validation_error`), for `echo_ai` errors (`AITimeout → 504`, `AIQuotaError → 429`, `AIUnavailable` / `AIInvalidOutput → 503`), and a catch-all (→ `500 internal`, message without internals).
+- `GET /health` → `{status, contract_version: "2.0", ai_mode, storage}`. `ai_mode` comes from `echo_ai.config.is_fake()`.
 
 **Acceptance:** tests for 401 on a missing key, the envelope shape for 404 and 422, and the health body.
 
@@ -48,7 +48,7 @@ A running FastAPI server that implements **every endpoint in the contract with r
 - `app/store/base.py`: plain dataclasses or pydantic records for `Recipe`, `Step`, `Session`, `Event`, mirroring API-CONTRACT §6, and a `Store` protocol with async methods for: list / get / create / update / delete recipe; get / list / replace / update steps; create / get / list sessions; append / list events; put / get / delete a blob (`bucket`, `path`, `bytes`, `content_type`); `blob_exists(bucket, path) -> bool`; `signed_url(bucket, path, ttl_s) -> str`; `signed_upload(bucket, path) -> {upload_url, upload_token, resumable_endpoint, expires_at}` (API-CONTRACT §2 `POST /recipes`).
 - `app/store/memory.py`: dict-backed implementation. Blobs are written under `DATA_DIR/<bucket>/<path>`. `signed_url` returns `<PUBLIC_BASE_URL or request base>/local-files/<bucket>/<path>`; add an unauthenticated `GET /local-files/{bucket}/{path:path}` route that serves those files **only when `STORAGE=memory`** (reject `..` in paths). `signed_upload` returns `upload_url = <base>/local-upload/<bucket>/<path>?token=<random>`, `upload_token` = that token, `resumable_endpoint = null`, expiry in 2 hours; add an unauthenticated `PUT /local-upload/{bucket}/{path:path}` route, **memory mode only**, that checks the token (single use, constant-time compare), streams the body to disk in chunks and aborts with `413` past `MAX_VIDEO_MB`.
 - `app/deps.py::get_store()` returns a process-wide singleton chosen by `STORAGE` (`supabase` raises a clear "not implemented until BE-02" error for now).
-- **Startup seed (memory mode only):** load `ghostchef_ai.config.fixture_dir()/sushi_recipe.json`, create one recipe with status `published`, its steps, and copy `images/step-<idx>.jpg` into the `media` bucket at `media/<recipe_id>/steps/<idx>/ref.jpg`. Use a **fixed UUID** for the seeded recipe (e.g. `00000000-0000-4000-8000-000000000001`) and deterministic step UUIDs (`uuid5` of recipe id + idx) so clients can hard-code them in tests.
+- **Startup seed (memory mode only):** load `echo_ai.config.fixture_dir()/sushi_recipe.json`, create one recipe with status `published`, its steps, and copy `images/step-<idx>.jpg` into the `media` bucket at `media/<recipe_id>/steps/<idx>/ref.jpg`. Use a **fixed UUID** for the seeded recipe (e.g. `00000000-0000-4000-8000-000000000001`) and deterministic step UUIDs (`uuid5` of recipe id + idx) so clients can hard-code them in tests.
 
 **Acceptance:** store unit tests (CRUD, cascade delete, blob round trip); after startup `GET /recipes` shows the seeded recipe.
 
@@ -63,12 +63,12 @@ A running FastAPI server that implements **every endpoint in the contract with r
 ### BE-01.5 Check, watch, sessions — then push
 
 **Do**
-- `POST /check` and `POST /watch` (multipart per §3.1 / §3.2): load the step and its recipe, load the reference image bytes from the store (check only), convert the step record to `ghostchef_ai.StepSpec`, call `check_frame` / `watch_frame` with the budgets from settings, measure `latency_ms` with `time.perf_counter`, return the response with `request_id` and `step_id` echoed. If `session_id` is given: store the frame at `frames/<session_id>/<request_id>.jpg` and append the server-recorded event (`check_pass` / `check_fix` / `check_unsure`; `watch_warn` only for warns).
+- `POST /check` and `POST /watch` (multipart per §3.1 / §3.2): load the step and its recipe, load the reference image bytes from the store (check only), convert the step record to `echo_ai.StepSpec`, call `check_frame` / `watch_frame` with the budgets from settings, measure `latency_ms` with `time.perf_counter`, return the response with `request_id` and `step_id` echoed. If `session_id` is given: store the frame at `frames/<session_id>/<request_id>.jpg` and append the server-recorded event (`check_pass` / `check_fix` / `check_unsure`; `watch_warn` only for warns).
 - `POST /sessions`, `POST /sessions/{id}/events` (reject server-recorded kinds from clients with `422`; `session_end` sets `finished_at`), `GET /sessions/{id}` with `summary`, `GET /sessions?active=true&limit=`.
 - Summary rules: `steps_total` = number of steps; `steps_passed_first_try` = steps whose first check event is `check_pass`; `fixes_caught` = count of `check_fix`; `warnings` = count of `watch_warn`; `questions` = count of `question`.
 
 **Acceptance**
-- Tests: in fake mode the first check on step 3 is `fix` with `mistake_id: rice_too_thick`, the second is `pass`; a tiny (< 5 KB) JPEG gives `unsure`; watch calls 1–3 are `ok`, 4–6 `warn`. Call `ghostchef_ai.fake.reset()` in a fixture between tests.
+- Tests: in fake mode the first check on step 3 is `fix` with `mistake_id: rice_too_thick`, the second is `pass`; a tiny (< 5 KB) JPEG gives `unsure`; watch calls 1–3 are `ok`, 4–6 `warn`. Call `echo_ai.fake.reset()` in a fixture between tests.
 - Events appear in `GET /sessions/{id}`; the summary matches.
 - **Commit and push now** (`[backend] BE-01 first slice: recipes, check, watch, sessions`). Post the LAN URL and dev key privately to the team.
 
@@ -76,9 +76,9 @@ A running FastAPI server that implements **every endpoint in the contract with r
 
 **Do** — all with real logic on the memory store:
 - `GET /sessions/{id}/monitor` in the full contract shape: `current_step` from the latest `step_change` event's `to_idx` (else step 1); `last_frame_url` and `last_frame_at` for the latest stored frame; `last_result`; last 30 events newest first; `latency` from `app/metrics.py` (per-session lists of check and watch latencies; p50, max, n).
-- `GET /live-token?recipe_id=&session_id=`: build the config with `ghostchef_ai.build_live_config(...)` from the recipe's steps and transcript, call `mint_live_token`, return the §5 shape with `api_version: "v1beta"`.
+- `GET /live-token?recipe_id=&session_id=`: build the config with `echo_ai.build_live_config(...)` from the recipe's steps and transcript, call `mint_live_token`, return the §5 shape with `api_version: "v1beta"`.
 - `POST /recipes` (JSON, API-CONTRACT §2): validate `title`, `consent == true`, `step_marks_s` (non-negative, ascending); create the recipe as `uploading` with `consent_at` and `step_marks_s`; return `201` with `store.signed_upload("videos", "<recipe_id>/source.mp4")`.
-- `POST /recipes/{id}/process`: `409 recipe_not_ready` unless `uploading`; `409 upload_missing` unless `blob_exists`; set `processing`; start a background task that calls `ghostchef_ai.extract_recipe(path, title_hint=…, step_marks_s=…)`, inserts the steps, and sets `review`. **No ffmpeg yet:** for now each step's reference image is the fixture image with the same `idx` if one exists, else none. On any exception set `failed` and `error`.
+- `POST /recipes/{id}/process`: `409 recipe_not_ready` unless `uploading`; `409 upload_missing` unless `blob_exists`; set `processing`; start a background task that calls `echo_ai.extract_recipe(path, title_hint=…, step_marks_s=…)`, inserts the steps, and sets `review`. **No ffmpeg yet:** for now each step's reference image is the fixture image with the same `idx` if one exists, else none. On any exception set `failed` and `error`.
 - `PATCH /recipes/{id}`, `PATCH /steps/{id}` (enforce word limits → `422`; a changed `timestamp_s` is stored, re-extraction comes in BE-06), `POST /recipes/{id}/publish` (rules in §2), `DELETE /recipes/{id}` (cascade including blobs).
 
 **Acceptance:** contract tests for each endpoint's success path and its main error (`409` publish while processing, `422` over-long title, `422` missing consent, `422` descending `step_marks_s`, `409 upload_missing` on `/process` before the upload, `409 recipe_not_ready` on a second `/process`, `401`-free `PUT` to `upload_url` with a wrong token refused, `404` unknown ids). In a test, `POST /recipes` → `PUT upload_url` with a small MP4 → `POST /process` moves the recipe `uploading → processing → review` within a few seconds.

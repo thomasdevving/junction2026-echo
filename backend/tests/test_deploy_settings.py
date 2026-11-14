@@ -48,7 +48,7 @@ def off_railway(monkeypatch):
 @pytest.mark.parametrize("fake", ["0", "false", "no"])
 def test_supabase_real_ai_default_key_refused(monkeypatch, off_railway, settings_key, key, fake):
     monkeypatch.setattr(get_settings(), "storage", "supabase")
-    monkeypatch.setenv("GHOSTCHEF_AI_FAKE", fake)
+    monkeypatch.setenv("ECHO_AI_FAKE", fake)
     settings_key(key)
     with pytest.raises(RuntimeError, match="DEMO_API_KEY"):
         main.check_deploy_settings()
@@ -56,7 +56,7 @@ def test_supabase_real_ai_default_key_refused(monkeypatch, off_railway, settings
 
 def test_supabase_real_ai_real_key_allowed(monkeypatch, off_railway, settings_key):
     monkeypatch.setattr(get_settings(), "storage", "supabase")
-    monkeypatch.setenv("GHOSTCHEF_AI_FAKE", "0")
+    monkeypatch.setenv("ECHO_AI_FAKE", "0")
     settings_key("a-long-random-production-key")
     main.check_deploy_settings()
 
@@ -66,6 +66,6 @@ def test_default_key_allowed_unless_supabase_and_real_ai(
     monkeypatch, off_railway, settings_key, storage, fake
 ):
     monkeypatch.setattr(get_settings(), "storage", storage)
-    monkeypatch.setenv("GHOSTCHEF_AI_FAKE", fake)
+    monkeypatch.setenv("ECHO_AI_FAKE", fake)
     settings_key("dev-key")
     main.check_deploy_settings()

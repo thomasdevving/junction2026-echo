@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""End-to-end smoke test of the Ghost Chef API (backend/README.md).
+"""End-to-end smoke test of the Echo API (backend/README.md).
 
     python scripts/smoke.py --base http://localhost:8000 --key dev-key [--fast]
 

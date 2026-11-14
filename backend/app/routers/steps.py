@@ -19,7 +19,7 @@ from app.seed import ref_image_path
 from app.store.base import BlobTooLarge, Store
 from app.views import load_recipe, load_step, step_out
 
-log = logging.getLogger("ghostchef.steps")
+log = logging.getLogger("echo.steps")
 
 router = APIRouter(tags=["steps"])
 
@@ -49,7 +49,7 @@ async def _reextract_still(
         )
     at_s = min(at_s, max(duration - 0.1, 0.0))
 
-    workdir = Path(await asyncio.to_thread(tempfile.mkdtemp, prefix="ghostchef-still-"))
+    workdir = Path(await asyncio.to_thread(tempfile.mkdtemp, prefix="echo-still-"))
     try:
         out = workdir / "ref.jpg"
         try:

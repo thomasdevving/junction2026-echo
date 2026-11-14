@@ -28,12 +28,12 @@ The image needs code from three folders (`backend/`, `ai/`, `web/`), so **the bu
 
 **Do** — `backend/Dockerfile`:
 - Base `python:3.12-slim`. Install `ffmpeg` with apt (needed from BE-06; install it now so the image does not change later).
-- Copy `ai/` and install it (`pip install ./ai` is fine in the image; set `GHOSTCHEF_FIXTURE_DIR=/srv/ai/fixtures` so fake mode and seeding can still find the fixture).
+- Copy `ai/` and install it (`pip install ./ai` is fine in the image; set `ECHO_FIXTURE_DIR=/srv/ai/fixtures` so fake mode and seeding can still find the fixture).
 - Copy `backend/` and install it. Copy `web/` to `/srv/web` and set `WEB_DIR=/srv/web`.
 - Run as a non-root user. `CMD` runs `uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}` with **one worker** (in-memory session state — latest frame, in-flight guard, metrics — assumes a single process).
 - `backend/Dockerfile.dockerignore` (BuildKit reads `<Dockerfile name>.dockerignore`): exclude `.git`, `**/.venv`, `**/__pycache__`, `ai/footage`, `ai/eval/frames/raw`, `ios`, `**/.env`, `backend/.data`.
 
-**Acceptance:** from the repository root, `docker build -f backend/Dockerfile -t ghostchef-backend .` succeeds and `docker run -p 8000:8000 -e DEMO_API_KEY=dev-key ghostchef-backend` answers `/health` (memory + fake by default). If Docker is not installed on this laptop, say so in `STATUS.md` and rely on Railway's build log instead.
+**Acceptance:** from the repository root, `docker build -f backend/Dockerfile -t echo-backend .` succeeds and `docker run -p 8000:8000 -e DEMO_API_KEY=dev-key echo-backend` answers `/health` (memory + fake by default). If Docker is not installed on this laptop, say so in `STATUS.md` and rely on Railway's build log instead.
 
 ### BE-04.2 Railway configuration
 
@@ -41,7 +41,7 @@ The image needs code from three folders (`backend/`, `ai/`, `web/`), so **the bu
 - `backend/railway.json` (config as code): Dockerfile builder with `dockerfilePath: "backend/Dockerfile"`, health check path `/health`, restart on failure. Check the current schema in Railway's docs.
 - A "Deploying" section in `backend/README.md` with the exact dashboard steps:
   1. New project → deploy from the GitHub repository; root directory = repository root; config file path = `backend/railway.json`.
-  2. Variables: `DEMO_API_KEY` (new long random string), `STORAGE=supabase`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `GHOSTCHEF_AI_FAKE=0`, `GEMINI_API_KEY`, the four `GHOSTCHEF_MODEL_*` values from `ai/STATUS.md`, `CORS_ORIGINS` (the Railway URL itself, plus `http://localhost:5173` for local web work).
+  2. Variables: `DEMO_API_KEY` (new long random string), `STORAGE=supabase`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `ECHO_AI_FAKE=0`, `GEMINI_API_KEY`, the four `ECHO_MODEL_*` values from `ai/STATUS.md`, `CORS_ORIGINS` (the Railway URL itself, plus `http://localhost:5173` for local web work).
   3. Generate a public domain.
   4. Set replicas to 1.
 
@@ -77,7 +77,7 @@ Limits to write down: plain HTTP on a LAN address means the **web simulator's ca
 ## Verification
 
 ```bash
-docker build -f backend/Dockerfile -t ghostchef-backend .        # from the repository root
+docker build -f backend/Dockerfile -t echo-backend .        # from the repository root
 python backend/scripts/smoke.py --base https://<domain> --key <demo key> --frame <real frame>
 ```
 

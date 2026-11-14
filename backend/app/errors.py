@@ -11,7 +11,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import ai, metrics
 
-log = logging.getLogger("ghostchef.errors")
+log = logging.getLogger("echo.errors")
 
 
 class ApiError(Exception):

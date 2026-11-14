@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import ghostchef_ai
+import echo_ai
 import pytest
 
 from app import faults
@@ -18,20 +18,20 @@ pytestmark = requires_ai
 def model_calls(monkeypatch):
     """Counts real model calls; watch_frame raises AIQuotaError while calls["quota"] is set."""
     calls = {"watch": 0, "check": 0, "quota": True}
-    real_watch, real_check = ghostchef_ai.watch_frame, ghostchef_ai.check_frame
+    real_watch, real_check = echo_ai.watch_frame, echo_ai.check_frame
 
     async def watch(*a, **kw):
         calls["watch"] += 1
         if calls["quota"]:
-            raise ghostchef_ai.AIQuotaError("429 from the model")
+            raise echo_ai.AIQuotaError("429 from the model")
         return await real_watch(*a, **kw)
 
     async def check(*a, **kw):
         calls["check"] += 1
         return await real_check(*a, **kw)
 
-    monkeypatch.setattr(ghostchef_ai, "watch_frame", watch)
-    monkeypatch.setattr(ghostchef_ai, "check_frame", check)
+    monkeypatch.setattr(echo_ai, "watch_frame", watch)
+    monkeypatch.setattr(echo_ai, "check_frame", check)
     return calls
 
 
@@ -82,9 +82,9 @@ def test_quota_on_check_does_not_start_watch_cooldown(client, auth, model_calls,
     model_calls["quota"] = False
 
     async def check_quota(*a, **kw):
-        raise ghostchef_ai.AIQuotaError("429")
+        raise echo_ai.AIQuotaError("429")
 
-    monkeypatch.setattr(ghostchef_ai, "check_frame", check_quota)
+    monkeypatch.setattr(echo_ai, "check_frame", check_quota)
     assert _post(client, auth, "check").status_code == 429
     assert not faults.watch_cooldown_active()
     assert _post(client, auth, "watch").status_code == 200
@@ -120,7 +120,7 @@ def test_cooldown_releases_the_inflight_claim_and_logs(client, auth, model_calls
             files={"frame": ("f.jpg", frame, "image/jpeg")},
         )
 
-    with caplog.at_level("INFO", logger="ghostchef.calls"):
+    with caplog.at_level("INFO", logger="echo.calls"):
         assert watch().status_code == 429  # model quota
         assert watch().status_code == 429  # cool-down
     assert frames._watch_inflight == set()
@@ -233,7 +233,7 @@ def test_startup_warns_when_enabled(monkeypatch, caplog, app):
     from fastapi.testclient import TestClient
 
     _inject(monkeypatch, "timeout")
-    with caplog.at_level("WARNING", logger="ghostchef"):
+    with caplog.at_level("WARNING", logger="echo"):
         with TestClient(app):
             pass
     assert any("FAULT INJECTION IS ENABLED" in r.getMessage() for r in caplog.records)

@@ -107,7 +107,7 @@ def event_out(e: Event) -> EventOut:
     )
 
 
-def step_spec(step: Step):  # -> ghostchef_ai.StepSpec
+def step_spec(step: Step):  # -> echo_ai.StepSpec
     from app import ai
 
     return ai.get().StepSpec.model_validate(

@@ -151,9 +151,9 @@ def test_live_config_cached_token_not(client, auth, monkeypatch):
 
 
 def test_live_token_never_logged(client, auth, caplog):
-    caplog.set_level(logging.INFO, logger="ghostchef")
+    caplog.set_level(logging.INFO, logger="echo")
     assert client.get(f"/live-token?recipe_id={SEED_RECIPE_ID}", headers=auth).status_code == 200
-    recs = [r for r in caplog.records if r.name == "ghostchef.live"]
+    recs = [r for r in caplog.records if r.name == "echo.live"]
     assert len(recs) == 1
     assert set(recs[0].fields) == {"recipe_id", "model", "locked", "expires_at"}
     for r in caplog.records:

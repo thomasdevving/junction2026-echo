@@ -21,14 +21,14 @@ from app.store.base import Event, Store, utcnow
 from app.views import load_session, load_step, parse_uuid, step_spec
 
 router = APIRouter(tags=["check and watch"])
-log = logging.getLogger("ghostchef.frames")
+log = logging.getLogger("echo.frames")
 
 StoreDep = Annotated[Store, Depends(get_store)]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 
 Endpoint = Literal["check", "watch"]
 
-# Safety net on top of the budget ghostchef_ai enforces itself (BE-03.4).
+# Safety net on top of the budget echo_ai enforces itself (BE-03.4).
 BUDGET_GRACE_S = 0.5
 
 # Sessions with a /watch call running. Checked and claimed with no await in between, so two

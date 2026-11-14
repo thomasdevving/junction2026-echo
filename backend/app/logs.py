@@ -12,7 +12,7 @@ import re
 from datetime import UTC, datetime
 from typing import Any
 
-CALL_LOGGER = "ghostchef.calls"
+CALL_LOGGER = "echo.calls"
 _call_log = logging.getLogger(CALL_LOGGER)
 
 _SECRET_QUERY = re.compile(r"([?&](?:t|token)=)[^&\s]*")
@@ -83,12 +83,12 @@ class RedactQueryFilter(logging.Filter):
 
 
 def setup_logging() -> None:
-    """Gives the `ghostchef` loggers a JSON handler at INFO, once per process."""
-    root = logging.getLogger("ghostchef")
-    if not any(getattr(h, "_ghostchef", False) for h in root.handlers):
+    """Gives the `echo` loggers a JSON handler at INFO, once per process."""
+    root = logging.getLogger("echo")
+    if not any(getattr(h, "_echo", False) for h in root.handlers):
         handler = logging.StreamHandler()
         handler.setFormatter(JsonFormatter())
-        handler._ghostchef = True  # type: ignore[attr-defined]
+        handler._echo = True  # type: ignore[attr-defined]
         root.addHandler(handler)
     root.setLevel(logging.INFO)
     access = logging.getLogger("uvicorn.access")

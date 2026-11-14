@@ -31,7 +31,7 @@ from app.errors import ApiError
 from app.store.base import BlobTooLarge, Event, Recipe, Session, SignedUpload, Step, utcnow
 from app.store.paths import check_blob_path, check_prefix
 
-log = logging.getLogger("ghostchef.store.supabase")
+log = logging.getLogger("echo.store.supabase")
 
 T = TypeVar("T")
 

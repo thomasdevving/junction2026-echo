@@ -1,11 +1,11 @@
-# Ghost Chef backend image (BE-04).
+# Echo backend image (BE-04).
 #
 # The build context is the REPOSITORY ROOT, because the image needs backend/, ai/ and web/:
 #
-#     docker build -f backend/Dockerfile -t ghostchef-backend .
-#     docker run -p 8000:8000 -e DEMO_API_KEY=dev-key ghostchef-backend
+#     docker build -f backend/Dockerfile -t echo-backend .
+#     docker run -p 8000:8000 -e DEMO_API_KEY=dev-key echo-backend
 #
-# Defaults: STORAGE=memory, GHOSTCHEF_AI_FAKE=1. Production sets both through Railway variables.
+# Defaults: STORAGE=memory, ECHO_AI_FAKE=1. Production sets both through Railway variables.
 # Exclusions for a local build: backend/Dockerfile.dockerignore (BuildKit reads it automatically).
 
 FROM python:3.12-slim
@@ -26,7 +26,7 @@ RUN groupadd --system --gid 10001 app \
 
 WORKDIR /srv
 
-# ghostchef_ai: a regular (non-editable) install, so the fixture is located by env var.
+# echo_ai: a regular (non-editable) install, so the fixture is located by env var.
 COPY ai/pyproject.toml /srv/ai/pyproject.toml
 COPY ai/src /srv/ai/src
 COPY ai/fixtures /srv/ai/fixtures
@@ -45,11 +45,11 @@ COPY web /srv/web
 
 RUN mkdir -p /srv/data && chown app:app /srv/data
 
-ENV GHOSTCHEF_FIXTURE_DIR=/srv/ai/fixtures \
+ENV ECHO_FIXTURE_DIR=/srv/ai/fixtures \
     WEB_DIR=/srv/web \
     DATA_DIR=/srv/data \
     STORAGE=memory \
-    GHOSTCHEF_AI_FAKE=1
+    ECHO_AI_FAKE=1
 
 USER app
 WORKDIR /srv/backend

@@ -3,11 +3,11 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ghostchef-backend"
+name = "echo-backend"
 version = "0.1.0"
-description = "Ghost Chef FastAPI backend"
+description = "Echo FastAPI backend"
 requires-python = ">=3.11"
-# ghostchef-ai is NOT listed here: install it with `pip install -e ../ai` (see README).
+# echo-ai is NOT listed here: install it with `pip install -e ../ai` (see README).
 dependencies = [
     "fastapi",
     "uvicorn[standard]",

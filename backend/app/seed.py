@@ -1,4 +1,4 @@
-"""Startup seed for memory mode: the fixture recipe from ghostchef_ai (API-CONTRACT §8)."""
+"""Startup seed for memory mode: the fixture recipe from echo_ai (API-CONTRACT §8)."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from typing import Any
 from app import ai, refcache
 from app.store.base import Recipe, RecipeStatus, Step, Store, utcnow
 
-log = logging.getLogger("ghostchef.seed")
+log = logging.getLogger("echo.seed")
 
 SEED_RECIPE_ID = "00000000-0000-4000-8000-000000000001"
 
@@ -52,7 +52,7 @@ def step_from_spec(recipe_id: str, spec: dict[str, Any], step_id: str | None = N
 
 
 def load_draft(fixture_dir: Path) -> Any:
-    """sushi_recipe.json validated as ghostchef_ai.schemas.RecipeDraft."""
+    """sushi_recipe.json validated as echo_ai.schemas.RecipeDraft."""
     g = ai.get()
     return g.RecipeDraft.model_validate(
         json.loads((fixture_dir / "sushi_recipe.json").read_text(encoding="utf-8"))
@@ -93,9 +93,9 @@ async def write_fixture_recipe(
 async def seed_fixture(store: Store) -> Recipe | None:
     """Memory-mode startup seed. Supabase mode is seeded only by scripts/seed.py."""
     if not ai.available():
-        log.warning("ghostchef_ai not installed: skipping the fixture seed")
+        log.warning("echo_ai not installed: skipping the fixture seed")
         return None
-    from ghostchef_ai import config as ai_config
+    from echo_ai import config as ai_config
 
     existing = await store.get_recipe(SEED_RECIPE_ID)
     if existing is not None:

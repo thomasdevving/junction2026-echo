@@ -7,7 +7,7 @@
 #   PORT=8001 backend/scripts/emergency.sh
 #
 # Storage is always memory (the fixture recipe is seeded at startup). GEMINI_API_KEY and any
-# GHOSTCHEF_MODEL_* values come from the environment, else from backend/.env. The demo key comes
+# ECHO_MODEL_* values come from the environment, else from backend/.env. The demo key comes
 # from DEMO_API_KEY / backend/.env as usual. No key is ever printed.
 set -euo pipefail
 
@@ -45,9 +45,9 @@ dotenv_get() {
   printf '%s' "$line"
 }
 
-# ghostchef_ai reads these from the process environment, not from backend/.env.
-for var in GEMINI_API_KEY GHOSTCHEF_MODEL_VIDEO GHOSTCHEF_MODEL_CHECK GHOSTCHEF_MODEL_WATCH \
-           GHOSTCHEF_MODEL_LIVE; do
+# echo_ai reads these from the process environment, not from backend/.env.
+for var in GEMINI_API_KEY ECHO_MODEL_VIDEO ECHO_MODEL_CHECK ECHO_MODEL_WATCH \
+           ECHO_MODEL_LIVE; do
   if [[ -z "${!var:-}" ]]; then
     val="$(dotenv_get "$var")"
     if [[ -n "$val" ]]; then export "$var=$val"; fi
@@ -57,9 +57,9 @@ done
 export STORAGE=memory
 export PUBLIC_BASE_URL=          # derive URLs from the request, i.e. the LAN address phones use
 if [[ "$FAKE" == 1 ]]; then
-  export GHOSTCHEF_AI_FAKE=1
+  export ECHO_AI_FAKE=1
 else
-  export GHOSTCHEF_AI_FAKE=0
+  export ECHO_AI_FAKE=0
   if [[ -z "${GEMINI_API_KEY:-}" ]]; then
     echo "GEMINI_API_KEY is not set (environment or backend/.env). Use --fake to rehearse without it." >&2
     exit 1
@@ -88,7 +88,7 @@ lan_addresses() {
   fi
 }
 
-echo "Ghost Chef emergency mode: STORAGE=memory, AI=$([[ "$FAKE" == 1 ]] && echo fake || echo gemini), port $PORT"
+echo "Echo emergency mode: STORAGE=memory, AI=$([[ "$FAKE" == 1 ]] && echo fake || echo gemini), port $PORT"
 echo "Type one of these into the app's settings as the server URL (same Wi-Fi / hotspot as this laptop):"
 found=0
 while read -r addr; do

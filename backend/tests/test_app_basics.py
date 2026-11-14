@@ -109,9 +109,9 @@ def test_ai_env_defaults_to_fake(monkeypatch):
     from app import ai
     from app.config import get_settings
 
-    monkeypatch.delenv("GHOSTCHEF_AI_FAKE", raising=False)
+    monkeypatch.delenv("ECHO_AI_FAKE", raising=False)
     get_settings.cache_clear()
     ai._export_ai_env()
-    assert os.environ["GHOSTCHEF_AI_FAKE"] == "1"
+    assert os.environ["ECHO_AI_FAKE"] == "1"
     if ai.available():
         assert ai.ai_mode() == "fake"

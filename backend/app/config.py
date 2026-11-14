@@ -24,8 +24,8 @@ class Settings(BaseSettings):
     supabase_url: str | None = None
     supabase_service_key: SecretStr | None = None
 
-    # Read by ghostchef_ai itself; mirrored here only so the configuration is listed in one place.
-    ghostchef_ai_fake: str = "1"
+    # Read by echo_ai itself; mirrored here only so the configuration is listed in one place.
+    echo_ai_fake: str = "1"
     gemini_api_key: SecretStr | None = None
 
     check_budget_s: float = Field(default=8.0, gt=0)

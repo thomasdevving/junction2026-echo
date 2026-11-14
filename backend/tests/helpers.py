@@ -10,7 +10,7 @@ from app.seed import SEED_RECIPE_ID, seed_step_id
 
 def big_jpeg() -> bytes:
     """> 5 KB: the fake AI judges it."""
-    from ghostchef_ai import config
+    from echo_ai import config
 
     return (config.fixture_dir() / "images" / "step-3.jpg").read_bytes()
 
@@ -34,10 +34,10 @@ def _fixture_facts() -> tuple[str, int, int, str, str]:
     Returns (title, checked_idx, plain_idx, first_mistake_id, first_mistake_headline).
     checked_idx is the first step with watch_fors (the fake AI answers fix / warn there);
     plain_idx is the first step without any (the fake AI always passes it).
-    Without ghostchef_ai installed the AI tests are skipped, so placeholders are fine.
+    Without echo_ai installed the AI tests are skipped, so placeholders are fine.
     """
     try:
-        from ghostchef_ai import fake
+        from echo_ai import fake
     except ImportError:
         return ("", 1, 2, "", "")
     draft = fake.load_fixture()

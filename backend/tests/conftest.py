@@ -10,8 +10,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 # Defaults for every test: memory store, fake AI, no delays. Set before app modules import.
-os.environ.setdefault("GHOSTCHEF_AI_FAKE", "1")
-os.environ.setdefault("GHOSTCHEF_AI_FAKE_DELAY", "0")
+os.environ.setdefault("ECHO_AI_FAKE", "1")
+os.environ.setdefault("ECHO_AI_FAKE_DELAY", "0")
 
 from app import ai, faults, metrics  # noqa: E402
 from app.config import get_settings  # noqa: E402
@@ -20,7 +20,7 @@ from app.deps import reset_store  # noqa: E402
 KEY = "test-key"
 
 requires_ai = pytest.mark.skipif(
-    not ai.available(), reason="ghostchef_ai not installed (needs AI-01 on main)"
+    not ai.available(), reason="echo_ai not installed (needs AI-01 on main)"
 )
 
 
@@ -94,7 +94,7 @@ def _env(tmp_path, monkeypatch) -> Iterator[None]:
     monkeypatch.delenv("FAULT_INJECT", raising=False)
     monkeypatch.delenv("FAULT_INJECT_ENABLED", raising=False)
     if ai.available():
-        from ghostchef_ai import fake
+        from echo_ai import fake
 
         fake.reset()
     yield

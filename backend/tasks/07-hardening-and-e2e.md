@@ -42,7 +42,7 @@ Run it against production with real Gemini **once**, mindful of quota (ask the A
 
 Check and fix each:
 - [ ] No endpoint except `/health`, `/local-files/*` and `/local-upload/*` (memory mode only, the latter token-checked), `/sessions/{id}/latest-frame.jpg` (token), and `/app/*` (static) is reachable without the key.
-- [ ] `DEMO_API_KEY` in production is not `dev-key`; the server refuses to start with `dev-key` when `STORAGE=supabase` and `GHOSTCHEF_AI_FAKE=0`.
+- [ ] `DEMO_API_KEY` in production is not `dev-key`; the server refuses to start with `dev-key` when `STORAGE=supabase` and `ECHO_AI_FAKE=0`.
 - [ ] `CORS_ORIGINS` in production is not `*`.
 - [ ] Path traversal impossible in `/local-files`.
 - [ ] Logs contain no keys, tokens, or signed-URL signatures (grep a log sample).

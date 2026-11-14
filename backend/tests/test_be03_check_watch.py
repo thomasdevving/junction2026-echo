@@ -204,19 +204,19 @@ def test_truncated_large_frame_is_415_on_reencode_path():
 
 
 def test_watch_frame_over_200kb_is_downscaled_not_rejected(client, auth, monkeypatch, caplog):
-    import ghostchef_ai
+    import echo_ai
 
     seen: list[bytes] = []
-    real = ghostchef_ai.watch_frame
+    real = echo_ai.watch_frame
 
     async def spy(frame_jpeg, step, *, timeout_s=3.5):
         seen.append(frame_jpeg)
         return await real(frame_jpeg, step, timeout_s=timeout_s)
 
-    monkeypatch.setattr(ghostchef_ai, "watch_frame", spy)
+    monkeypatch.setattr(echo_ai, "watch_frame", spy)
     big = jpeg(400, 400, noise=True, quality=98)
     assert images.WATCH_SOFT_BYTES < len(big) < images.WATCH_MAX_BYTES
-    with caplog.at_level(logging.WARNING, logger="ghostchef.images"):
+    with caplog.at_level(logging.WARNING, logger="echo.images"):
         r = post_frame(client, auth, "watch", big)
     assert r.status_code == 200, r.text
     assert len(seen[0]) < len(big)
@@ -229,13 +229,13 @@ def test_watch_frame_over_200kb_is_downscaled_not_rejected(client, auth, monkeyp
 
 
 def test_watch_frame_large_dimensions_downscaled_to_512(client, auth, monkeypatch):
-    import ghostchef_ai
+    import echo_ai
 
     seen: list[bytes] = []
 
     async def spy(frame_jpeg, step, *, timeout_s=3.5):
         seen.append(frame_jpeg)
-        return ghostchef_ai.WatchResult(
+        return echo_ai.WatchResult(
             status="ok",
             mistake_id=None,
             headline="",
@@ -245,7 +245,7 @@ def test_watch_frame_large_dimensions_downscaled_to_512(client, auth, monkeypatc
             model="spy",
         )
 
-    monkeypatch.setattr(ghostchef_ai, "watch_frame", spy)
+    monkeypatch.setattr(echo_ai, "watch_frame", spy)
     assert post_frame(client, auth, "watch", jpeg(1280, 720)).status_code == 200
     assert size_of(seen[0]) == (512, 288)
 
@@ -312,13 +312,13 @@ def test_two_checks_on_same_step_read_the_ref_blob_once(client, auth, monkeypatc
 
 
 def test_ref_cache_invalidated_by_step_patch_and_recipe_delete(client, auth, monkeypatch):
-    import ghostchef_ai
+    import echo_ai
 
     refs: list[bytes | None] = []
 
     async def spy(frame_jpeg, step, ref_image_jpeg, *, timeout_s=8.0):
         refs.append(ref_image_jpeg)
-        return ghostchef_ai.CheckResult(
+        return echo_ai.CheckResult(
             verdict="pass",
             mistake_id=None,
             headline="Looks right",
@@ -328,7 +328,7 @@ def test_ref_cache_invalidated_by_step_patch_and_recipe_delete(client, auth, mon
             model="spy",
         )
 
-    monkeypatch.setattr(ghostchef_ai, "check_frame", spy)
+    monkeypatch.setattr(echo_ai, "check_frame", spy)
     refcache.clear()
     post_frame(client, auth, "check", big_jpeg())
     assert len(refcache._cache) == 1
@@ -380,14 +380,14 @@ async def test_ref_cache_is_bounded():
 
 def test_slow_watch_frame_gives_504(client, auth, monkeypatch):
     """A hang inside the package that ignores timeout_s still returns 504 (wait_for)."""
-    import ghostchef_ai
+    import echo_ai
 
     async def hang(frame_jpeg, step, *, timeout_s=3.5):
         await asyncio.sleep(30)
 
     monkeypatch.setenv("WATCH_BUDGET_S", "0.2")
     get_settings.cache_clear()
-    monkeypatch.setattr(ghostchef_ai, "watch_frame", hang)
+    monkeypatch.setattr(echo_ai, "watch_frame", hang)
     sid = session(client, auth)
     req = rid()
     r = post_frame(client, auth, "watch", big_jpeg(), session_id=sid, request_id=req)
@@ -403,17 +403,17 @@ def test_slow_watch_frame_gives_504(client, auth, monkeypatch):
 
 
 def test_budget_is_passed_to_the_package(client, auth, monkeypatch):
-    import ghostchef_ai
+    import echo_ai
 
     seen = {}
 
     async def spy(frame_jpeg, step, ref, *, timeout_s=8.0):
         seen["check"] = timeout_s
-        raise ghostchef_ai.AIQuotaError("quota")
+        raise echo_ai.AIQuotaError("quota")
 
     monkeypatch.setenv("CHECK_BUDGET_S", "6.5")
     get_settings.cache_clear()
-    monkeypatch.setattr(ghostchef_ai, "check_frame", spy)
+    monkeypatch.setattr(echo_ai, "check_frame", spy)
     req = rid()
     r = post_frame(client, auth, "check", big_jpeg(), request_id=req)
     assert seen["check"] == 6.5
@@ -423,12 +423,12 @@ def test_budget_is_passed_to_the_package(client, auth, monkeypatch):
 
 
 def test_quota_error_on_watch_gives_429(client, auth, monkeypatch):
-    import ghostchef_ai
+    import echo_ai
 
     async def quota(*a, **k):
-        raise ghostchef_ai.AIQuotaError("rate limited")
+        raise echo_ai.AIQuotaError("rate limited")
 
-    monkeypatch.setattr(ghostchef_ai, "watch_frame", quota)
+    monkeypatch.setattr(echo_ai, "watch_frame", quota)
     sid = session(client, auth)
     r = post_frame(client, auth, "watch", big_jpeg(), session_id=sid)
     assert r.status_code == 429
@@ -444,7 +444,7 @@ def test_quota_error_on_watch_gives_429(client, auth, monkeypatch):
 
 
 async def test_second_watch_in_flight_gets_429(monkeypatch):
-    import ghostchef_ai
+    import echo_ai
 
     from app.main import create_app
     from app.seed import seed_fixture
@@ -454,7 +454,7 @@ async def test_second_watch_in_flight_gets_429(monkeypatch):
     async def slow(frame_jpeg, step, *, timeout_s=3.5):
         started.set()
         await asyncio.sleep(0.5)
-        return ghostchef_ai.WatchResult(
+        return echo_ai.WatchResult(
             status="ok",
             mistake_id=None,
             headline="",
@@ -464,7 +464,7 @@ async def test_second_watch_in_flight_gets_429(monkeypatch):
             model="slow",
         )
 
-    monkeypatch.setattr(ghostchef_ai, "watch_frame", slow)
+    monkeypatch.setattr(echo_ai, "watch_frame", slow)
     app = create_app()
     await seed_fixture(get_store())
     headers = {"X-Demo-Key": KEY}
@@ -610,12 +610,12 @@ async def test_every_check_frame_is_stored(client, auth):
 
 
 async def test_failed_ai_call_produces_no_event(client, auth, monkeypatch):
-    import ghostchef_ai
+    import echo_ai
 
     async def broken(*a, **k):
-        raise ghostchef_ai.AIUnavailable("503 high demand")
+        raise echo_ai.AIUnavailable("503 high demand")
 
-    monkeypatch.setattr(ghostchef_ai, "check_frame", broken)
+    monkeypatch.setattr(echo_ai, "check_frame", broken)
     sid = session(client, auth)
     r = post_frame(client, auth, "check", big_jpeg(), session_id=sid)
     assert r.status_code == 503
@@ -656,13 +656,13 @@ def _call_lines(caplog) -> list[dict]:
     from app.logs import JsonFormatter
 
     fmt = JsonFormatter()
-    return [json.loads(fmt.format(r)) for r in caplog.records if r.name == "ghostchef.calls"]
+    return [json.loads(fmt.format(r)) for r in caplog.records if r.name == "echo.calls"]
 
 
 def test_one_log_line_per_call(client, auth, caplog):
     sid = session(client, auth)
     req = rid()
-    with caplog.at_level(logging.INFO, logger="ghostchef.calls"):
+    with caplog.at_level(logging.INFO, logger="echo.calls"):
         post_frame(client, auth, "check", big_jpeg(), session_id=sid, request_id=req)
         post_frame(client, auth, "watch", png(), session_id=sid)
     lines = _call_lines(caplog)

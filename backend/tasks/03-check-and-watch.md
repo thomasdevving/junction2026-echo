@@ -27,7 +27,7 @@
 ### BE-03.1 Switch to real Gemini
 
 **Do**
-- `git pull`, `pip install -e ../ai` again (dependencies may have changed), set `GHOSTCHEF_AI_FAKE=0` and `GEMINI_API_KEY` in `.env`, restart.
+- `git pull`, `pip install -e ../ai` again (dependencies may have changed), set `ECHO_AI_FAKE=0` and `GEMINI_API_KEY` in `.env`, restart.
 - `GET /health` must report `ai_mode: gemini`.
 - Run the smoke script with a **real photo** as `--frame` (ask the AI owner for one dev frame of a mistake and one of a correct result).
 
@@ -91,7 +91,7 @@
 cd backend
 ruff check .
 pytest -q
-GHOSTCHEF_AI_FAKE=0 uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+ECHO_AI_FAKE=0 uvicorn app.main:app --host 0.0.0.0 --port 8000 &
 python scripts/smoke.py --base http://localhost:8000 --key dev-key --frame /path/to/real-frame.jpg --watch-n 10
 ```
 

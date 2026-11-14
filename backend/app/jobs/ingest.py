@@ -31,7 +31,7 @@ from app.seed import clip_path, ref_image_path, step_from_spec
 from app.store.base import BlobTooLarge, Step, Store, utcnow
 from app.views import expire_stale_upload
 
-log = logging.getLogger("ghostchef.ingest")
+log = logging.getLogger("echo.ingest")
 
 STALE_PROCESSING = timedelta(minutes=15)
 MIN_CLIP_S = 1.0
@@ -207,7 +207,7 @@ async def _ingest(recipe_id: str, store: Store) -> None:
     if not ffmpeg_available():
         raise IngestError("ffmpeg is not installed on the server")
 
-    workdir = Path(await asyncio.to_thread(tempfile.mkdtemp, prefix="ghostchef-ingest-"))
+    workdir = Path(await asyncio.to_thread(tempfile.mkdtemp, prefix="echo-ingest-"))
     try:
         src = workdir / "src.mp4"
         info = await _download_and_probe(store, recipe.video_path, src)

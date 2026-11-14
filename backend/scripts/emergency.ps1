@@ -5,7 +5,7 @@
 #   backend\scripts\emergency.ps1 -Port 8001
 #
 # Storage is always memory (the fixture recipe is seeded at startup). GEMINI_API_KEY and any
-# GHOSTCHEF_MODEL_* values come from the environment, else from backend\.env. No key is printed.
+# ECHO_MODEL_* values come from the environment, else from backend\.env. No key is printed.
 # Allow Python through Windows Firewall for private networks when prompted.
 param(
     [switch]$Fake,
@@ -27,9 +27,9 @@ function Get-DotEnvValue([string]$Name) {
     return ($value -replace '\s+#.*$', '').Trim()   # unquoted: drop an inline " # comment"
 }
 
-# ghostchef_ai reads these from the process environment, not from backend\.env.
-foreach ($var in "GEMINI_API_KEY", "GHOSTCHEF_MODEL_VIDEO", "GHOSTCHEF_MODEL_CHECK",
-                 "GHOSTCHEF_MODEL_WATCH", "GHOSTCHEF_MODEL_LIVE") {
+# echo_ai reads these from the process environment, not from backend\.env.
+foreach ($var in "GEMINI_API_KEY", "ECHO_MODEL_VIDEO", "ECHO_MODEL_CHECK",
+                 "ECHO_MODEL_WATCH", "ECHO_MODEL_LIVE") {
     if (-not [Environment]::GetEnvironmentVariable($var)) {
         $val = Get-DotEnvValue $var
         if ($val) { [Environment]::SetEnvironmentVariable($var, $val, "Process") }
@@ -42,9 +42,9 @@ $env:STORAGE = "memory"
 # treats a blank value as unset.
 $env:PUBLIC_BASE_URL = " "
 if ($Fake) {
-    $env:GHOSTCHEF_AI_FAKE = "1"
+    $env:ECHO_AI_FAKE = "1"
 } else {
-    $env:GHOSTCHEF_AI_FAKE = "0"
+    $env:ECHO_AI_FAKE = "0"
     if (-not $env:GEMINI_API_KEY) {
         Write-Error "GEMINI_API_KEY is not set (environment or backend\.env). Use -Fake to rehearse without it."
         exit 1
@@ -61,7 +61,7 @@ if ($Fake) {
 $Python = if (Test-Path ".venv\Scripts\python.exe") { ".venv\Scripts\python.exe" } else { "python" }
 
 $mode = if ($Fake) { "fake" } else { "gemini" }
-Write-Host "Ghost Chef emergency mode: STORAGE=memory, AI=$mode, port $Port"
+Write-Host "Echo emergency mode: STORAGE=memory, AI=$mode, port $Port"
 Write-Host "Type one of these into the app's settings as the server URL (same Wi-Fi / hotspot as this laptop):"
 $addresses = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue |
     Where-Object { $_.IPAddress -notlike "127.*" -and $_.IPAddress -notlike "169.254.*" } |

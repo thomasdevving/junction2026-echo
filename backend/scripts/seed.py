@@ -28,7 +28,7 @@ from app.store.ops import purge_recipe  # noqa: E402
 
 def default_fixture_dir() -> Path:
     try:
-        from ghostchef_ai import config as ai_config
+        from echo_ai import config as ai_config
 
         return ai_config.fixture_dir()
     except ImportError:
@@ -37,9 +37,9 @@ def default_fixture_dir() -> Path:
 
 async def run(fixture_dir: Path, publish: bool, replace: bool) -> int:
     try:
-        from ghostchef_ai.schemas import RecipeDraft
+        from echo_ai.schemas import RecipeDraft
     except ImportError:
-        print("ghostchef_ai is not installed: pip install -e ../ai", file=sys.stderr)
+        print("echo_ai is not installed: pip install -e ../ai", file=sys.stderr)
         return 2
 
     recipe_file = fixture_dir / "sushi_recipe.json"

@@ -169,7 +169,7 @@ async def test_signed_upload_round_trip(store_and_recipe):
 
 
 async def test_signed_resumable_upload_with_ios_headers(store_and_recipe):
-    """TUS exactly as ios/GhostChef/Chef/ChefUploader.swift sends it: x-signature, no JWT."""
+    """TUS exactly as ios/Echo/Chef/ChefUploader.swift sends it: x-signature, no JWT."""
     import base64
 
     store, rid = store_and_recipe

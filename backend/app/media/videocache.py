@@ -20,7 +20,7 @@ from app.config import get_settings
 from app.media.ffmpeg import ProbeResult, probe
 from app.store.base import Recipe, Store
 
-log = logging.getLogger("ghostchef.videocache")
+log = logging.getLogger("echo.videocache")
 
 TTL_S = 600.0
 MAX_ENTRIES = 2
@@ -47,7 +47,7 @@ def _lock() -> asyncio.Lock:
 def _cache_dir() -> Path:
     global _dir
     if _dir is None or not _dir.is_dir():
-        _dir = Path(tempfile.mkdtemp(prefix="ghostchef-videocache-"))
+        _dir = Path(tempfile.mkdtemp(prefix="echo-videocache-"))
     return _dir
 
 

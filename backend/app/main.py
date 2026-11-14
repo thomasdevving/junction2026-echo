@@ -26,7 +26,7 @@ from app.routers import frames, health, latest_frame, live, local, recipes, sess
 from app.seed import seed_fixture
 from app.store.base import Store
 
-log = logging.getLogger("ghostchef")
+log = logging.getLogger("echo")
 
 
 DEFAULT_DEMO_KEY = "dev-key"
@@ -54,7 +54,7 @@ def check_deploy_settings() -> None:
         if not key.strip() or key.strip() == DEFAULT_DEMO_KEY:
             raise RuntimeError(
                 "DEMO_API_KEY is unset or the default 'dev-key' with STORAGE=supabase and the "
-                "real AI (GHOSTCHEF_AI_FAKE=0): set a long random DEMO_API_KEY"
+                "real AI (ECHO_AI_FAKE=0): set a long random DEMO_API_KEY"
             )
 
 
@@ -93,7 +93,7 @@ def create_app() -> FastAPI:
     # No /docs or /openapi.json: contract §1 leaves only /health open. The schema is exported
     # to backend/openapi.json instead.
     app = FastAPI(
-        title="Ghost Chef API",
+        title="Echo API",
         version="2.0",
         lifespan=lifespan,
         docs_url=None,

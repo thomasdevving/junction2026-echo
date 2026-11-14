@@ -31,7 +31,7 @@ The demo key is shared privately, never written here.
 
 | Endpoint group | Implemented | Tested | Notes |
 |---|---|---|---|
-| `/health` | yes | yes | Without `ghostchef_ai` installed `ai_mode` would be `unavailable` (not a contract value; broken setup only) |
+| `/health` | yes | yes | Without `echo_ai` installed `ai_mode` would be `unavailable` (not a contract value; broken setup only) |
 | Recipes and steps (§2) | yes | yes | Supabase mode: signed upload URL + `resumable_endpoint` (`https://trfaijfrgfyrjvhocqif.storage.supabase.co/storage/v1/upload/resumable/sign`, fixed in the full check below); simple `PUT` and TUS with the iOS headers both run and work. Memory mode: upload via `PUT /local-upload` (`resumable_endpoint: null`). BE-06: `/process` runs the real job (download, size check, probe, `extract_recipe`, ffmpeg stills and clips); `PATCH /steps` re-extracts the still when `timestamp_s` changes (except on a recipe with no source video, such as the seed: stored, not re-extracted). `DELETE` of the seeded recipe needs `?force=true` (else `409 recipe_not_ready`). `/health` has an extra `ffmpeg` field. Publishing an already-published recipe returns 200 |
 | `/check`, `/watch` (§3) | yes | yes | BE-03 complete: 413/415/422 validation, downscaling, 504 budget, `/watch` one in flight per session → 429. Guard-level 401/413 and framework-level 422s carry `request_id: null` (the body is not parsed yet at that point) |
 | Sessions, events, monitor (§4) | yes | yes | BE-05: `active=true` = unfinished **and** started in the last 3 h. `session_end` is idempotent (a repeat returns the first event id). `steps_passed_first_try` ignores `check_unsure`. The monitor's last frame, result and latency live in process memory and are lost on restart. Session, title and steps are cached for 3 s |
@@ -48,7 +48,7 @@ The demo key is shared privately, never written here.
 | 2026-11-14 | same, BE-03.7 run: photo A to check, B to watch, `--watch-n 36`, real 2.5 s spacing, 2 min 8 s | 38 calls, **0 errors**; `/live-token` 503 as above | 1170 / 1316 (n=2) | 900 / 1526 (n=36) |
 | 2026-11-14 | same, after the review fixes, `--watch-n 4 --fast` | every check/watch 200 | 1775 / 2093 (n=2) | 1000 / 1110 (n=4) |
 | 2026-11-14 | Docker image on `localhost:8010` (fake, memory), `--fast` | exit 0, every status as expected | 750 / 751 (n=2) | 300 / 301 (n=6) |
-| 2026-11-14 | Docker image on `localhost:8011` with **production config** (`STORAGE=supabase`, `GHOSTCHEF_AI_FAKE=0`), default fixture frame, `--fast` | every check/watch 200; only failure `/live-token` 503 (AI-05, see Needs) | 1562 / 1969 (n=2) | 1000 / 1426 (n=6) |
+| 2026-11-14 | Docker image on `localhost:8011` with **production config** (`STORAGE=supabase`, `ECHO_AI_FAKE=0`), default fixture frame, `--fast` | every check/watch 200; only failure `/live-token` 503 (AI-05, see Needs) | 1562 / 1969 (n=2) | 1000 / 1426 (n=6) |
 | 2026-11-14 | `scripts/emergency.sh` on this laptop, reached via its LAN address `http://192.168.1.244:8020` from the same laptop (gemini, memory), `--fast` | every check/watch 200; `/live-token` 503 as above | 1662 / 1748 (n=2) | 932 / 1065 (n=6) |
 | 2026-11-14 | `https://statai-production.up.railway.app` (**gemini, supabase**), default fixture frame `ai/fixtures/images/step-3.jpg`, `--watch-n 10` | every check/watch 200; only failure `/live-token` 503 (AI-05, see Needs) | 1217 / 1238 (n=2) | 712 / 868 (n=10) |
 | 2026-11-14 | `http://localhost:8000` (fake, memory), BE-05 smoke (question, monitor follows step change, `last_frame_url` → 200 `image/jpeg`, double `session_end`), `--fast`, run after the review fixes | exit 0, every status as expected | 750 / 750 (n=2) | 301 / 301 (n=6) |
@@ -63,7 +63,7 @@ The demo key is shared privately, never written here.
 | 2026-11-14 | `http://127.0.0.1:8050` (fake, memory), full check | OK, every status as expected | 750 / 751 (n=2) | 300 / 301 (n=6) |
 | 2026-11-14 | `https://statai-production.up.railway.app` (**gemini, supabase**), deployment `1befa7f0`, full check, default fixture frame, `--fast` | OK, every status as expected; `/live-token` 200 | 1130 / 1448 (n=2) | 693 / 785 (n=6) |
 | 2026-11-14 | `https://statai-production.up.railway.app` (**gemini, supabase**), deployment `1befa7f0` = commit `f023c9e` (BE-07 code), default fixture frame, `--fast` | OK, every status as expected. CORS preflight now lists `X-Fault` (new code live); `dev-key` → 401; startup log has no fault-injection warning; Railway variables contain no `FAULT_INJECT*` | 1076 / 1305 (n=2) | 839 / 1017 (n=6) |
-Fake-mode latencies: they measure `GHOSTCHEF_AI_FAKE_DELAY` (0.3 s default), not Gemini.
+Fake-mode latencies: they measure `ECHO_AI_FAKE_DELAY` (0.3 s default), not Gemini.
 
 ## Accounts (who holds them; no secrets here)
 
@@ -91,7 +91,7 @@ Device-side recovery tests (EVALUATION §6: camera, glasses, airplane mode, back
 Verified in this session: `ruff check .` clean; `pytest -q` 67 passed (fake AI, memory store, no network); `scripts/smoke.py --fast` exit 0 against a local uvicorn; `curl /health` → `{"status":"ok","contract_version":"2.0","ai_mode":"fake","storage":"memory"}`. `openapi.json` exported (the contract still wins).
 
 - Seeded recipe id `00000000-0000-4000-8000-000000000001`; step ids are `uuid5(recipe_id, "step-<idx>")` (step 3 = `rice_too_thick`).
-- Server must run with `ghostchef_ai` installed (`pip install -e ../ai`).
+- Server must run with `echo_ai` installed (`pip install -e ../ai`).
 - Security review (security-tester) ran on the batch; its six findings were fixed and re-verified clean: `/process` race, auth checked before any body is parsed (`app/guard.py`), body caps (64 KB JSON → `413`, 8 MB `/check` `/watch`), upload token consumed only after a complete upload (a failed upload can retry the same URL), NaN/Infinity rejected, `/docs` and `/openapi.json` not served (use `backend/openapi.json`).
 - Any path without a valid key, including unknown paths, answers `401`; only `/health`, `/app/*`, `/local-files/*`, `/local-upload/*` are open.
 - Known, accepted for memory mode: sessions, events and monitor metrics grow in process memory without a limit.
@@ -141,7 +141,7 @@ Not verified / known limits:
 
 Run in this session and seen:
 - **Verification:** `ruff check .` is clean. `pytest -q` gives 108 passed, 3 skipped (fake AI, memory store, no network). 37 of the passing tests are new, in `tests/test_be03_check_watch.py`.
-- **Real Gemini (BE-03.1):** `GHOSTCHEF_AI_FAKE=0`, `GET /health` → `ai_mode: gemini`. Models reported: `gemini-3.5-flash-lite` for both check and watch. The server ran on `127.0.0.1:8000` with the memory store. `.env` still says `GHOSTCHEF_AI_FAKE=1`; the real runs set the variable on the command line.
+- **Real Gemini (BE-03.1):** `ECHO_AI_FAKE=0`, `GET /health` → `ai_mode: gemini`. Models reported: `gemini-3.5-flash-lite` for both check and watch. The server ran on `127.0.0.1:8000` with the memory store. `.env` still says `ECHO_AI_FAKE=1`; the real runs set the variable on the command line.
 - **Frames used.** The AI owner has no dev frames: AI-03 is not filmed, and AI-04's private stock clip is not on this laptop. Two real photos from Wikimedia Commons were used instead. They are kept outside the repo and never committed.
   - **A:** "Roll sushi making.jpg", CC BY-SA 2.0. Hands rolling a maki with a bamboo mat, side view.
   - **B:** "Uramaki1.jpg", CC BY-SA 4.0. A plate of cut uramaki, top view.
@@ -185,8 +185,8 @@ Design:
   - No event, stored frame or monitor result when the AI call fails or the client has disconnected.
 - **Metrics:** ring buffers of 500 latencies per session; error counts by code process-wide (`metrics.errors_total`) and per session, but only for sessions that exist (a made-up `session_id` never creates an entry).
 - **Logs (`app/logs.py`):**
-  - The `ghostchef` loggers write JSON lines.
-  - `ghostchef.calls` writes one line per call: endpoint, session_id, step_idx, request_id, verdict/status, mistake_id, confidence, latency_ms, model, http_status, error code.
+  - The `echo` loggers write JSON lines.
+  - `echo.calls` writes one line per call: endpoint, session_id, step_idx, request_id, verdict/status, mistake_id, confidence, latency_ms, model, http_status, error code.
   - No frame bytes, keys or tokens are logged.
 - **Smoke script:** new `--watch-frame` and `--allow-model-errors` options, plus a table of error responses by code.
 
@@ -199,8 +199,8 @@ Not verified / known limits:
 
 Run in this session and seen:
 - **BE-04.1 Dockerfile.**
-  - From the repo root, `docker build -f backend/Dockerfile -t ghostchef-backend .` succeeded (Docker 29.9.3, image 680 MB).
-  - `docker run -p 8010:8000 -e DEMO_API_KEY=dev-key ghostchef-backend`: `/health` → `ai_mode: fake`, `storage: memory`; `/app/` → 200; smoke exit 0.
+  - From the repo root, `docker build -f backend/Dockerfile -t echo-backend .` succeeded (Docker 29.9.3, image 680 MB).
+  - `docker run -p 8010:8000 -e DEMO_API_KEY=dev-key echo-backend`: `/health` → `ai_mode: fake`, `storage: memory`; `/app/` → 200; smoke exit 0.
   - Inside the container: process runs as uid 10001 (`app`); `ffmpeg` present; no `.env` file anywhere in the image; command line shows `--workers 1`; with `-e PORT=9123` it answered on 9123.
   - Same image with production-style variables (Supabase + real Gemini, keys passed from a temporary env file that was deleted afterwards): `/health` → `gemini` / `supabase`, smoke as in the table above.
 - **BE-04.2.** `railway.json` is valid JSON with the fields from Railway's config-as-code reference (Dockerfile builder, `dockerfilePath`, healthcheck `/health`, `ON_FAILURE`). README → "Deploying (Railway)" has the dashboard steps.
@@ -251,10 +251,10 @@ Run in this session and seen:
   - Checks happen in this order: recipe, then session (404/422), then status `published` (else `409 recipe_not_ready`). Only then come the guard and the mint, so a 404/409/422 never uses up the 3 s window.
   - The config is cached in an LRU of 32. The key is recipe id + sha256 of title, chef, transcript, step specs and the live model id. One entry per recipe: a `PATCH /steps` changes the hash and replaces the entry. The token is never cached. Tests confirm 3 calls give 1 build and 3 mints.
   - The guard allows one token per `session_id` every 3 s; a faster repeat gets `429 quota_exhausted` with `retryable: true`. A failed mint (Gemini error or timeout) clears the stamp, so a retry is a real attempt. Calls without `session_id` are not limited, as the task specifies.
-  - The log line `ghostchef.live` carries `recipe_id`, `model`, `locked` and `expires_at` only. The uvicorn log of the local run was checked: it does not contain the token string.
+  - The log line `echo.live` carries `recipe_id`, `model`, `locked` and `expires_at` only. The uvicorn log of the local run was checked: it does not contain the token string.
   - Fake mode returns the fake token (`locked: false`, model `fake`).
-  - **With real AI** (`GHOSTCHEF_AI_FAKE=0`, local server on `:8001`): `503 model_unavailable`, "mint_live_token is not implemented yet". AI-05 is still NOT STARTED on `main`. So **no real `model` / `locked` value has been observed**, and the BE-05.1 real-AI acceptance is open.
-  - **Re-checked 2026-11-14 after AI-05 (`96e105e`) reached `main`:** in-process `TestClient` on this laptop, `GHOSTCHEF_AI_FAKE=0`, memory store, seeded recipe: `GET /live-token` → **200**, `model: gemini-3.8-live`, `api_version: v1beta`, `locked: true`, 30 min expiry (one real mint; token not logged). BE-05.1 real-AI acceptance met **locally**; production not redeployed yet.
+  - **With real AI** (`ECHO_AI_FAKE=0`, local server on `:8001`): `503 model_unavailable`, "mint_live_token is not implemented yet". AI-05 is still NOT STARTED on `main`. So **no real `model` / `locked` value has been observed**, and the BE-05.1 real-AI acceptance is open.
+  - **Re-checked 2026-11-14 after AI-05 (`96e105e`) reached `main`:** in-process `TestClient` on this laptop, `ECHO_AI_FAKE=0`, memory store, seeded recipe: `GET /live-token` → **200**, `model: gemini-3.8-live`, `api_version: v1beta`, `locked: true`, 30 min expiry (one real mint; token not logged). BE-05.1 real-AI acceptance met **locally**; production not redeployed yet.
 - **BE-05.2 monitor:**
   - Tests cover the empty session, a step change (including an unknown `to_idx` falling back to step 1), an `ok` watch (in `last_result`, not in `events`), a `warn`, a check, the last 30 events newest first, and the state after a restart.
   - Session, recipe title and steps are cached for 3 s per session. A warm call makes exactly one store query (`list_events`); a test asserts this.
@@ -292,8 +292,8 @@ To finish BE-05 (owner):
 ## Sandwich switch (D-19) notes (2026-11-14)
 
 - No production code was sushi-specific: `app/seed.py` and `scripts/seed.py` only read `ai/fixtures/sushi_recipe.json`, whose path stays the same under D-19.
-- Tests no longer hard-code the maki fixture. `tests/helpers.py` reads the fixture through `ghostchef_ai.fake.load_fixture()` and exposes `RECIPE_TITLE`, `CHECKED_IDX` / `CHECKED_STEP` (first step with `watch_fors`), `PLAIN_IDX` / `PLAIN_STEP` (first step without), `FIRST_MISTAKE_ID`, `FIRST_MISTAKE_HEADLINE`. `STEP3` / `STEP2` are gone.
-- Run on the owner's laptop: `pytest -q` → 143 passed, 3 skipped on the current (sushi) fixture, and the same with `GHOSTCHEF_FIXTURE_DIR` pointing at a draft six-step sandwich fixture in a scratch folder (placeholder images). `ruff check` clean.
+- Tests no longer hard-code the maki fixture. `tests/helpers.py` reads the fixture through `echo_ai.fake.load_fixture()` and exposes `RECIPE_TITLE`, `CHECKED_IDX` / `CHECKED_STEP` (first step with `watch_fors`), `PLAIN_IDX` / `PLAIN_STEP` (first step without), `FIRST_MISTAKE_ID`, `FIRST_MISTAKE_HEADLINE`. `STEP3` / `STEP2` are gone.
+- Run on the owner's laptop: `pytest -q` → 143 passed, 3 skipped on the current (sushi) fixture, and the same with `ECHO_FIXTURE_DIR` pointing at a draft six-step sandwich fixture in a scratch folder (placeholder images). `ruff check` clean.
 - **Production re-seeded 2026-11-14** from the AI track's sandwich fixture (`b9b01bb`): `STORAGE=supabase python scripts/seed.py --replace --publish`. `--replace` also deleted the old recipe's sessions and frames (test data only). `GET /recipes/{id}` on production shows "Ham and cheese sandwich", published, 6 steps with reference images. The fixture's narration and images are still **placeholders**; re-seed again once AI-03.5 pushes real stills.
 
 ## BE-06 notes (2026-11-14)
@@ -355,6 +355,13 @@ Whole-track check against the docs, run in this session and seen:
 - **Deploy setup changed:** Railway now follows `main` with automatic deploys on (the push of `63bb638` built by itself, as did `60dafdc` before it). BE-04.5 recorded them as off and the source as pinned. Every push to `main` from any track now redeploys production. Owner to decide whether to switch it back off before the demo.
 - **First real ingestion run (BE-06 gap closed except for real footage):** local server with production config (`STORAGE=supabase`, real Gemini). Input: a generated 60 s 1280×720 `testsrc2` video with one caption per step ("Step 1 - Lay out two slices of bread" … "Step 6 - Cut diagonally"), sine-tone audio, 19.4 MB, step marks every 10 s. Not a chef video. Flow: `POST /recipes` → TUS in 4 × 6 MB chunks with the iOS headers (7.2 s) → `/process` 202 (second call 409) → **`review` after 54 s** (download from live Supabase, real `extract_recipe`, ffmpeg) → 6 steps with titles matching the captions, every `ref_image_url` 200 `image/jpeg` and `clip_url` 200 `video/mp4` (4 s) → `PATCH /steps` `timestamp_s=5` → 200 with a new still → publish 200 → `/live-token` for the ingested recipe 200 (`gemini-3.8-live`, `locked: true`) → `DELETE` 204, then 404. Transcript empty and `watch_fors` empty on every step: expected for a test pattern with no speech or food. Server log: no errors, no key or JWT strings. Supabase afterwards: no `videos` objects, `media` back to the 6 seed stills.
 - Still open: BE-06.5 (real chef take from the glasses), BE-07.6 (hotspot rehearsal, freeze tag), a labelled mistake frame (AI-03).
+
+## Rename to Echo (2026-11-14)
+
+- "Ghost Chef" → "Echo" everywhere, identifiers included: env vars `GHOSTCHEF_*` → `ECHO_*`, packages `echo-backend` / `echo_ai`, loggers `echo` / `echo.calls` / `echo.images` / `echo.live`, Docker tag `echo-backend`.
+- Verified locally: `pytest -q` 274 passed, 5 skipped; Docker image builds, `/health` 200 (fake, memory).
+- Railway production: `ECHO_AI_FAKE` and `ECHO_MODEL_CHECK|LIVE|VIDEO|WATCH` added as references to the old `GHOSTCHEF_*` values (`${{GHOSTCHEF_…}}`). **Do not delete the `GHOSTCHEF_*` variables yet**: replace each `ECHO_*` reference with its literal value in the dashboard first, then delete the old five.
+- Local `.env` files: rename `GHOSTCHEF_*` keys to `ECHO_*`, then `pip install -e ../ai -e .` again.
 
 ## Needs from other tracks
 

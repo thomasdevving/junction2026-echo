@@ -58,7 +58,7 @@ The human runs it once in the Supabase SQL editor.
 **Do** — `backend/scripts/seed.py`:
 - `python scripts/seed.py [--fixture ../ai/fixtures] [--publish] [--replace]`
 - Works against whichever store `STORAGE` selects.
-- Reads `sushi_recipe.json` (validate it with `ghostchef_ai.schemas.RecipeDraft`), creates the recipe with the **same fixed UUIDs** as the BE-01 startup seed, uploads `images/step-<idx>.jpg` to `media/<recipe_id>/steps/<idx>/ref.jpg`, inserts the steps, sets status `review` or `published`.
+- Reads `sushi_recipe.json` (validate it with `echo_ai.schemas.RecipeDraft`), creates the recipe with the **same fixed UUIDs** as the BE-01 startup seed, uploads `images/step-<idx>.jpg` to `media/<recipe_id>/steps/<idx>/ref.jpg`, inserts the steps, sets status `review` or `published`.
 - `--replace` deletes an existing recipe with that id first. Without it, an existing recipe makes the script exit with a message (no accidental duplicates).
 - Prints the recipe id and step ids.
 - Memory mode keeps its automatic startup seed from BE-01; Supabase mode is seeded **only** by this script.

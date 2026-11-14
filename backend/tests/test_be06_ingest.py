@@ -71,7 +71,7 @@ def _image(client, url) -> Image.Image:
 
 def _draft(windows: list[tuple[float, tuple[float, float] | None]]):
     """A RecipeDraft from the fixture: one step per (timestamp_s, clip window)."""
-    from ghostchef_ai import fake
+    from echo_ai import fake
 
     base = fake.load_fixture()
     steps = []
@@ -90,13 +90,13 @@ def _draft(windows: list[tuple[float, tuple[float, float] | None]]):
 
 
 def _patch_extract(monkeypatch, fn) -> None:
-    import ghostchef_ai
+    import echo_ai
 
-    monkeypatch.setattr(ghostchef_ai, "extract_recipe", fn)
+    monkeypatch.setattr(echo_ai, "extract_recipe", fn)
 
 
 def _spy_extract(monkeypatch, draft=None) -> list[dict]:
-    from ghostchef_ai import fake
+    from echo_ai import fake
 
     calls: list[dict] = []
 
@@ -202,10 +202,10 @@ def test_startup_sweep(client, auth):
 def test_failing_extract_recipe_is_readable_and_leaks_nothing(
     client, auth, testsrc_bytes, monkeypatch, exc_name, message
 ):
-    import ghostchef_ai
+    import echo_ai
 
     async def boom(*a, **kw):
-        raise getattr(ghostchef_ai, exc_name)("SECRET api key in /tmp/x")
+        raise getattr(echo_ai, exc_name)("SECRET api key in /tmp/x")
 
     _patch_extract(monkeypatch, boom)
     rid, body = ingest_video(client, auth, testsrc_bytes)
@@ -297,11 +297,11 @@ def test_temp_dir_is_cleaned(client, auth, testsrc_bytes, monkeypatch, tmp_path,
         _patch_extract(monkeypatch, boom)
     _, body = ingest_video(client, auth, testsrc_bytes)
     assert body["status"] == ("failed" if fail else "review")
-    assert [p for p in tmp.iterdir() if p.name.startswith("ghostchef-ingest-")] == []
+    assert [p for p in tmp.iterdir() if p.name.startswith("echo-ingest-")] == []
 
 
 async def test_only_one_ingestion_at_a_time(app, testsrc_bytes, monkeypatch):
-    from ghostchef_ai import fake
+    from echo_ai import fake
 
     active = peak = 0
     release = asyncio.Event()
@@ -689,7 +689,7 @@ def test_videocache_evict_beats_an_inflight_download(tmp_path):
 
 
 async def test_sweep_leaves_a_running_job_alone(app, testsrc_bytes, monkeypatch):
-    from ghostchef_ai import fake
+    from echo_ai import fake
 
     release = asyncio.Event()
     started = asyncio.Event()

@@ -27,13 +27,13 @@ from app.store.base import Recipe, Step, Store
 from app.views import load_recipe, load_session, step_spec
 
 router = APIRouter(tags=["live"])
-log = logging.getLogger("ghostchef.live")
+log = logging.getLogger("echo.live")
 
 API_VERSION = "v1beta"
 GUARD_S = 3.0
 CONFIG_CACHE_MAX = 32
 
-# cache key -> LiveConfig (ghostchef_ai model)
+# cache key -> LiveConfig (echo_ai model)
 _config_cache: OrderedDict[str, Any] = OrderedDict()
 # session_id -> monotonic time of the last token minted (or attempted) for it
 _last_mint: dict[str, float] = {}

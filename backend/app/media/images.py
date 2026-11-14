@@ -14,7 +14,7 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 
 from app.errors import ApiError
 
-log = logging.getLogger("ghostchef.images")
+log = logging.getLogger("echo.images")
 
 MB = 1024 * 1024
 

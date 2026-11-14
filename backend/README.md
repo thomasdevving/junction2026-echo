@@ -17,7 +17,7 @@ New here? Read [../README.md](../README.md), then the whole of [../docs/API-CONT
 | `scripts/smoke.py` — one command that exercises the whole API and prints latency | everyone, after every push |
 | An emergency way to run the same server from a laptop on a hotspot | the demo |
 
-You do **not** write prompts or call Gemini directly: that is the `ghostchef_ai` package in `ai/`, which you import. You do not write client UI: `web/` is served by you as static files but owned by its track.
+You do **not** write prompts or call Gemini directly: that is the `echo_ai` package in `ai/`, which you import. You do not write client UI: `web/` is served by you as static files but owned by its track.
 
 ## Setup
 
@@ -27,7 +27,7 @@ Requires Python 3.11+, and `ffmpeg` + `ffprobe` on the PATH from BE-06 onward (`
 cd backend
 python -m venv .venv
 source .venv/bin/activate            # Windows PowerShell: .venv\Scripts\Activate.ps1
-pip install -e ../ai                 # the ghostchef_ai package (needs AI-01 on main)
+pip install -e ../ai                 # the echo_ai package (needs AI-01 on main)
 pip install -e ".[dev]"
 cp .env.example .env
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -85,8 +85,8 @@ Every variable is read in `app/config.py` and listed in `.env.example`.
 | `STORAGE` | `memory` | `memory` or `supabase` |
 | `DATA_DIR` | `.data` | Local file root for the memory store |
 | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | — | Required when `STORAGE=supabase` |
-| `GHOSTCHEF_AI_FAKE` | `1` | `1` = fake AI, `0` = real Gemini (read by `ghostchef_ai`) |
-| `GEMINI_API_KEY` | — | Required when fake is off (read by `ghostchef_ai`) |
+| `ECHO_AI_FAKE` | `1` | `1` = fake AI, `0` = real Gemini (read by `echo_ai`) |
+| `GEMINI_API_KEY` | — | Required when fake is off (read by `echo_ai`) |
 | `CHECK_BUDGET_S` / `WATCH_BUDGET_S` | `8` / `3.5` | Model time budgets from the contract |
 | `SIGNED_URL_TTL_S` | `7200` | Signed URL lifetime |
 | `MAX_VIDEO_MB` | `500` | Video size limit, enforced by the ingestion job while it downloads the video in chunks (and by the memory-mode upload route); the `videos` bucket carries the same limit |
@@ -98,7 +98,7 @@ Every variable is read in `app/config.py` and listed in `.env.example`.
 
 ### Startup refusals
 
-The server refuses to start (`check_deploy_settings`) with `DEMO_API_KEY` unset or `dev-key` on Railway, and also with `STORAGE=supabase` and the real AI (`GHOSTCHEF_AI_FAKE=0`) anywhere.
+The server refuses to start (`check_deploy_settings`) with `DEMO_API_KEY` unset or `dev-key` on Railway, and also with `STORAGE=supabase` and the real AI (`ECHO_AI_FAKE=0`) anywhere.
 
 ### Quota cool-down (BE-07.2)
 
@@ -127,11 +127,11 @@ curl -H 'X-Demo-Key: dev-key' -H 'X-Fault: 1' -F step_id=... -F request_id=$(uui
 The image needs `backend/`, `ai/` and `web/`, so the **build context is the repository root**:
 
 ```bash
-docker build -f backend/Dockerfile -t ghostchef-backend .                 # from the repo root
-docker run -p 8000:8000 -e DEMO_API_KEY=dev-key ghostchef-backend         # memory + fake AI
+docker build -f backend/Dockerfile -t echo-backend .                 # from the repo root
+docker run -p 8000:8000 -e DEMO_API_KEY=dev-key echo-backend         # memory + fake AI
 ```
 
-`python:3.12-slim` + `ffmpeg`, runs as a non-root user with **one** uvicorn worker (session state is in process memory, so never scale it out), listens on `$PORT` (default 8000). Inside the image: `GHOSTCHEF_FIXTURE_DIR=/srv/ai/fixtures`, `WEB_DIR=/srv/web`, `DATA_DIR=/srv/data`. `backend/Dockerfile.dockerignore` keeps `.env`, `.venv`, `.git`, `ios/`, footage and `backend/.data` out of a local build context; the Dockerfile also copies only the backend paths it needs.
+`python:3.12-slim` + `ffmpeg`, runs as a non-root user with **one** uvicorn worker (session state is in process memory, so never scale it out), listens on `$PORT` (default 8000). Inside the image: `ECHO_FIXTURE_DIR=/srv/ai/fixtures`, `WEB_DIR=/srv/web`, `DATA_DIR=/srv/data`. `backend/Dockerfile.dockerignore` keeps `.env`, `.venv`, `.git`, `ios/`, footage and `backend/.data` out of a local build context; the Dockerfile also copies only the backend paths it needs.
 
 ## Deploying (Railway)
 
@@ -154,9 +154,9 @@ docker run -p 8000:8000 -e DEMO_API_KEY=dev-key ghostchef-backend         # memo
    | `DEMO_API_KEY` | required: the server refuses to start on Railway with an empty key or `dev-key`. A new long random string: `python -c "import secrets; print(secrets.token_urlsafe(32))"` |
    | `STORAGE` | `supabase` |
    | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | from the Supabase project (service role key) |
-   | `GHOSTCHEF_AI_FAKE` | `0` |
+   | `ECHO_AI_FAKE` | `0` |
    | `GEMINI_API_KEY` | the event key |
-   | `GHOSTCHEF_MODEL_VIDEO` / `_CHECK` / `_WATCH` / `_LIVE` | from `ai/STATUS.md` → "Gemini account facts". On 2026-11-14 these were `gemini-3.5-flash` / `gemini-3.5-flash-lite` / `gemini-3.5-flash-lite` / `gemini-3.8-live`. Re-check before you deploy |
+   | `ECHO_MODEL_VIDEO` / `_CHECK` / `_WATCH` / `_LIVE` | from `ai/STATUS.md` → "Gemini account facts". On 2026-11-14 these were `gemini-3.5-flash` / `gemini-3.5-flash-lite` / `gemini-3.5-flash-lite` / `gemini-3.8-live`. Re-check before you deploy |
    | `CORS_ORIGINS` | `https://<your-domain>.up.railway.app,http://localhost:5173` (fill in after step 4) |
    | `RAILWAY_DOCKERFILE_PATH` | `backend/Dockerfile` (step 2) |
 
@@ -195,7 +195,7 @@ backend\scripts\emergency.ps1           # Windows         (-Fake, -Port 8001)
 
 **Before you run it**, check the laptop is ready:
 - The backend venv is set up, as in [Setup](#setup).
-- `backend/.env` holds `GEMINI_API_KEY` and a private `DEMO_API_KEY`. With real Gemini the script refuses the public default `dev-key`. The `GHOSTCHEF_MODEL_*` values are optional.
+- `backend/.env` holds `GEMINI_API_KEY` and a private `DEMO_API_KEY`. With real Gemini the script refuses the public default `dev-key`. The `ECHO_MODEL_*` values are optional.
 - Values in `.env` are plain `KEY=value` lines. Quotes and trailing ` # comments` are handled.
 
 **What the script does:**
@@ -230,7 +230,7 @@ Run in order. One Claude session per batch. Kickoff prompt: [../docs/PLAN.md §7
 | 06 | [Ingestion pipeline with ffmpeg](tasks/06-ingestion-pipeline.md) | G3 | 02, AI-06 | WEB-02 | — |
 | 07 | [Hardening and end-to-end](tasks/07-hardening-and-e2e.md) | G4 | all above | Demo readiness | Run the recovery tests |
 
-G1 only needs one thing from you beyond BE-01: run with `GHOSTCHEF_AI_FAKE=0` as soon as AI-04 is on `main`.
+G1 only needs one thing from you beyond BE-01: run with `ECHO_AI_FAKE=0` as soon as AI-04 is on `main`.
 
 ## Rules for this track
 
@@ -240,5 +240,5 @@ G1 only needs one thing from you beyond BE-01: run with `GHOSTCHEF_AI_FAKE=0` as
 - **Run the smoke script after every push** against whatever the clients are using: `python scripts/smoke.py --base http://localhost:8000 --key dev-key`.
 - **Secrets** live in `.env` (untracked) and in Railway's variables. Never log a key, a token, or a signed URL's signature.
 - **Measure, don't guess.** `latency_ms` is measured around the AI call with a monotonic clock and reported in every response.
-- Do not edit `ai/` or `web/`. If `ghostchef_ai` misbehaves, write it in [STATUS.md](STATUS.md) under "Needs from other tracks" and tell the AI owner.
+- Do not edit `ai/` or `web/`. If `echo_ai` misbehaves, write it in [STATUS.md](STATUS.md) under "Needs from other tracks" and tell the AI owner.
 - Deploying, creating cloud projects, and setting secrets are done by **you, the human owner**, in the provider's dashboard or CLI. Claude prepares the files and tells you the exact steps.

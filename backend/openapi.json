@@ -1,7 +1,7 @@
 {
  "openapi": "3.1.0",
  "info": {
-  "title": "Ghost Chef API",
+  "title": "Echo API",
   "version": "2.0"
  },
  "paths": {

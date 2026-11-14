@@ -48,7 +48,7 @@ The bytes never pass through FastAPI (contract v2.0), so validation moves to `/p
 **Do** — `app/jobs/ingest.py::run_ingestion(recipe_id)`:
 1. Download the video from Storage to a temp dir (size check, BE-06.2).
 2. `probe` → duration. Drop any `step_marks_s` beyond the duration.
-3. `draft = await ghostchef_ai.extract_recipe(path, title_hint=recipe.title, step_marks_s=recipe.step_marks_s)`.
+3. `draft = await echo_ai.extract_recipe(path, title_hint=recipe.title, step_marks_s=recipe.step_marks_s)`.
 4. Clamp every `timestamp_s` into `[0, duration − 0.1]`; clamp clips into the duration; drop clips shorter than 1 s.
 5. For each step: `extract_still` → upload to `media/<recipe_id>/steps/<idx>/ref.jpg`. If the step has a clip window: `extract_clip` → upload `clip.mp4`. A failed clip is logged and skipped; a failed still marks the step as having no reference image.
 6. `replace_steps`, store the transcript, set status `review`.
