@@ -83,11 +83,11 @@ One Claude session per batch. Kickoff prompt: [../docs/PLAN.md §7](../docs/PLAN
 - No names, faces, or quotes of people outside the team in the repository without their permission. The repository is public.
 - Submitting forms, publishing videos, and messaging organizers or partners are done by **you, the human owner**. Claude drafts; you send.
 - Do not edit other tracks' folders. API problems go in [STATUS.md](STATUS.md) → "Needs from other tracks" and to the backend owner.
-- The demo key is typed into Settings and kept in the browser's localStorage. It is never written into a file in this folder.
+- Same-origin browser sign-in uses an expiring HttpOnly cookie. The login code and backend API key are never stored by web code. Advanced settings retain manual `X-Demo-Key` configuration for separate development servers; that manually entered key uses localStorage.
 
 ## Running the demo monitor
 
-Open `/monitor/` (standalone server) or `/app/monitor/` (backend server). Enter the API base URL and demo key in Settings. The monitor automatically follows the newest active simulator/iOS session. Choose a session in the picker to pin it, or use `?session=<id>`. The default view keeps the three session views and latest activity prominent. **Details** reveals session selection, backup playback, the full timeline and metrics; `?clean=0` opens that view directly. `?clean=1` keeps the clean view.
+Open `/monitor/` (standalone server) or `/app/monitor/` (backend server). Use **Sign in** with the shared demo login code. For a separate development server, use the API base URL and demo key under Advanced connection settings. The monitor automatically follows the newest active simulator/iOS session. Choose a session in the picker to pin it, or use `?session=<id>`. The default view keeps the three session views and latest activity prominent. **Details** reveals session selection, backup playback, the full timeline and metrics; `?clean=0` opens that view directly. `?clean=1` keeps the clean view.
 
 Keyboard: **F** document fullscreen (if allowed), **B** choose a local backup recording, **S** open details and focus the session picker, **H** toggle details. Backup files stay on the device and are permanently marked REPLAY; fake-AI mode is always labelled. Start a new simulator session to demonstrate automatic reattachment.
 
@@ -95,7 +95,7 @@ Verification: `node --test "web/tests/*.test.mjs"`. Hardware and three-metre che
 
 ## Reviewing a chef recording
 
-Open `/review/` on the standalone server or `/app/review/` on the backend. Use the shared Settings to enter the API base and demo key. Recipes recorded and uploaded in iOS Chef mode appear automatically; `?recipe=<id>` opens one directly. Uploading/processing recipes update every three seconds while visible; the library refreshes every five seconds.
+Open `/review/` on the standalone server or `/app/review/` on the backend. Use **Sign in** with the shared demo login code (or Advanced connection settings for a separate development server). Recipes recorded and uploaded in iOS Chef mode appear automatically; `?recipe=<id>` opens one directly. Uploading/processing recipes update every three seconds while visible; the library refreshes every five seconds.
 
 Review each step’s text, visible success criteria and known mistakes, with the shared lens preview beside the reference. Save each changed card before publishing. With source video available, pause on a clear moment and use **Use current frame**; ±0.1 s / ±1 s controls and numeric timestamps are also available. Published recipes hide the source video per the API contract; numeric re-picking still asks the backend to extract a still if it has the source.
 
@@ -109,4 +109,4 @@ Simulator, Review and Monitor keep the same three navigation links, with the cur
 
 The browser cannot pair with the glasses. Pair them with an iPhone in the Meta AI app, then use the team’s Echo iPhone test build (`Settings → Glasses Lab → Register with Meta AI`). Choose Cook for a lesson or Chef to record one. Monitor follows that app’s session when both use the same backend and demo key. The guide records the prototype limits: physical-device validation and glasses audio routing are still pending, and no public iPhone download link exists yet.
 
-A browser with no key shows **Connect this browser**, rather than **Key rejected**. Enter the private team demo key in Settings; it is never shipped in the website source. An entered key actually refused by the API still shows an error. The public homepage and brand gallery need no key.
+A signed-out browser shows **Sign in**. Enter the shared demo login code; the backend exchanges it for an expiring HttpOnly cookie and keeps Railway secrets private. Sessions survive reloads but end on sign-out, expiry or a server restart. `WEB_LOGIN_CODE` must be configured privately on the backend. Separate development servers retain manual API-key access under Advanced connection settings. The public homepage and brand gallery need no login.

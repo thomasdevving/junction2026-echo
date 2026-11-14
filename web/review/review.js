@@ -1,8 +1,9 @@
 import { listRecipes, getRecipe, createRecipe, putVideo, processRecipe, patchRecipe, patchStep, publishRecipe, deleteRecipe } from '../shared/api.js';
-import { CONFIG_EVENT, getConfig } from '../shared/config.js';
+import { CONFIG_EVENT } from '../shared/config.js';
 import { mountChrome } from '../shared/chrome.js';
 import { renderLens } from '../shared/lens.js';
 import { icon } from '../shared/icons.js';
+import { hasApiAccess } from '../shared/browser-session.js';
 import { wordCount, uploadErrors, mistakeId, validateStep, stepDraft, imageUrl } from './validation.js';
 
 const $ = selector => document.querySelector(selector);
@@ -37,8 +38,8 @@ function selectListItem() {
 
 async function refreshList() {
   if (listBusy || document.hidden) return;
-  if (!getConfig().demoKey) {
-    message(libraryMessage, 'Connect this browser in Settings to see your recordings.');
+  if (!hasApiAccess()) {
+    message(libraryMessage, 'Sign in to this browser to see your recordings.');
     lastList = Date.now(); return;
   }
   listBusy = true;
@@ -71,9 +72,9 @@ async function openRecipe(id, force = false) {
   selectedId = id; recipe = null; editors = new Map(); metaDirty = false; metaSaving = false;
   selectListItem();
   const url = new URL(location.href); url.searchParams.set('recipe', id); history.replaceState(null, '', url);
-  if (!getConfig().demoKey) {
+  if (!hasApiAccess()) {
     workspace.setAttribute('aria-busy', 'false');
-    workspace.innerHTML = '<div class="welcome panel"><p class="overline">YOUR LESSONS, IN THIS BROWSER</p><h2>Connect to your recordings.</h2><p>Enter the team’s private demo key in Settings. Your selected recipe will open once this browser is connected.</p><button class="btn btn-light" type="button" data-connect-review>Connect this browser</button></div>';
+    workspace.innerHTML = '<div class="welcome panel"><p class="overline">YOUR LESSONS, IN THIS BROWSER</p><h2>Sign in to your recordings.</h2><p>Use the shared demo login code. Your selected recipe will open after sign-in.</p><button class="btn btn-light" type="button" data-connect-review>Sign in</button></div>';
     workspace.querySelector('[data-connect-review]').addEventListener('click', () => document.querySelector('.tool-header [data-open-settings]').click());
     return;
   }
@@ -426,6 +427,11 @@ addEventListener(CONFIG_EVENT, () => {
   refreshList();
 });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { refreshList(); refreshPending(); } });
+document.addEventListener('echo:status', event => {
+  if (!['ok', 'fake'].includes(event.detail.state)) return;
+  if (!recipe && selectedId) openRecipe(selectedId, true);
+  refreshList();
+});
 setInterval(() => {
   if (document.hidden) return;
   updateElapsed();

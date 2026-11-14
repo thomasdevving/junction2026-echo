@@ -8,6 +8,7 @@ import { ApiError, newRequestId } from "../shared/api.js";
 import { renderLens, describeLens } from "../shared/lens.js";
 import { createDebouncer } from "../shared/debounce.js";
 import { icon } from "../shared/icons.js";
+import { hasApiAccess } from '../shared/browser-session.js';
 
 // ---------- timings (contract + task file) ----------
 const PASS_ADVANCE_MS = 2000;
@@ -409,10 +410,10 @@ function startSimulator() {
   const pickerMsg = $("#picker-msg");
 
   async function loadRecipes() {
-    if (!getConfig().demoKey) {
+    if (!hasApiAccess()) {
       S.recipes = [];
       pickerList.innerHTML = '';
-      pickerMsg.textContent = 'Connect this browser above with the team’s demo key, then choose a lesson.';
+      pickerMsg.textContent = 'Sign in using Connect this browser above, then choose a lesson.';
       if (S.mode === 'pick') draw();
       return;
     }

@@ -2,6 +2,7 @@
 // Adds X-Demo-Key, turns the error envelope into ApiError, and times every call out.
 
 import { getConfig } from "./config.js";
+import { forgetBrowserSession, sameOriginApi } from './browser-session.js';
 
 export const TIMEOUTS = Object.freeze({ check: 10000, watch: 4000, default: 10000 });
 
@@ -19,7 +20,10 @@ export class ApiError extends Error {
 async function request(method, path, { json, form, timeoutMs = TIMEOUTS.default, auth = true } = {}) {
   const { apiBase, demoKey } = getConfig();
   const headers = {};
-  if (auth) headers["X-Demo-Key"] = demoKey;
+  if (auth) {
+    if (sameOriginApi(apiBase)) headers['X-Echo-Browser'] = '1';
+    if (demoKey) headers["X-Demo-Key"] = demoKey;
+  }
   let body;
   if (json !== undefined) {
     headers["Content-Type"] = "application/json";
@@ -32,7 +36,7 @@ async function request(method, path, { json, form, timeoutMs = TIMEOUTS.default,
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   let res;
   try {
-    res = await fetch(apiBase + path, { method, headers, body, signal: ctrl.signal });
+    res = await fetch(apiBase + path, { method, headers, body, signal: ctrl.signal, credentials: 'same-origin' });
   } catch (err) {
     const timedOut = err && err.name === "AbortError";
     throw new ApiError({
@@ -55,6 +59,7 @@ async function request(method, path, { json, form, timeoutMs = TIMEOUTS.default,
     }
   }
   if (!res.ok) {
+    if (res.status === 401) forgetBrowserSession(apiBase);
     const e = (data && data.error) || {};
     throw new ApiError({
       status: res.status,

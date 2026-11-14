@@ -184,3 +184,9 @@ Backup recording: none yet.
 - WEB-02.5: iOS/AI owners to provide one consented real chef take, uploaded in Chef mode or identified as the MP4 fallback, so extraction and human review can be measured on real material.
 - WEB-04 final: AI owner to publish AI-07 measured results (set sizes, verdict/false-approval counts, ablation and watcher results, model IDs, date and conditions); iOS owner to publish IOS-06 real-device model/firmware, what actually ran and its limitations. Finalization is blocked until these exist.
 - WEB-03.6: iOS owner to run one real session while the monitor is attached; compare the reconstructed lens to the phone preview and record observed delay/mismatches. A human should also check the monitor from three metres away.
+
+## Browser sign-in (2026-11-14)
+
+Added a shared **Sign in** dialog for the user-requested demo login code. Same-origin Simulator, Review and Monitor restore an expiring HttpOnly session after reload; login codes/API credentials are not returned by the auth API or persisted by this flow. Advanced connection settings retain manual API-key access for separate development servers. Sign-out clears the browser session and legacy saved key. Public homepage health remains accessible without signing in.
+
+Observed: **40/40 web tests pass**, including cookie-flow request options, no secret persistence, session restoration, signed-out connection state and legacy cross-origin header compatibility. Chromium on the isolated `localhost:8102` fake-AI/memory server successfully signs in with Enter, opens the sandwich lesson and restores it after reload. Fake mode remains visibly labelled. Backend auth/security tests pass 34/34. No production recipe, real Gemini or hardware validation is implied.

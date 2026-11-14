@@ -4,6 +4,7 @@
 import { getConfig, setConfig, CONFIG_EVENT, DEFAULTS } from "./config.js";
 import { probeConnection } from './connection.js';
 import { mountSetup } from './setup.js';
+import { sameOriginApi, refreshBrowserSession, browserSignIn, browserSignOut } from './browser-session.js';
 import { icon } from "./icons.js";
 
 const POLL_MS = 10000;
@@ -15,9 +16,16 @@ function settingsDialog() {
   dlg.innerHTML = `
     <form method="dialog" novalidate>
       <header>
-        <h2 id="settings-title">Settings</h2>
+        <h2 id="settings-title">Connect to Echo</h2>
         <button class="btn btn-icon btn-ghost" value="cancel" formnovalidate aria-label="Close settings">${icon("close")}</button>
       </header>
+      <section class="browser-login" id="browser-login">
+        <p class="hint">Sign in to access lessons and cooking sessions.</p>
+        <label class="field" for="browser-login-code">Demo login code<input class="input" id="browser-login-code" name="accessCode" type="password" autocomplete="current-password" maxlength="128"></label>
+        <div class="browser-login-actions"><button class="btn btn-light" type="button" id="browser-sign-in">Sign in</button><button class="btn" type="button" id="browser-sign-out" hidden>Sign out</button></div>
+        <p class="hint" id="browser-login-message" role="status"></p>
+      </section>
+      <details class="advanced-connection" id="advanced-connection"><summary>Advanced connection settings</summary>
       <div class="field">
         <label for="set-base">API base URL</label>
         <input class="input" id="set-base" name="apiBase" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="http://localhost:8000">
@@ -38,6 +46,7 @@ function settingsDialog() {
           <input class="input" id="set-interval" name="watchIntervalMs" type="number" min="500" max="30000" step="100" placeholder="${DEFAULTS.watchIntervalMs}">
         </div>
       </div>
+      </details>
       <div class="settings-actions">
         <button class="btn btn-ghost" value="cancel" formnovalidate>Cancel</button>
         <button class="btn btn-primary" value="save">Save settings</button>
@@ -47,7 +56,40 @@ function settingsDialog() {
 
   const f = dlg.querySelector("form");
   const field = name => f.elements.namedItem(name);
+  const loginMessage = dlg.querySelector('#browser-login-message');
+  let loginBusy = false, opening = 0;
+  function loginState(state) {
+    dlg.querySelector('#browser-sign-out').hidden = !state.authenticated;
+    field('accessCode').disabled = Boolean(state.authenticated);
+    dlg.querySelector('#browser-sign-in').hidden = Boolean(state.authenticated);
+    loginMessage.textContent = state.authenticated ? 'Signed in. This session expires automatically after a few hours.' : state.login_available === false ? 'Browser login needs WEB_LOGIN_CODE in the Railway service variables. The API key is never exposed.' : 'Use the shared demo login code from the team.';
+  }
+  dlg.querySelector('#browser-sign-in').addEventListener('click', async () => {
+    const code = field('accessCode').value;
+    if (loginBusy || !code) { if (!code) loginMessage.textContent = 'Enter the demo login code.'; return; }
+    loginBusy = true; const version = opening;
+    dlg.querySelector('#browser-sign-in').disabled = true;
+    loginMessage.textContent = 'Signing in…';
+    try {
+      const base = field('apiBase').value.trim().replace(/\/+$/, '') || getConfig().apiBase;
+      await browserSignIn(code, base);
+      if (version !== opening) return;
+      field('accessCode').value = ''; dlg.returnValue = ''; dlg.close();
+    } catch (error) { if (version === opening) loginMessage.textContent = error.message || 'Could not sign in.'; }
+    finally { loginBusy = false; dlg.querySelector('#browser-sign-in').disabled = false; }
+  });
+  dlg.querySelector('#browser-sign-out').addEventListener('click', async () => {
+    if (loginBusy) return;
+    loginBusy = true;
+    try { await browserSignOut(); field('accessCode').value = ''; dlg.returnValue = ''; dlg.close(); }
+    catch (error) { loginMessage.textContent = error.message; }
+    finally { loginBusy = false; }
+  });
+  field('accessCode').addEventListener('keydown', event => {
+    if (event.key === 'Enter') { event.preventDefault(); dlg.querySelector('#browser-sign-in').click(); }
+  });
   dlg.addEventListener("close", () => {
+    opening++; field('accessCode').value = '';
     if (dlg.returnValue !== "save") return;
     setConfig({
       apiBase: field("apiBase").value,
@@ -69,9 +111,15 @@ function settingsDialog() {
       field("demoKey").value = c.demoKey;
       field("watchThreshold").value = c.watchThreshold === DEFAULTS.watchThreshold ? "" : c.watchThreshold;
       field("watchIntervalMs").value = c.watchIntervalMs === DEFAULTS.watchIntervalMs ? "" : c.watchIntervalMs;
+      const login = sameOriginApi();
+      dlg.querySelector('#browser-login').hidden = !login;
+      dlg.querySelector('#advanced-connection').open = !login;
+      field('accessCode').value = ''; loginState({ authenticated: false });
       dlg.returnValue = "";
       dlg.showModal();
-      (c.demoKey ? field("apiBase") : field("demoKey")).focus();
+      (login ? field('accessCode') : c.demoKey ? field("apiBase") : field("demoKey")).focus();
+      const version = ++opening;
+      if (login) refreshBrowserSession().then(state => { if (version === opening) loginState(state); }).catch(error => { if (version === opening) loginMessage.textContent = error.message; });
     },
     get isOpen() {
       return dlg.open;
@@ -91,7 +139,7 @@ function statusStrip(openSettings, shouldPoll, requiresKey) {
   function draw(s) {
     last = s;
     const { apiBase } = getConfig();
-    strip.dataset.state = s.state === 'key_required' && s.h?.ai_mode === 'fake' ? 'fake' : s.state;
+    strip.dataset.state = ['key_required', 'login_required'].includes(s.state) && s.h?.ai_mode === 'fake' ? 'fake' : s.state;
     const base = `<span class="status-item">API <b>${apiBase}</b></span>`;
     let html;
     switch (s.state) {
@@ -107,13 +155,16 @@ function statusStrip(openSettings, shouldPoll, requiresKey) {
       case "key_required":
         html = `<span class="status-flag">${s.h.ai_mode === 'fake' ? 'Fake AI · ' : ''}Connect this browser</span>${base}<span class="status-item">Enter the team’s demo key in Settings.</span><span class="status-item">ai_mode <b>${s.h.ai_mode}</b></span><span class="status-item">storage <b>${s.h.storage}</b></span>`;
         break;
+      case "login_required":
+        html = `<span class="status-flag">${s.h.ai_mode === 'fake' ? 'Fake AI · ' : ''}Sign in</span>${base}<span class="status-item">Use the demo login code to open lessons and sessions.</span><span class="status-item">ai_mode <b>${s.h.ai_mode}</b></span><span class="status-item">storage <b>${s.h.storage}</b></span>`;
+        break;
       default: {
         const fake = s.h.ai_mode === "fake";
         html = `${fake ? `<span class="status-flag">${icon("warn", { size: 18 })}Fake AI</span>` : `<span class="status-flag">${requiresKey ? 'Live' : 'Service online'}</span>`}${base}<span class="status-item">ai_mode <b>${s.h.ai_mode}</b></span><span class="status-item">storage <b>${s.h.storage}</b></span><span class="status-item">contract <b>${s.h.contract_version}</b></span>`;
       }
     }
     const needsKey = ['key_required', 'unauthorized', 'down'].includes(s.state);
-    strip.innerHTML = `${html}<button type="button" class="status-action">${needsKey ? "Open settings" : "Settings"}</button>`;
+    strip.innerHTML = `${html}<button type="button" class="status-action">${s.state === 'login_required' ? 'Sign in' : needsKey ? "Open settings" : "Settings"}</button>`;
     strip.querySelector(".status-action").addEventListener("click", openSettings);
     document.dispatchEvent(new CustomEvent("echo:status", { detail: s }));
   }

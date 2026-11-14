@@ -3,6 +3,7 @@ import { CONFIG_EVENT, getConfig } from '../shared/config.js';
 import { getMonitor, listSessions, getRecipe } from '../shared/api.js';
 import { renderLens } from '../shared/lens.js';
 import { icon } from '../shared/icons.js';
+import { hasApiAccess } from '../shared/browser-session.js';
 import { MonitorPoller } from './polling.js';
 import { connectionState, deriveLens, describeEvent, frameUrl, milliseconds, orderedEvents } from './state.js';
 
@@ -89,7 +90,7 @@ function paint() {
   if (status === 'offline') note = `${state.error || 'Reconnecting'}${state.lastSuccess ? ` · last update ${((Date.now() - state.lastSuccess) / 1000).toFixed(0)} s ago` : ''}`;
   else if (status === 'waiting') note = state.error || 'Looking for an active session…';
   else if (status === 'idle') note += feed?.session.finished_at ? ' · ended' : ' · no recent activity';
-  if (!getConfig().demoKey && !state.replay) note = 'Connect this browser in Settings with the team’s demo key.';
+  if (!hasApiAccess() && !state.replay) note = 'Sign in to this browser to follow a session.';
   $('connection-note').textContent = note;
   $('frame-age').textContent = feed?.last_frame_at ? `Frame age ${ageText(feed.last_frame_at)}` : 'No frame yet';
   $('ref-step').textContent = step ? `Step ${step.idx}` : 'Current step';
@@ -127,7 +128,7 @@ function loadRecipe(id) {
 }
 
 const poller = new MonitorPoller({
-  listSessions, getMonitor, enabled: () => !document.hidden && !state.replay && Boolean(getConfig().demoKey),
+  listSessions, getMonitor, enabled: () => !document.hidden && !state.replay && hasApiAccess(),
   onSessions(items) { sessions = items; updatePicker(); if (!poller.sessionId) { state.failed = false; state.error = ''; paint(); } },
   onAttach() {
     Object.assign(state, { feed: null, lastSuccess: null, failed: false, total: '?', error: '' });
