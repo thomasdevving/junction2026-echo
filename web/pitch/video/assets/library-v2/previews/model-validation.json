@@ -1,0 +1,75 @@
+{
+  "report": [
+    {
+      "ready": true,
+      "error": null,
+      "id": "cutting-board",
+      "triangles": 2112,
+      "parts": 2
+    },
+    {
+      "ready": true,
+      "error": null,
+      "id": "bread",
+      "triangles": 2496,
+      "parts": 3
+    },
+    {
+      "ready": true,
+      "error": null,
+      "id": "cheese",
+      "triangles": 448,
+      "parts": 1
+    },
+    {
+      "ready": true,
+      "error": null,
+      "id": "ham",
+      "triangles": 3784,
+      "parts": 1
+    },
+    {
+      "ready": true,
+      "error": null,
+      "id": "lettuce",
+      "triangles": 6120,
+      "parts": 10
+    },
+    {
+      "ready": true,
+      "error": null,
+      "id": "sandwich",
+      "triangles": 15344,
+      "parts": 18
+    },
+    {
+      "ready": true,
+      "error": null,
+      "id": "sandwich-exploded",
+      "triangles": 15344,
+      "parts": 18
+    },
+    {
+      "ready": true,
+      "error": null,
+      "id": "smart-glasses-concept",
+      "triangles": 7840,
+      "parts": 15
+    },
+    {
+      "ready": true,
+      "error": null,
+      "id": "phone",
+      "triangles": 1472,
+      "parts": 3
+    },
+    {
+      "ready": true,
+      "error": null,
+      "id": "butter-knife",
+      "triangles": 896,
+      "parts": 2
+    }
+  ],
+  "errors": []
+}

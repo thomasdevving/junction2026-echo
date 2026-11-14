@@ -1,0 +1,14 @@
+{
+  "_note": "Voiceover text. Source of truth for wording is script.md §2; keep the two in sync. E1 ships only once its numbers are in docs/EVALUATION.md §4.",
+  "audition": "A",
+  "voice": { "id": "cjVigY5qzO86Huf0OWal", "name": "Eric", "chosen": "2026-11-14, Gate 2" },
+  "groups": [["A"], ["C", "D", "E2", "F"]],
+  "parts": [
+    { "id": "A", "at": "0:00", "text": "Your hands are full of bread and filling... The recipe video keeps playing, but it can't see your board. It can't tell you the filling is piled in the middle... This is Echo." },
+    { "id": "C", "at": "0:55", "text": "Here's how. The glasses stream what the cook sees to the phone. Gemini turns the chef's video into checkable steps. It compares the cook's view with the chef's reference frame: pass, fix, or can't tell. A fast watcher looks for known mistakes. And Gemini Live answers questions from the chef's narration." },
+    { "id": "D", "at": "1:20", "text": "It shows when it's watching. The chef agrees before recording, and can delete everything. And when it can't see clearly, it says so instead of guessing." },
+    { "id": "E1", "at": "1:32", "ship": false, "text": "On our held-out test, Echo caught ⟨X⟩ of ⟨Y⟩ mistakes and wrongly approved ⟨FA⟩. A check takes about ⟨CHECK_P50⟩ seconds." },
+    { "id": "E2", "at": "1:32", "text": "We built an evaluation that counts wrong approvals and response time. The method and its limits are in our repository." },
+    { "id": "F", "at": "1:42", "text": "Echo is for anyone learning a chef's dish with their hands busy. Next: a proposed pilot with one cooking class, then other hands-on skills." }
+  ]
+}

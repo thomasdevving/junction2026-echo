@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Echo · pitch deck</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  @page { size: 1920px 1080px; margin: 0; }
+  body { overflow: hidden; }
+  .slide { display: none; }
+  .slide.on { display: block; }
+  /* on screen: scale the 1920x1080 slide to fit the window, centred (render + print stay 1:1) */
+  body.fit { width: 100vw; height: 100vh; }
+  body.fit .slide.on { position: absolute; left: var(--fit-x, 0px); top: var(--fit-y, 0px); transform: scale(var(--fit, 1)); transform-origin: top left; }
+  .file-hint { max-width: 60ch; margin: 15vh auto; padding: 0 24px; color: #fff; font: 500 20px/1.6 system-ui, sans-serif; }
+  .file-hint code { color: #8dcaff; }
+  body.print { overflow: visible; }
+  body.print .slide { display: block; break-after: page; }
+
+  .s-top { position: absolute; left: var(--safe); top: 64px; font-size: 34px; }
+  .s-num { position: absolute; right: var(--safe); top: 74px; color: var(--text-faint); font-size: 22px; font-weight: 600; letter-spacing: 0.12em; }
+
+  /* 1 · the moment */
+  .s1-copy { position: absolute; left: 140px; top: 280px; width: 720px; }
+  .s1-copy .headline { margin-top: 34px; }
+  .s1-art { position: absolute; left: 860px; top: 170px; width: 1000px; height: 760px; }
+
+  /* 2 · Echo in one sentence */
+  .s2 { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 40px; }
+  .s2 .logo { font-size: 120px; }
+  .s2 .headline { font-size: 96px; }
+  .s2 .lede { max-width: 40ch; color: var(--text-dim); font-size: 40px; line-height: 1.45; letter-spacing: -0.01em; margin: 0; }
+
+  /* 4 · how it works */
+  .s4-copy { position: absolute; left: var(--safe); top: 170px; }
+  .s4-copy .headline { margin-top: 26px; font-size: 84px; }
+  .s4-arch { position: absolute; left: 160px; top: 400px; width: 1600px; height: 640px; transform: scale(0.94); transform-origin: top left; }
+  .s4-small { position: absolute; left: var(--safe); bottom: 52px; }
+</style>
+</head>
+<body>
+<script>
+  // ES modules do not run from file:// in Chrome: say how to open the deck instead of showing a blank page.
+  if (location.protocol === "file:") {
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.innerHTML = '<div class="file-hint"><p>This deck has to be opened through a local web server.</p><p>From the <code>web/</code> folder run <code>python -m http.server 5173 --bind 127.0.0.1</code>, then open <code>http://127.0.0.1:5173/pitch/deck/deck.html</code>. Or use <code>deck.pdf</code>.</p></div>';
+    });
+  }
+</script>
+
+<section class="stage slide" data-n="1" aria-label="The moment">
+  <div class="s-top logo"><span class="logo-mark"></span>echo<span class="logo-period">.</span></div>
+  <div class="s-num">01 / 08</div>
+  <div class="s1-copy">
+    <p class="eyebrow"><span class="eyebrow-orbit"></span>The moment</p>
+    <h1 class="headline" data-head='[[{"t":"The video can&#39;t"}],[{"t":"see"},{"t":"your board.","accent":true}]]'></h1>
+  </div>
+  <div class="s1-art" data-art="moment"></div>
+  <div class="chip">Illustration</div>
+</section>
+
+<section class="stage slide" data-n="2" aria-label="Echo in one sentence">
+  <div class="s-num">02 / 08</div>
+  <div class="s2">
+    <div class="logo"><span class="logo-mark"></span>echo<span class="logo-period">.</span></div>
+    <h1 class="headline" data-head='[[{"t":"Cook from the chef&#39;s"},{"t":"point of view.","accent":true}]]'></h1>
+    <p class="lede">A chef records once through smart glasses. You cook it hands-free while Gemini compares your view with the chef's.</p>
+  </div>
+</section>
+
+<section class="stage slide" data-n="4" aria-label="How it works">
+  <div class="s-top logo"><span class="logo-mark"></span>echo<span class="logo-period">.</span></div>
+  <div class="s-num">04 / 08</div>
+  <div class="s4-copy">
+    <p class="eyebrow"><span class="eyebrow-orbit"></span>How it works</p>
+    <h1 class="headline" data-head='[[{"t":"Four jobs for"},{"t":"Gemini.","accent":true}]]'></h1>
+  </div>
+  <div class="s4-arch" data-art="arch"></div>
+  <p class="small s4-small">Meta Device Access Toolkit iOS 1.0.1 · Gemini 3.5 Flash · 3.5 Flash Lite · 3.8 Live · FastAPI · Supabase</p>
+</section>
+
+<script type="module">
+import { buildHeadline } from "../shared/film-kit.js";
+import { createMomentArt } from "../shared/moment-art.js";
+import { createArch } from "../shared/arch-diagram.js";
+
+for (const h of document.querySelectorAll("[data-head]")) buildHeadline(h, JSON.parse(h.dataset.head));
+for (const box of document.querySelectorAll('[data-art="moment"]')) {
+  const art = createMomentArt();
+  box.append(art.svg);
+  art.setStatic();
+}
+const archs = [];
+for (const box of document.querySelectorAll('[data-art="arch"]')) {
+  const arch = createArch();
+  box.append(arch.svg);
+  archs.push(arch);
+}
+
+const slides = [...document.querySelectorAll(".slide")];
+let current = 0;
+window.showSlide = (n) => {
+  const i = slides.findIndex((s) => Number(s.dataset.n) === n);
+  if (i < 0) throw new Error(`no slide ${n}`);
+  slides.forEach((s, k) => s.classList.toggle("on", k === i));
+  current = i;
+  archs.forEach((a) => a.update()); // SVG lengths need the slide to be displayed
+};
+function fit() {
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+  document.body.classList.toggle("fit", s !== 1);
+  document.body.style.setProperty("--fit", String(s));
+  document.body.style.setProperty("--fit-x", `${(innerWidth - 1920 * s) / 2}px`);
+  document.body.style.setProperty("--fit-y", `${(innerHeight - 1080 * s) / 2}px`);
+}
+addEventListener("resize", fit);
+fit();
+window.printMode = () => {
+  document.body.classList.remove("fit");
+  removeEventListener("resize", fit);
+  document.body.classList.add("print");
+  archs.forEach((a) => a.update());
+};
+addEventListener("keydown", (e) => {
+  if (["ArrowRight", "PageDown", " "].includes(e.key)) showSlide(Number(slides[Math.min(current + 1, slides.length - 1)].dataset.n));
+  if (["ArrowLeft", "PageUp"].includes(e.key)) showSlide(Number(slides[Math.max(current - 1, 0)].dataset.n));
+});
+
+await document.fonts.load("500 96px Manrope");
+await document.fonts.ready;
+showSlide(Number(slides[0].dataset.n));
+window.ready = true;
+</script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+{
+  "root": "/mnt/c/Users/aleks/OneDrive/Documents/ChatGPT/junction 26/web/pitch/video/assets/library-v2",
+  "assets": [
+    {
+      "id": "walnut-board",
+      "name": "Walnut preparation board",
+      "category": "Cutouts",
+      "use": "Base layer for overhead ingredient choreography.",
+      "prompt": "Use case: product-mockup. Create ONE isolated premium food-film compositing asset. Photorealistic macro detail, physically plausible natural material, clean restrained commercial food photography, soft key light from upper left, gentle cool rim from upper right. Orthographic straight-down camera, no perspective tilt. Subject centered, fully visible with at least 12% padding on every side. Genuine transparent alpha background, no ground plane, no checkerboard, no outside drop shadow, no text, hands, labels, UI or extra objects. Highest available detail. A single empty dark American walnut chopping board, landscape 3:2 proportions, softly rounded corners and precise beveled edges, subtle shallow juice groove, rich fine directional wood grain, small natural mineral streaks, satin oil finish. No handle, no lettering, no scratches that look dirty. Board face parallel to image plane. Wide landscape output.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-50e2d841-0613-42f8-a2bd-3b8fd376e9ab.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-50e2d841-0613-42f8-a2bd-3b8fd376e9ab.png",
+      "file": "images/walnut-board.png"
+    },
+    {
+      "id": "bread-slice",
+      "name": "Artisan sandwich bread",
+      "category": "Cutouts",
+      "use": "Reusable base ingredient; preserve scale between comparison states.",
+      "prompt": "Use case: product-mockup. Create ONE isolated premium food-film compositing asset. Photorealistic macro detail, physically plausible natural material, clean restrained commercial food photography, soft key light from upper left, gentle cool rim from upper right. Orthographic straight-down camera, no perspective tilt. Subject centered, fully visible with at least 12% padding on every side. Genuine transparent alpha background, no ground plane, no checkerboard, no outside drop shadow, no text, hands, labels, UI or extra objects. Highest available detail. A single thick slice of artisan white sandwich bread, approximately square with softly domed double-shouldered top, warm golden brown crust, delicate irregular crumb pores, pale creamy interior, believable fresh baked softness. No seeds, spread, filling or plate. Portrait-ish bread centered on square canvas.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-7b8b796c-3be9-44df-9067-4985ee2c5fd4.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-7b8b796c-3be9-44df-9067-4985ee2c5fd4.png",
+      "file": "images/bread-slice.png"
+    },
+    {
+      "id": "lettuce-leaf",
+      "name": "Butter lettuce leaf",
+      "category": "Cutouts",
+      "use": "Independent ingredient layer with visible fine veins.",
+      "prompt": "Use case: product-mockup. Create ONE isolated premium food-film compositing asset. Photorealistic macro detail, physically plausible natural material, clean restrained commercial food photography, soft key light from upper left, gentle cool rim from upper right. Orthographic straight-down camera, no perspective tilt. Subject centered, fully visible with at least 12% padding on every side. Genuine transparent alpha background, no ground plane, no checkerboard, no outside drop shadow, no text, hands, labels, UI or extra objects. Highest available detail. One broad fresh butter lettuce leaf suitable for a sandwich, soft wavy translucent edges, fine branching vein network, light central rib, medium leaf green with realistic subtle color variation. A few tiny dew droplets but not covered in water. Leaf flattened naturally, tip upward and short stem downward, no bunch or extra leaves.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-d7c0a936-fdd2-4904-b1ff-2108df34d763.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-d7c0a936-fdd2-4904-b1ff-2108df34d763.png",
+      "file": "images/lettuce-leaf.png"
+    },
+    {
+      "id": "gouda-slice",
+      "name": "Gouda cheese slice",
+      "category": "Cutouts",
+      "use": "Separate filling layer for fixed-size redistribution.",
+      "prompt": "Use case: product-mockup. One isolated premium food-film asset, photorealistic macro detail with physically plausible material. Soft commercial studio light from upper left and delicate cool rim from upper right. Strict straight-down orthographic camera. Subject fully inside square image with 15 percent padding. Genuine alpha-transparent background; no checkerboard, ground plane, surrounding shadow, utensils, hands, text, label or additional objects. One thin square slice of young Gouda, creamy golden yellow, soft naturally cut edges and gently lifted one corner, microscopic pores and restrained waxy sheen. Mostly smooth with two or three tiny natural pinholes, not cartoon Swiss cheese. Lying almost flat.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-9a140eac-3cfd-4efd-b4dc-e32d627f07d6.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-9a140eac-3cfd-4efd-b4dc-e32d627f07d6.png",
+      "file": "images/gouda-slice.png"
+    },
+    {
+      "id": "ham-fold",
+      "name": "Folded deli ham",
+      "category": "Cutouts",
+      "use": "Reusable folded filling; move and rotate without inflating.",
+      "prompt": "Use case: product-mockup. One isolated premium food-film asset, photorealistic macro detail with physically plausible material. Soft commercial studio light from upper left and delicate cool rim from upper right. Strict straight-down orthographic camera. Subject fully inside square image with 15 percent padding. Genuine alpha-transparent background; no checkerboard, ground plane, surrounding shadow, utensils, hands, text, label or additional objects. One single round slice of deli ham loosely folded into one soft natural ripple, pale rose pink with fine marbling and an extremely thin pale edge, moist but not glossy plastic, detailed natural muscle grain. Broad flattened fold, not a pile, no other meat slices.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-19b557a4-5491-4b65-bd63-eb15d7332f34.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-19b557a4-5491-4b65-bd63-eb15d7332f34.png",
+      "file": "images/ham-fold.png"
+    },
+    {
+      "id": "tomato-slice",
+      "name": "Tomato cross-section",
+      "category": "Cutouts",
+      "use": "Optional ingredient and detailed macro insert.",
+      "prompt": "Use case: product-mockup. One isolated premium food-film asset, photorealistic macro detail with physically plausible material. Soft commercial studio light from upper left and delicate cool rim from upper right. Strict straight-down orthographic camera. Subject fully inside square image with 15 percent padding. Genuine alpha-transparent background; no checkerboard, ground plane, surrounding shadow, utensils, hands, text, label or additional objects. One perfect fresh tomato cross-section slice, saturated natural red perimeter, delicate translucent seed chambers and tiny golden seeds, realistic glistening moisture and visible thin skin. No green stem or whole tomato. Entire circular slice in view.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-69aa096d-2c2e-46db-84f3-6993ffe2b5da.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-69aa096d-2c2e-46db-84f3-6993ffe2b5da.png",
+      "file": "images/tomato-slice.png"
+    },
+    {
+      "id": "cucumber-slice",
+      "name": "Cucumber cross-section",
+      "category": "Cutouts",
+      "use": "Small ingredient detail for assembly shots and repeated arrangements.",
+      "prompt": "Use case: product-mockup. One isolated premium food-film asset, photorealistic macro detail with physically plausible material. Soft commercial studio light from upper left and delicate cool rim from upper right. Strict straight-down orthographic camera. Subject fully inside square image with 15 percent padding. Genuine alpha-transparent background; no checkerboard, ground plane, surrounding shadow, utensils, hands, text, label or additional objects. One single thin round cucumber slice, dark finely textured green skin, translucent pale lime flesh, precise small seed structure, freshly cut and barely moist. Whole circle visible, realistic botanical detail.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-bed5f881-2c41-446a-ad6d-d231c2a693fc.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-bed5f881-2c41-446a-ad6d-d231c2a693fc.png",
+      "file": "images/cucumber-slice.png"
+    },
+    {
+      "id": "pesto-smear",
+      "name": "Basil pesto brushstroke",
+      "category": "Cutouts",
+      "use": "A spread layer on bread; reveal using an animated clip mask.",
+      "prompt": "Use case: product-mockup. One isolated premium food-film asset, photorealistic macro detail with physically plausible material. Soft commercial studio light from upper left and delicate cool rim from upper right. Strict straight-down orthographic camera. Subject fully inside square image with 15 percent padding. Genuine alpha-transparent background; no checkerboard, ground plane, surrounding shadow, utensils, hands, text, label or additional objects. A single broad short smear of freshly made basil pesto, elongated oval shape with one tapered end, tiny basil particles, crushed pale pine nut flecks and restrained olive-oil glints, deep fresh olive green, realistic thickness and directional spatula ridges. No floating droplets or decorative herbs.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-cc7043e1-e95c-49ae-8c0c-19b9da89b358.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-cc7043e1-e95c-49ae-8c0c-19b9da89b358.png",
+      "file": "images/pesto-smear.png"
+    },
+    {
+      "id": "spreading-knife",
+      "name": "Brushed steel spreading knife",
+      "category": "Cutouts",
+      "use": "Animated tool for a spread reveal; rotate about the handle.",
+      "prompt": "Use case: product-mockup. One isolated premium food-film asset, photorealistic macro detail with physically plausible material. Soft commercial studio light from upper left and delicate cool rim from upper right. Strict straight-down orthographic camera. Subject fully inside square image with 15 percent padding. Genuine alpha-transparent background; no checkerboard, ground plane, surrounding shadow, utensils, hands, text, label or additional objects. One premium butter spreading knife, brushed stainless steel rounded blade, warm dark walnut handle with two tiny flush steel pins, anatomically plausible elegant kitchen utensil. Long axis vertical, blade upward, fully visible including tip and handle; no food attached. Blade broad and rounded, non-serrated.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-6bc5a5bd-67ef-47f7-88f6-3ea67dbd748c.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-6bc5a5bd-67ef-47f7-88f6-3ea67dbd748c.png",
+      "file": "images/spreading-knife.png"
+    },
+    {
+      "id": "sandwich-hero",
+      "name": "Finished sandwich hero",
+      "category": "Food portraits",
+      "use": "Appetizing closing reward or a brief food-detail insert.",
+      "prompt": "Use case: product-mockup. One premium photorealistic commercial food asset on genuine alpha transparent background. A fresh artisan sandwich cut diagonally into two halves, one half forward and the other leaning behind at a believable angle. Golden crust white sandwich bread with realistic airy crumb, butter lettuce, thin folded pink ham and golden Gouda cheese, restrained pesto spread. Three-quarter tabletop camera, exquisite natural food detail and believable scale, upper-left soft key light and cool subtle rim. Complete subject with 15 percent padding. No plate, table, hands, text, logo, extra garnish or surrounding ground shadow. No levitating ingredients. Wide landscape composition.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-705d6b79-f95c-45d4-8d0e-3bdf528f5221.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-705d6b79-f95c-45d4-8d0e-3bdf528f5221.png",
+      "file": "images/sandwich-hero.png"
+    },
+    {
+      "id": "sandwich-exploded-portrait",
+      "name": "Suspended sandwich layers",
+      "category": "Food portraits",
+      "use": "Brief composition reference or parallax insert; use the GLB for a true orbit.",
+      "transparent": true,
+      "prompt": "Use case: product-mockup. A luxury photorealistic food-commercial exploded composition: one square artisan sandwich separated into exactly FIVE floating horizontal layers along a single vertical axis. Bottom to top: bread slice, one butter lettuce leaf, one gently folded ham slice, one thin Gouda square, second bread slice. Plausible equal sandwich scale, tidy vertical spacing, each layer entirely visible, no duplicate ingredients or random particles. Three-quarter camera 20 degrees above the horizon, extraordinary crumb pores, leaf veins, natural meat texture and precise cheese thickness. Warm upper-left soft key, cool subtle rim. Entire stack centered in a tall portrait canvas with 15% margin. Genuine alpha transparent background with no floor, halo, ambient cloud, exterior shadow, text, labels or graphics. Food advertising illustration, not an engineering diagram.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-f5f7ee03-f3aa-40d6-b43b-cf471dc536a0.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-f5f7ee03-f3aa-40d6-b43b-cf471dc536a0.png",
+      "file": "images/sandwich-exploded-portrait.png"
+    },
+    {
+      "id": "waveguide-glass",
+      "name": "Optical waveguide concept",
+      "category": "Product details",
+      "use": "A conceptual optical insert for a short lens transition; not a hardware schematic.",
+      "transparent": true,
+      "prompt": "Use case: product-mockup. One isolated macro product render of a thin rounded-rectangle optical glass waveguide slab, gently floating at an elegant 3/4 angle. Crystal-clear center, very fine polished bevel, precision laminated edge visible, subtle pale cyan and soft lavender thin-film interference only along edges. One tiny controlled internal reflected ray, physically restrained. Exquisite high-end optical manufacturing detail, not a chunky crystal or a holographic screen. Wide landscape composition, full object inside frame with 15% margin. Genuine alpha transparent background and transparent glass center, no ground, floor shadow, smoke, text, symbols, UI, screws, diagrams, brands or additional objects. Studio key upper left with a crisp fine edge highlight.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-ced9b705-2cb2-4711-b7e7-5c3ab3d16647.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-ced9b705-2cb2-4711-b7e7-5c3ab3d16647.png",
+      "file": "images/waveguide-glass.png"
+    },
+    {
+      "id": "phone-blank",
+      "name": "Neutral phone screen prop",
+      "category": "Product details",
+      "use": "Replace the blank screen with real product UI; useful for the record-to-step scene.",
+      "transparent": true,
+      "prompt": "Use case: product-mockup. One premium generic smartphone seen absolutely front-on, long axis vertical, centered on square canvas, whole device visible with generous 15% padding. Ultra-thin charcoal anodized aluminium bezel, subtly rounded corners, accurate glass thickness at edge, small restrained centered circular front camera. Display is flat uniform near-black, blank, no icons or text. Beautiful commercial product lighting, tiny cool edge reflections, precise material finish. Genuine alpha transparent background; absolutely no ground shadow, halo, background gradient, hands, logos or other devices. Screen a clearly defined rectangular region, no perspective skew.",
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-64360a36-b05c-4bb3-ae06-e721614f575b.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-64360a36-b05c-4bb3-ae06-e721614f575b.png",
+      "file": "images/phone-blank.png"
+    },
+    {
+      "id": "glasses-hinge-macro",
+      "name": "Glasses hinge macro",
+      "category": "Product details",
+      "use": "A short cinematic detail shot before the full glasses reveal.",
+      "transparent": false,
+      "prompt": "Use case: product-mockup. Create a cinematic extreme macro image based on the provided smart-glasses reference. Preserve its understated black frame visual family; this is a generic concept, no brand logo. Focus tightly on a single outer hinge and temple junction: satin-black acetate, precise bevel highlights, a tiny recessed camera with coated optical glass, minute machined hinge detail and a restrained brushed-metal accent. Physical, tactile and believable, no exposed circuit board. Shallow depth of field with the far frame gently out of focus. Deep midnight navy studio background, a very fine ice-blue rim and broad warm-white key. Compose the hinge in the right 55 percent of a wide cinematic frame, leave the left 35 percent dark and uncluttered for animated typography. No text, HUD, giant glowing lens, dust, decorative rings or colored smoke.",
+      "references": [
+        "/mnt/c/Users/aleks/OneDrive/Documents/ChatGPT/junction 26/web/pitch/video/assets/generated-v1/glasses-hero-cutout.png"
+      ],
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-a552e188-3f42-4fde-9e72-daaef41fe7f8.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-a552e188-3f42-4fde-9e72-daaef41fe7f8.png",
+      "file": "images/glasses-hinge-macro.png"
+    },
+    {
+      "id": "midnight-product-stage",
+      "name": "Midnight product stage",
+      "category": "Backgrounds",
+      "use": "A quiet dimensional stage behind a glasses reveal or ending.",
+      "prompt": "Use case: background. Cinematic premium product-film environment, wide 16:9 landscape. Deep midnight navy studio cyclorama with a continuous almost invisible horizon in lower third, a low broad charcoal slate plinth occupying the lower right, subtle satin reflection, one elegant diffuse icy-blue rim grazing the far edge. Extremely fine physical surface detail, luxurious dark tonality with readable gradients, controlled lighting, beautiful negative space in upper left and center for a smart-glasses product composited later. Empty scene, no glasses, no text, no logos, no neon strips, no grids, no floating particles, no lens flare, no giant light ring. Camera at table height, restrained 70mm commercial product photography.",
+      "transparent": false,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-9eebe30b-6239-400e-bad3-f44f01ab33f6.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-9eebe30b-6239-400e-bad3-f44f01ab33f6.png",
+      "file": "images/midnight-product-stage.png"
+    },
+    {
+      "id": "warm-kitchen-counter",
+      "name": "Warm kitchen counter",
+      "category": "Backgrounds",
+      "use": "A temporary contextual backdrop for food props; replace with real footage where required.",
+      "prompt": "Use case: background. Photorealistic high-end cinematic still of an empty contemporary Nordic kitchen counter, wide 16:9 landscape. Natural warm walnut work surface fills the bottom half, soft off-white plaster backsplash and pale wood cabinets out of focus, a distant muted green plant at far left, practical warm under-cabinet light balanced with cool morning window light from the left. Counter foreground is empty, pristine but not artificial, detailed grain, believable subtle reflections. Camera 25 degrees above countertop, 50mm lens, shallow depth of field. Premium food-film lighting, gentle contrast, no people, food, appliances in foreground, brands, text or UI. Leave center clear for compositing. This is a synthetic setting illustration, not a real filmed location.",
+      "transparent": false,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-c52f006b-d2a2-4122-a6f6-fdf5693dbffb.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-c52f006b-d2a2-4122-a6f6-fdf5693dbffb.png",
+      "file": "images/warm-kitchen-counter.png"
+    },
+    {
+      "id": "overhead-stone-surface",
+      "name": "Overhead limestone surface",
+      "category": "Backgrounds",
+      "use": "A neutral base for the cutout ingredients and comparison scene.",
+      "prompt": "Use case: background. Photorealistic straight-down orthographic view of one empty pale warm grey honed limestone kitchen worktop. Wide 16:9 landscape, full-frame continuous surface. Exquisite understated mineral grain and tiny soft pores, extremely subtle natural tonal variation, soft daylight from upper left, no directional perspective, no harsh shadows or vignette. Flat, quiet and luxurious; texture must stay subtle enough for food cutouts and interface graphics above it. No seams, tiles, dishes, ingredients, hands, writing or decorative props. Not marble with dramatic veins, not concrete industrial grime.",
+      "transparent": false,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-662c5af7-1e3c-4986-9cc7-3c80ffc6b843.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-662c5af7-1e3c-4986-9cc7-3c80ffc6b843.png",
+      "file": "images/overhead-stone-surface.png"
+    },
+    {
+      "id": "optical-caustics-stage",
+      "name": "Optical caustics stage",
+      "category": "Backgrounds",
+      "use": "A restrained 1–2 second transition behind a lens close-up.",
+      "prompt": "Use case: background. Wide cinematic 16:9 abstract photographic optical light study for a premium smart-glasses film. Dark midnight blue plane with a single physically plausible crescent of refracted pale ice-blue light crossing the lower-right quadrant, a few beautifully thin chromatic edges in subtle warm white and lavender, fine soft focus falloff. Real optical caustics cast by glass just outside frame. Top left and central 60 percent remain dark and empty for typography or compositing. Extremely elegant material and light, rich black detail, no glowing orb, no tunnel, no smoke, no holographic symbols, no star field, no geometric grid, no text, no visible object. Restrained and cinematic.",
+      "transparent": false,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-b8db318e-7c5c-492a-a6aa-15196e7cca66.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-b8db318e-7c5c-492a-a6aa-15196e7cca66.png",
+      "file": "images/optical-caustics-stage.png"
+    },
+    {
+      "id": "texture-walnut",
+      "name": "Walnut material map",
+      "category": "Material maps",
+      "use": "Embedded into the board GLB; also useful as a quiet physical surface.",
+      "prompt": "Use case: texture asset for a 3D model. Create one high-resolution square photographic material color map, viewed perfectly orthographically from directly above, filling every pixel edge to edge. Uniform neutral diffuse illumination, no perspective, no vignette, no directional cast shadows, no gloss highlight, no border, no text. Tiny natural variations and high-frequency material detail. This is a flat surface texture, not a photo of an isolated object. Dark oiled American walnut wood, fine long horizontal grain, warm rich medium brown, restrained subtle darker fibers and tiny pores, no planks or seams, no large dramatic knots. Entire image is wood.",
+      "transparent": false,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-092f9b1e-7895-4dff-a893-c9ebec161c33.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-092f9b1e-7895-4dff-a893-c9ebec161c33.png",
+      "file": "images/texture-walnut.png"
+    },
+    {
+      "id": "texture-bread-crumb",
+      "name": "Bread crumb material map",
+      "category": "Material maps",
+      "use": "Embedded into bread faces for detailed close and medium 3D shots.",
+      "prompt": "Use case: texture asset for a 3D model. Create one high-resolution square photographic material color map, viewed perfectly orthographically from directly above, filling every pixel edge to edge. Uniform neutral diffuse illumination, no perspective, no vignette, no directional cast shadows, no gloss highlight, no border, no text. Tiny natural variations and high-frequency material detail. This is a flat surface texture, not a photo of an isolated object. Fresh white artisan sandwich bread interior. Pale warm ivory crumb with many irregular small pores and occasional slightly larger air pockets. Delicate torn baked cell walls and soft fibrous detail. Entire image is the cut interior, no crust visible. Gentle natural pore depth but overall flat even lighting, no toasted coloration.",
+      "transparent": false,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-11bcd978-1d01-49d8-9405-ce681fd3dff2.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-11bcd978-1d01-49d8-9405-ce681fd3dff2.png",
+      "file": "images/texture-bread-crumb.png"
+    },
+    {
+      "id": "texture-bread-crust",
+      "name": "Bread crust material map",
+      "category": "Material maps",
+      "use": "Embedded into the bread crust; warm baked detail for rotations.",
+      "prompt": "Use case: texture asset for a 3D model. Create one high-resolution square photographic material color map, viewed perfectly orthographically from directly above, filling every pixel edge to edge. Uniform neutral diffuse illumination, no perspective, no vignette, no directional cast shadows, no gloss highlight, no border, no text. Tiny natural variations and high-frequency material detail. This is a flat surface texture, not a photo of an isolated object. Golden brown baked bread crust surface in extreme macro, very fine irregular microblisters, a few subtle toasted freckles and fine hairline cracks. Warm honey and amber tones, not burnt. Entire image is crust, no white interior, flour dust, cut boundary or bread shape visible.",
+      "transparent": false,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-3a2ea694-3ed2-4f5a-9ac7-87cae7b3c3ff.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-3a2ea694-3ed2-4f5a-9ac7-87cae7b3c3ff.png",
+      "file": "images/texture-bread-crust.png"
+    },
+    {
+      "id": "texture-ham",
+      "name": "Ham material map",
+      "category": "Material maps",
+      "use": "Embedded into the ham GLB surface.",
+      "prompt": "Use case: material texture for a 3D prop. High-resolution square color texture, perfectly orthographic, flat surface filling every pixel edge to edge. Even neutral diffuse light, no perspective, no vignette, no cast shadows, no text, no borders, no isolated object boundary. Detailed natural material at macro scale. Pale rose-pink deli ham surface, delicate irregular muscle fibers, very fine white fat marbling, restrained natural color variation and tiny pores. Fresh and appetizing, not raw red meat, not a pattern of overlapping slices. No gloss spots.",
+      "transparent": false,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-b945b96d-d332-4f87-ac4f-57351af87194.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-b945b96d-d332-4f87-ac4f-57351af87194.png",
+      "file": "images/texture-ham.png"
+    },
+    {
+      "id": "texture-cheese",
+      "name": "Gouda material map",
+      "category": "Material maps",
+      "use": "Embedded into the cheese GLB surface.",
+      "prompt": "Use case: material texture for a 3D prop. High-resolution square color texture, perfectly orthographic, flat surface filling every pixel edge to edge. Even neutral diffuse light, no perspective, no vignette, no cast shadows, no text, no borders, no isolated object boundary. Detailed natural material at macro scale. Smooth golden cream young Gouda cheese surface with extremely subtle waxy grain, tiny natural pores and gentle pale yellow color variation. Very fine material detail, not large Swiss cheese holes, not melted or grated. Entire frame cheese.",
+      "transparent": false,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-eb8dcda3-1b5a-407d-96d7-875ec07490b2.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-eb8dcda3-1b5a-407d-96d7-875ec07490b2.png",
+      "file": "images/texture-cheese.png"
+    },
+    {
+      "id": "texture-leaf",
+      "name": "Leaf material map",
+      "category": "Material maps",
+      "use": "Embedded into the lettuce GLB; small veins complement the geometric ribs.",
+      "prompt": "Use case: material texture for a 3D prop. High-resolution square color texture, perfectly orthographic, flat surface filling every pixel edge to edge. Even neutral diffuse light, no perspective, no vignette, no cast shadows, no text, no borders, no isolated object boundary. Detailed natural material at macro scale. Fresh butter lettuce lamina in close macro, rich natural medium green, a delicate network of thin pale branching secondary veins across softly puckered translucent tissue. Only the continuous leaf surface; no outer leaf edges, holes, central thick stem, droplets or other objects. Fine irregular botanical texture.",
+      "transparent": false,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-350fb58e-0da3-4048-a404-268f8b71d31d.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-350fb58e-0da3-4048-a404-268f8b71d31d.png",
+      "file": "images/texture-leaf.png"
+    },
+    {
+      "id": "pesto-bowl",
+      "name": "Ceramic pesto bowl",
+      "category": "Cutouts",
+      "use": "An optional kitchen prop beside the preparation board.",
+      "prompt": "Use case: product-mockup. One isolated premium food-film asset, photorealistic macro detail with physically plausible material. Soft commercial studio light from upper left and delicate cool rim from upper right. Strict straight-down orthographic camera. Subject fully inside square image with 15 percent padding. Genuine alpha-transparent background; no checkerboard, ground plane, surrounding shadow, utensils, hands, text, label or additional objects. A single small handmade off-white ceramic dipping bowl filled with fresh basil pesto. Delicate ivory glaze with tiny brown ceramic speckles, thin rounded rim, realistic green basil texture and pine nut flecks, a restrained oil sheen. Bowl viewed exactly overhead, entire circle visible, no spoon or garnish outside the bowl.",
+      "transparent": true,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-a63d820f-94b4-4c32-8474-2065040d2777.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-a63d820f-94b4-4c32-8474-2065040d2777.png",
+      "file": "images/pesto-bowl.png"
+    },
+    {
+      "id": "basil-sprig",
+      "name": "Fresh basil sprig",
+      "category": "Cutouts",
+      "use": "A small natural detail or a slow foreground parallax element.",
+      "prompt": "Use case: product-mockup. One isolated premium food-film asset, photorealistic macro detail with physically plausible material. Soft commercial studio light from upper left and delicate cool rim from upper right. Strict straight-down orthographic camera. Subject fully inside square image with 15 percent padding. Genuine alpha-transparent background; no checkerboard, ground plane, surrounding shadow, utensils, hands, text, label or additional objects. One small fresh basil sprig with exactly four broad green leaves attached to a short delicate stem, detailed natural veins, subtly curled leaf edges, healthy fresh appearance, slight translucent rim. Elegant diagonal orientation, no bunch, no other plants, no water splashes.",
+      "transparent": true,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-518db6d2-17a1-4e77-a1c6-9d5750dbc7a7.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-518db6d2-17a1-4e77-a1c6-9d5750dbc7a7.png",
+      "file": "images/basil-sprig.png"
+    },
+    {
+      "id": "ivory-plate",
+      "name": "Handmade ivory plate",
+      "category": "Cutouts",
+      "use": "A neutral base for the finished sandwich or a result shot.",
+      "prompt": "Use case: product-mockup. One isolated premium food-film asset, photorealistic macro detail with physically plausible material. Soft commercial studio light from upper left and delicate cool rim from upper right. Strict straight-down orthographic camera. Subject fully inside square image with 15 percent padding. Genuine alpha-transparent background; no checkerboard, ground plane, surrounding shadow, utensils, hands, text, label or additional objects. One empty round handmade ivory ceramic dinner plate, elegant shallow bowl and broad gently sloped rim, delicate glaze microtexture with extremely subtle speckles, soft believable ceramic thickness, perfect overhead perspective. No patterns, decoration, text, cutlery or food. Clear inner plate area for compositing.",
+      "transparent": true,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-a20b7f9f-8291-4469-9e24-88c68034cbf9.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-a20b7f9f-8291-4469-9e24-88c68034cbf9.png",
+      "file": "images/ivory-plate.png"
+    },
+    {
+      "id": "linen-napkin",
+      "name": "Folded linen napkin",
+      "category": "Cutouts",
+      "use": "A peripheral tactile accent for the kitchen tabletop.",
+      "prompt": "Use case: product-mockup. One isolated premium food-film asset, photorealistic macro detail with physically plausible material. Soft commercial studio light from upper left and delicate cool rim from upper right. Strict straight-down orthographic camera. Subject fully inside square image with 15 percent padding. Genuine alpha-transparent background; no checkerboard, ground plane, surrounding shadow, utensils, hands, text, label or additional objects. One neatly but naturally folded warm oatmeal linen napkin, approximately rectangular, with one corner gently turned over. Very detailed woven linen fibers, fine stitched hem, small believable folds and soft internal shadows. No table shadow, plate, rings, utensils or pattern. Long axis diagonal by about 12 degrees, entire cloth visible.",
+      "transparent": true,
+      "outputHint": "Generated images are saved to /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d as /mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-eb03c994-ba18-43c2-b736-fab86ed44954.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "source": "/mnt/c/Users/aleks/.codex/generated_images/01a1daca-bad5-7480-be25-4801d5778f3d/exec-eb03c994-ba18-43c2-b736-fab86ed44954.png",
+      "file": "images/linen-napkin.png"
+    }
+  ]
+}

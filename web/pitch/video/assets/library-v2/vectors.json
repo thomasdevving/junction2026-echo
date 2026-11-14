@@ -1,0 +1,98 @@
+[
+  {
+    "id": "capture-corners",
+    "name": "Capture corners",
+    "category": "Vector effects",
+    "file": "vectors/capture-corners.svg",
+    "use": "A quiet framing cue for a recorded source. Animate the four paths independently.",
+    "generator": "original editable SVG"
+  },
+  {
+    "id": "focus-reticle",
+    "name": "Focus reticle",
+    "category": "Vector effects",
+    "file": "vectors/focus-reticle.svg",
+    "use": "Momentary focus acquisition; fade out once content is selected.",
+    "generator": "original editable SVG"
+  },
+  {
+    "id": "lens-glint",
+    "name": "Lens reflection sweep",
+    "category": "Vector effects",
+    "file": "vectors/lens-glint.svg",
+    "use": "Translate inside the exact lens mask; keep the physical frame above it.",
+    "generator": "original editable SVG"
+  },
+  {
+    "id": "optical-ribbon",
+    "name": "Optical light ribbon",
+    "category": "Vector effects",
+    "file": "vectors/optical-ribbon.svg",
+    "use": "Short transition accent. Reveal the main path with stroke-dashoffset, then remove it.",
+    "generator": "original editable SVG"
+  },
+  {
+    "id": "transfer-path",
+    "name": "Source-to-step path",
+    "category": "Vector effects",
+    "file": "vectors/transfer-path.svg",
+    "use": "Move a small source card along this path; derive the step card from the same DOM element.",
+    "generator": "original editable SVG"
+  },
+  {
+    "id": "step-rail",
+    "name": "Instruction sequence rail",
+    "category": "Vector effects",
+    "file": "vectors/step-rail.svg",
+    "use": "Editable five-node staging rail. Match the actual number of steps before use.",
+    "generator": "original editable SVG"
+  },
+  {
+    "id": "success-check",
+    "name": "Confirmation check",
+    "category": "Vector effects",
+    "file": "vectors/success-check.svg",
+    "use": "Draw the check once after the correction, without pulsing or a large pop.",
+    "generator": "original editable SVG"
+  },
+  {
+    "id": "correction-arrow",
+    "name": "Correction direction",
+    "category": "Vector effects",
+    "file": "vectors/correction-arrow.svg",
+    "use": "A restrained direction cue; animate alongside the same fixed-size ingredient.",
+    "generator": "original editable SVG"
+  },
+  {
+    "id": "bread-boundary",
+    "name": "Ingredient coverage boundary",
+    "category": "Vector effects",
+    "file": "vectors/bread-boundary.svg",
+    "use": "Optional single coverage outline. Use briefly at the area needing correction.",
+    "generator": "original editable SVG"
+  },
+  {
+    "id": "listening-wave",
+    "name": "Listening waveform",
+    "category": "Vector effects",
+    "file": "vectors/listening-wave.svg",
+    "use": "Optional listening-state cue. Illustrative waveform, not recorded audio.",
+    "generator": "original editable SVG"
+  },
+  {
+    "id": "glass-panel",
+    "name": "Subtle glass panel",
+    "category": "Vector effects",
+    "file": "vectors/glass-panel.svg",
+    "use": "Card surface only. Keep text and captured footage as live HTML on top.",
+    "generator": "original editable SVG"
+  },
+  {
+    "id": "aperture-transition",
+    "name": "Aperture transition guide",
+    "category": "Vector effects",
+    "file": "vectors/aperture-transition.svg",
+    "use": "A soft vignette for a lens push-through. It is an overlay, not the actual lens mask.",
+    "generator": "original editable SVG"
+  }
+]

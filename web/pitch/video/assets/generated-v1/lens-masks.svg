@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1774 887">
+  <!-- Hand-authored compositing guides for glasses-front-cutout.png only.
+       Slightly inset; confirm registration in the final shot. White = reveal. -->
+  <defs>
+    <path id="lens" d="M260 328 C290 282 395 270 501 280 C622 282 714 308 743 357 C768 400 753 501 723 573 C696 647 661 679 599 689 C524 700 406 699 348 681 C301 663 281 620 261 553 C241 482 227 384 260 328Z"/>
+    <clipPath id="viewer-left"><use href="#lens"/></clipPath>
+    <clipPath id="viewer-right"><use href="#lens" transform="translate(1774 0) scale(-1 1)"/></clipPath>
+    <clipPath id="both"><use href="#lens"/><use href="#lens" transform="translate(1774 0) scale(-1 1)"/></clipPath>
+  </defs>
+  <use href="#lens" fill="white"/>
+  <use href="#lens" fill="white" transform="translate(1774 0) scale(-1 1)"/>
+</svg>

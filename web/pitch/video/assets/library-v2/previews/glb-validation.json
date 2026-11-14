@@ -1,0 +1,82 @@
+[
+  {
+    "file": "bread.glb",
+    "triangles": 2496,
+    "parts": 3,
+    "embeddedTextures": 2,
+    "bytes": 6599368,
+    "valid": true
+  },
+  {
+    "file": "butter-knife.glb",
+    "triangles": 896,
+    "parts": 2,
+    "embeddedTextures": 0,
+    "bytes": 29296,
+    "valid": true
+  },
+  {
+    "file": "cheese.glb",
+    "triangles": 448,
+    "parts": 1,
+    "embeddedTextures": 1,
+    "bytes": 2043000,
+    "valid": true
+  },
+  {
+    "file": "cutting-board.glb",
+    "triangles": 2112,
+    "parts": 2,
+    "embeddedTextures": 1,
+    "bytes": 2853128,
+    "valid": true
+  },
+  {
+    "file": "ham.glb",
+    "triangles": 3784,
+    "parts": 1,
+    "embeddedTextures": 1,
+    "bytes": 2942596,
+    "valid": true
+  },
+  {
+    "file": "lettuce.glb",
+    "triangles": 6120,
+    "parts": 10,
+    "embeddedTextures": 1,
+    "bytes": 2720296,
+    "valid": true
+  },
+  {
+    "file": "phone.glb",
+    "triangles": 1472,
+    "parts": 3,
+    "embeddedTextures": 0,
+    "bytes": 46284,
+    "valid": true
+  },
+  {
+    "file": "sandwich-exploded.glb",
+    "triangles": 15344,
+    "parts": 18,
+    "embeddedTextures": 5,
+    "bytes": 14370556,
+    "valid": true
+  },
+  {
+    "file": "sandwich.glb",
+    "triangles": 15344,
+    "parts": 18,
+    "embeddedTextures": 5,
+    "bytes": 14370556,
+    "valid": true
+  },
+  {
+    "file": "smart-glasses-concept.glb",
+    "triangles": 7840,
+    "parts": 15,
+    "embeddedTextures": 0,
+    "bytes": 246456,
+    "valid": true
+  }
+]

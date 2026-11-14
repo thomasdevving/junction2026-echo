@@ -1,0 +1,21 @@
+{
+  "name": "echo-pitch-video",
+  "private": true,
+  "description": "Echo pitch video: voiceover (ElevenLabs) and render scripts. Isolated from web/, which has no build step.",
+  "type": "module",
+  "scripts": {
+    "voices": "node --env-file=.env.local --dns-result-order=ipv4first tts.mjs voices",
+    "audition": "node --env-file=.env.local --dns-result-order=ipv4first tts.mjs audition",
+    "vo": "node --env-file=.env.local --dns-result-order=ipv4first tts.mjs vo",
+    "sound:vo": "node --env-file=.env.local --dns-result-order=ipv4first soundtrack.mjs vo",
+    "sound:music": "node --env-file=.env.local --dns-result-order=ipv4first soundtrack.mjs music",
+    "sound:isolate": "node --env-file=.env.local --dns-result-order=ipv4first soundtrack.mjs isolate",
+    "sound:mix": "node soundtrack.mjs mix",
+    "sound:check": "node soundtrack.mjs check",
+    "film": "node build.mjs film",
+    "footage:prep": "node prep-footage.mjs"
+  },
+  "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.78.0"
+  }
+}

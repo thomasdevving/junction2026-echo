@@ -1,0 +1,112 @@
+[
+  {
+    "id": "cutting-board",
+    "name": "Walnut board \u2014 3D",
+    "category": "3D models",
+    "file": "models/cutting-board.glb",
+    "obj": "models/cutting-board.obj",
+    "use": "Beveled board, groove and fine geometric grain.",
+    "triangles": 2112,
+    "parts": 2,
+    "generator": "procedural Python source included"
+  },
+  {
+    "id": "bread",
+    "name": "Bread slice \u2014 3D",
+    "category": "3D models",
+    "file": "models/bread.glb",
+    "obj": "models/bread.obj",
+    "use": "Separate crust and crumb; editable named meshes.",
+    "triangles": 2496,
+    "parts": 3,
+    "generator": "procedural Python source included"
+  },
+  {
+    "id": "cheese",
+    "name": "Cheese slice \u2014 3D",
+    "category": "3D models",
+    "file": "models/cheese.glb",
+    "obj": "models/cheese.obj",
+    "use": "Thin softly curved layer; consistent physical dimensions.",
+    "triangles": 448,
+    "parts": 1,
+    "generator": "procedural Python source included"
+  },
+  {
+    "id": "ham",
+    "name": "Folded ham \u2014 3D",
+    "category": "3D models",
+    "file": "models/ham.glb",
+    "obj": "models/ham.obj",
+    "use": "Rippled surface for rotation and layer choreography.",
+    "triangles": 3784,
+    "parts": 1,
+    "generator": "procedural Python source included"
+  },
+  {
+    "id": "lettuce",
+    "name": "Veined lettuce \u2014 3D",
+    "category": "3D models",
+    "file": "models/lettuce.glb",
+    "obj": "models/lettuce.obj",
+    "use": "Wavy leaf with separate central and branching veins.",
+    "triangles": 6120,
+    "parts": 10,
+    "generator": "procedural Python source included"
+  },
+  {
+    "id": "sandwich",
+    "name": "Sandwich assembly \u2014 3D",
+    "category": "3D models",
+    "file": "models/sandwich.glb",
+    "obj": "models/sandwich.obj",
+    "use": "Named ingredient groups. Explode vectors provided per node.",
+    "triangles": 15344,
+    "parts": 18,
+    "generator": "procedural Python source included"
+  },
+  {
+    "id": "sandwich-exploded",
+    "name": "Exploded sandwich \u2014 3D",
+    "category": "3D models",
+    "file": "models/sandwich-exploded.glb",
+    "obj": "models/sandwich-exploded.obj",
+    "use": "Pre-separated assembly for camera moves and explanation.",
+    "triangles": 15344,
+    "parts": 18,
+    "generator": "procedural Python source included"
+  },
+  {
+    "id": "smart-glasses-concept",
+    "name": "Smart glasses concept \u2014 3D",
+    "category": "3D models",
+    "file": "models/smart-glasses-concept.glb",
+    "obj": "models/smart-glasses-concept.obj",
+    "use": "Original generic frame with true lens apertures, transparent lenses, hardware details and temples. Not Meta CAD.",
+    "triangles": 7840,
+    "parts": 15,
+    "generator": "procedural Python source included"
+  },
+  {
+    "id": "phone",
+    "name": "Phone prop \u2014 3D",
+    "category": "3D models",
+    "file": "models/phone.glb",
+    "obj": "models/phone.obj",
+    "use": "Generic blank phone; screen mesh can accept a UI texture.",
+    "triangles": 1472,
+    "parts": 3,
+    "generator": "procedural Python source included"
+  },
+  {
+    "id": "butter-knife",
+    "name": "Butter knife \u2014 3D",
+    "category": "3D models",
+    "file": "models/butter-knife.glb",
+    "obj": "models/butter-knife.obj",
+    "use": "Rounded spreading blade and separate handle.",
+    "triangles": 896,
+    "parts": 2,
+    "generator": "procedural Python source included"
+  }
+]

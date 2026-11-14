@@ -1,0 +1,13 @@
+# Pitch video/deck working files: never committed (public repo).
+.env
+.env.*
+!.env.example
+video/audio/
+video/footage/
+video/frames/
+video/out/
+node_modules/
+# 3D models from the asset library (50 MB, not used by the film or the deck)
+video/assets/library-v2/models/
+# output of the retired VO timing step
+video/timing.json

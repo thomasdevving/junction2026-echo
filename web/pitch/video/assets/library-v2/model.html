@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Echo • Object studio</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,Arial,sans-serif;color:#ecebe7;background:#0b1018}
+*{box-sizing:border-box}body{margin:0}canvas{display:block;width:100vw;height:100vh;touch-action:none;background:radial-gradient(ellipse at 50% 48%,#27384b,#111923 57%,#090e16)}
+header{position:absolute;top:30px;left:34px;pointer-events:none}a{color:#9dcbd0}h1{font:400 32px Georgia,serif;margin:14px 0 8px}.eyebrow{font-size:10px;letter-spacing:.2em;color:#90a4b8}p{font-size:12px;color:#aab6c3;line-height:1.6;max-width:380px}
+.controls{position:absolute;bottom:25px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;padding:12px;border:1px solid #ffffff18;background:#101823e8;border-radius:12px;backdrop-filter:blur(15px);white-space:nowrap}
+button,.download{border:1px solid #ffffff26;color:#e1e8ec;background:#ffffff06;padding:9px 12px;font:11px Arial;border-radius:6px;text-decoration:none;cursor:pointer}button:hover,.download:hover{background:#ffffff16}button[aria-pressed=true]{border-color:#99d1c1;color:#a6e0cd}label{font-size:11px;display:flex;align-items:center;gap:8px;padding:0 10px}input{accent-color:#9ed6c4;width:110px}
+#status{position:absolute;right:30px;top:32px;font:10px monospace;color:#94a8bc;text-align:right;line-height:1.7}
+#back{position:absolute;left:34px;bottom:35px;font-size:11px;text-decoration:none}.note{position:absolute;right:30px;bottom:34px;font-size:10px;color:#8c9aaa}
+.error{color:#ffb4a9!important}.light canvas{background:radial-gradient(ellipse at 50% 45%,#f9f7f2,#d8dedf)}.light header,.light #status{color:#263442}.light h1{color:#263442}.light header p,.light .eyebrow{color:#536674}.light .note{color:#536674}
+@media(max-width:800px){header{top:18px;left:20px}h1{font-size:25px}header p{max-width:240px}#status{right:18px;top:18px;max-width:100px}.controls{bottom:55px;max-width:95vw;flex-wrap:wrap;justify-content:center}.note{bottom:20px;right:20px}#back{left:20px;bottom:20px}}
+body.capture header,body.capture .controls,body.capture #status,body.capture #back,body.capture .note{display:none}
+</style>
+<canvas id="canvas" aria-label="Interactive 3D object. Drag to orbit and scroll to zoom." role="img"></canvas>
+<header><div class="eyebrow">ECHO / OBJECT STUDIO</div><h1 id="title">Loading object…</h1><p id="description">Original procedural prop. Drag to orbit · scroll to zoom.</p></header>
+<div id="status" role="status">Loading geometry</div>
+<div class="controls"><button id="spin" aria-pressed="false">Auto rotate</button><button id="reset">Reset</button><button id="front">Front</button><button id="top">Top</button><button id="theme">Light</button><label id="explode-label">Separate <input id="explode" type="range" min="0" max="1" step=".001" value="0"></label><a id="download" class="download" download>GLB ↓</a></div>
+<a href="./" id="back">← Asset library</a><div class="note">Concept geometry · meters · Y up</div>
+<script type="module" src="./model-viewer.js"></script></html>
