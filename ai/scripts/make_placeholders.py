@@ -5,6 +5,9 @@ Usage (from ai/):  python scripts/make_placeholders.py [--fixture fixtures]
 One 720x1280 portrait JPEG per step at fixtures/images/step-<idx>.jpg, clearly marked as a
 placeholder. A light deterministic noise texture keeps each file above 5000 bytes, so fake
 check_frame does not treat it as unjudgeable. Replaced by real chef stills in AI-03.5.
+
+Since 2026-11-15 fixtures/images holds real stills from the glasses take. A still that is not a
+known placeholder (its hash is not in placeholders.json) is never overwritten without --force.
 """
 
 from __future__ import annotations
@@ -55,11 +58,23 @@ def make(idx: int, title: str, out: Path) -> None:
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--fixture", default=str(Path(__file__).resolve().parents[1] / "fixtures"))
+    p.add_argument("--force", action="store_true", help="overwrite real chef stills too")
     args = p.parse_args()
     fixture = Path(args.fixture)
     recipe = json.loads((fixture / "sushi_recipe.json").read_text(encoding="utf-8"))
     images = fixture / "images"
     images.mkdir(parents=True, exist_ok=True)
+    try:
+        known = set(json.loads((images / "placeholders.json").read_text(encoding="utf-8")).values())
+    except (OSError, ValueError, AttributeError):
+        known = set()
+    real = [
+        f.name for s in recipe["steps"]
+        if (f := images / f"step-{s['idx']}.jpg").is_file()
+        and hashlib.sha256(f.read_bytes()).hexdigest() not in known
+    ]
+    if real and not args.force:
+        raise SystemExit(f"refusing to overwrite real chef stills {real}; pass --force to do it")
     for step in recipe["steps"]:
         out = images / f"step-{step['idx']}.jpg"
         make(step["idx"], step["title"], out)

@@ -1,6 +1,7 @@
 """AI-07 tooling without network: eval runner (fake mode), debounce replay, clip intake."""
 
 import csv
+import hashlib
 import importlib.util
 import json
 import shutil
@@ -177,30 +178,33 @@ def test_fit_long_edge_shrinks_like_the_clients():
 
 
 def test_placeholder_references_are_detected(tmp_path):
-    images = AI_DIR / "fixtures" / "images"
-    assert ev.placeholder_steps({1, 2, 3, 4, 5, 6}) == [1, 2, 3, 4, 5, 6]
-    # A real still has another hash; a missing image also counts as "no chef reference".
+    # The shipped references are real stills from the glasses take: none is a placeholder.
+    assert ev.placeholder_steps({1, 2, 3, 4, 5, 6}) == []
+    # A still whose hash is in the manifest is a placeholder card; a missing image also counts
+    # as "no chef reference"; any other still is real.
     own = tmp_path / "images"
     own.mkdir()
-    shutil.copy(images / "placeholders.json", own)
-    shutil.copy(images / "step-4.jpg", own / "step-4.jpg")
+    card = b"placeholder card"
+    (own / "step-4.jpg").write_bytes(card)
+    (own / "placeholders.json").write_text(
+        json.dumps({"step-4.jpg": hashlib.sha256(card).hexdigest()}), encoding="utf-8")
     (own / "step-2.jpg").write_bytes(b"real still")
     assert ev.placeholder_steps({2, 4, 5}, own) == [4, 5]
 
 
-def test_runner_records_provenance_and_warns_on_placeholders(tmp_path):
+def test_runner_records_provenance(tmp_path):
     cases_csv = _eval_dir(tmp_path, [("dev", "fix", "filling_piled_center", "big")])
     out = tmp_path / "results"
     assert ev.main(["--split", "dev", "--cases", str(cases_csv), "--out", str(out),
                     "--where", "test runner"]) == 0
     js = next(out.glob("*.json"))
     meta = json.loads(js.read_text(encoding="utf-8"))["meta"]
-    assert meta["placeholder_refs"] == [4]
+    assert meta["placeholder_refs"] == []  # real stills since the glasses take
     assert meta["frame_long_edge"] == 1280 and meta["media_resolution"] == "MEDIUM"
     assert meta["where"] == "test runner" and len(meta["fixture_sha256"]) == 12
     assert "uncommitted" in meta and "prompt_hashes" in meta
     md = js.with_suffix(".md").read_text(encoding="utf-8")
-    assert "placeholder cards" in md
+    assert "placeholder cards" not in md
     assert ev.main(["--split", "dev", "--mode", "watch", "--cases", str(cases_csv),
                     "--out", str(tmp_path / "w")]) == 0
     wmeta = json.loads(next((tmp_path / "w").glob("*.json")).read_text(encoding="utf-8"))

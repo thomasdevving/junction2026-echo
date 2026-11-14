@@ -2,7 +2,7 @@
 
     python scripts/live_smoke.py                       # 1 attempt + protocol extras
     python scripts/live_smoke.py --attempts 5          # ratios for the silence rules
-    python scripts/live_smoke.py --question-wav footage/live-smoke/question-spread-edges-16k.wav
+    python scripts/live_smoke.py --question-wav footage/live-smoke/question-cheese-16k.wav
 
 Each attempt: build the config from the fixture, mint a real token with
 echo_ai.mint_live_token (needs GEMINI_API_KEY, fake mode off), open the Live WebSocket with
@@ -41,14 +41,12 @@ from echo_ai.config import load_env  # noqa: E402
 from echo_ai.live import LIVE_API_VERSION, SILENT_FUNCTIONS  # noqa: E402
 from echo_ai.schemas import RecipeDraft  # noqa: E402
 
-# Demo beat 6 and the words a grounded answer uses. The placeholder narration gives two reasons
-# for "to the edges": for the spread, "so every bite has flavour and the filling has something to
-# stick to"; for the filling, piling it up "makes the sandwich fat in the centre and empty at the
-# corners, so it falls apart when you cut it". Either is the chef's content.
-DEMO_QUESTION = "Why spread it to the edges?"
+# Demo beat 6 and the words a grounded answer uses. The real chef transcript (the glasses take,
+# 2026-11-14) answers it on step 4: "don't put it in the middle like this, it should reach the
+# edges, or greater".
+DEMO_QUESTION = "Where should the cheese go?"
 DEMO_STEP = 4  # beat 1: the wearer is on "Add fillings" when beat 6 asks the question
-GROUNDED_WORDS = ("flavour", "flavor", "bite", "stick", "falls apart", "fall apart",
-                  "centre", "center", "corners")
+GROUNDED_WORDS = ("middle", "centre", "center", "edge")  # weak: topic overlap, not proof
 
 HOST = "wss://generativelanguage.googleapis.com"
 PATH = (f"/ws/google.ai.generativelanguage.{LIVE_API_VERSION}"

@@ -315,12 +315,21 @@ A read-only review of AI-01 to AI-07 found 4 bugs and several measurement risks.
 
 - Package `ghostchef_ai` → `echo_ai` (distribution `echo-ai`), env vars `GHOSTCHEF_*` → `ECHO_*`. Verified: 197 tests pass, ruff clean. Rename the keys in your local `ai/.env` and run `pip install -e .` again.
 
+## Real chef take in the fixture, 2026-11-15
+
+Source: the original 97 MB glasses take (Echo Chef mode, 2026-11-14, 2:14, 720x1280; same recording as `footage/chef-take-sandwich.mp4`, which is the shrunk copy).
+- `fixtures/sushi_recipe.json`: `transcript` is the real narration, copied from production's Gemini extraction of this take (recipe `ee755841`, published). Six steps kept, with titles, `key_line`s and every `watch_fors` string unchanged (API-CONTRACT §2 examples, D-19, and the iOS/web tests depend on them). `chef_quote` is the chef's own words for each step; step 3 `key_line` is now "Two leaves, torn to fit" (the chef uses two leaves) (a test checks each quote appears in the transcript); `instruction`, step 2/3 `success_criteria`, `timestamp_s` and clip ranges follow the take. Step boundaries were set by hand from frames, not by a model.
+- `fixtures/images/step-1..6.jpg`: real stills, 720x1280, taken at 24 / 60 / 83 / 111 / 120 / 131 s (finished state of each step; hands and table only, no faces). `placeholders.json` kept: no shipped still matches it now, and `make_placeholders.py` refuses to overwrite real stills without `--force`.
+- `eval/qa.csv` rebuilt on the real transcript. The chef gives no reason for spreading to the edges, so the old demo question is now out of lesson (`o04`). New demo question (beat 6, step 4): **"Where should the cheese go?"** (the chef: "don't put it in the middle like this, it should reach the edges, or greater"). `scripts/live_smoke.py` uses it; `GROUNDED_WORDS` = middle / centre / center / edge. **Not re-run against Gemini** after this change. The `--question-wav` example now names `question-cheese-16k.wav`, which is **not recorded yet**.
+- `scripts/smoke_models.py`: the text-reading check renders its own card in memory, since step-3.jpg no longer has printed text.
+- Verified here: `pytest -q` 197 passed, `ruff check` clean. The eval set is still unlabelled (no labels invented).
+
 ## Needs from other tracks
 
 - **iOS owner (Thomas) — AI-05.4 acceptance:** read "Live facts for `ios/`" above and confirm in chat that it is enough to start IOS-05. Two rules there are not in API-CONTRACT §5 yet and the phone must follow them: (1) send `[CONTEXT]` lines with `"turnComplete": false`; (2) reply to `check_my_work`, `next_step`, `previous_step`, `show_me` with `"scheduling": "SILENT"` beside `response` (not for `repeat_instruction`). Also: server frames are **binary** JSON; ignore the `turnComplete` that follows a `toolCall`; send `sessionResumption: {}` in the setup.
 - **Contract wording (docs owner, additive, no field changes):** suggest adding those two wire rules to API-CONTRACT §5.1 and §5.2 through §9, so the contract and the iOS client agree. The tool-response *payloads* in §5.2 are unchanged. §5 also says the Gemini default for `new_session_expires_at` is 1 min; ours is 2 min (as AI-05.2 asks), and resumption still worked after it passed.
 - **Backend owner (Stelios) — BE-05:** `api_version` comes from `echo_ai.live.LIVE_API_VERSION`; see "For other tracks" for the reconnect rule (same token resumes; new token only after 30 min or a restart).
-- **Real chef transcript (team, from the no-cooking decision):** `eval/qa.csv` and the Live smoke tests use the placeholder narration in the fixture. The demo question in beat 6 is answerable from it; if a real transcript ever replaces it, re-check `qa.csv`.
+- **Real chef transcript:** done 2026-11-15 (see "Real chef take in the fixture"). Someone should re-run `scripts/live_smoke.py` against Gemini on the new demo question and record `footage/live-smoke/question-cheese-16k.wav`.
 
 - **Team decision at the next sync (R-02, from AI-04):** the check model. `gemini-3.5-flash-lite` meets the 2 s target but still passes some clearly unfinished frames; `gemini-3.8-flash` judged the dev material better but took 2–7 s with one timeout. The default stays on lite until decided.
 - **Labelled frames (AI-03, team decision "no cooking"):** AI-04.3's "mistake frame → `warn` with the right id" and AI-04.5's confusion tables cannot be done without at least a few labelled dev frames, including mistakes. A non-cooking option is listed under "Footage and evaluation set".

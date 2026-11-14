@@ -85,7 +85,7 @@ def test_build_live_config(recipe):
     assert cfg.response_modalities == ["AUDIO"] and cfg.voice is None and cfg.session_resumption
     for s in recipe.steps:
         assert s.title in cfg.system_instruction
-    assert "every bite has flavour" in cfg.system_instruction
+    assert "the cheese should reach the edges" in cfg.system_instruction
     assert "[CONTEXT]" in cfg.system_instruction
     names = [d["name"] for d in cfg.tools[0]["function_declarations"]]
     assert names == ["check_my_work", "next_step", "previous_step", "show_me",

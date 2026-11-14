@@ -23,19 +23,24 @@ def test_fixture_shape(recipe):
                         "edges of the bread.")
     assert recipe.step(2).watch_for("spread_misses_edges") is not None
     assert not recipe.step(3).watch_fors and not recipe.step(6).watch_fors
-    assert "spread it right to the edges so every bite has flavour" in recipe.transcript
-    assert recipe.transcript.startswith("[PLACEHOLDER NARRATION")
+    # Real transcript of the glasses take (2026-11-14); every chef_quote is the chef's own words.
+    assert "it should reach the edges" in recipe.transcript
+    assert "PLACEHOLDER" not in recipe.transcript.upper()
+    for s in recipe.steps:
+        assert s.chef_quote.rstrip(".").lower() in recipe.transcript.lower()
     assert 150 <= len(recipe.transcript.split()) <= 300
     times = [s.timestamp_s for s in recipe.steps]
     assert times == sorted(times)
 
 
-def test_placeholder_images():
+def test_reference_images_are_real_stills():
     for idx in range(1, 7):
         p = AI_DIR / "fixtures" / "images" / f"step-{idx}.jpg"
         assert p.stat().st_size > 5000
         with Image.open(p) as im:
             assert im.format == "JPEG" and im.size == (720, 1280)
+    from echo_ai import eval as ev
+    assert ev.placeholder_steps(set(range(1, 7))) == []
 
 
 def _cli(*args, fake="1", **extra_env):
