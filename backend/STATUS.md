@@ -27,6 +27,8 @@ Status words: `DONE`, `DONE (fake)`, `PARTIAL`, `BLOCKED`, `NOT STARTED` (define
 
 The demo key is shared privately, never written here.
 
+**Seed recipe on production is stale (2026-11-15):** `ai/fixtures` now holds the real chef take (real narration, real stills, real timestamps; same step ids, titles and `watch_fors`). Production's seed recipe `00000000-…-0001` still has the placeholder narration and images until `STORAGE=supabase scripts/seed.py --publish --replace` is run. `--replace` also deletes that recipe's production sessions and frames. Backend `pytest -q` with the new fixture: 304 passed, 5 skipped.
+
 **Video upload limit (all Supabase environments): 52,428,800 bytes (50 MiB) per file.** Supabase Free plan, project-wide limit; the `videos` bucket's 500 MB does not apply above it. Measured on production 2026-11-14 (see "Upload limit" below). A larger file is refused by Supabase itself (TUS create `413`, simple `PUT` `400` with `EntityTooLarge`), never reaching FastAPI. Contract 2.2 (proposed) states this limit and adds `upload_max_bytes` to `POST /recipes`; deployed 2026-11-14 21:16 UTC (deployment `1360f34e`), production returns `upload_max_bytes: 52428800`. Memory mode: `MAX_VIDEO_MB` (default now 50).
 
 ## Contract conformance
