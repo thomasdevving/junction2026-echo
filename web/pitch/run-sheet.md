@@ -16,7 +16,7 @@
 - **Presenter:** ⟨fill⟩ — talks, never touches the laptop.
 - **Operator:** ⟨fill⟩ — runs the monitor laptop and this sheet; calls resets.
 - **Wearer:** a volunteer, ideally not on the team. Brief in two sentences:
-  *"You're making a maki roll with the chef's help in the glasses. Spread the rice the way you think is right, and if the glasses tell you something, do what they say."*
+  *"You're making a ham and cheese sandwich with the chef's help in the glasses. Add the filling the way you think is right, and if the glasses tell you something, do what they say."*
 
 ## Thirty minutes before
 
@@ -24,23 +24,23 @@
 - [ ] Phone on charger, Do Not Disturb on, auto-lock off. Phone: ⟨fill⟩
 - [ ] Production health shows `ai_mode: gemini`, `storage: supabase`: open ⟨fill: production URL⟩`/health`. **If it says `fake`, stop and tell the backend owner.**
 - [ ] App Settings → base URL = production URL; demo key entered; watch threshold = **0.7** (untuned contract default; replace with the value in `ai/STATUS.md` once AI-07 tunes it).
-- [ ] Recipe "Maki roll" is `published` and every reference image loads (open it in the simulator: ⟨fill: production URL⟩`/app/sim/`).
+- [ ] Recipe "Ham and cheese sandwich" is `published` and every reference image loads (open it in the simulator: ⟨fill: production URL⟩`/app/sim/`).
 - [ ] One full dry run on this table, under this light.
 - [ ] Monitor open on ⟨fill: production URL⟩`/app/monitor/` and showing **LIVE**. Backup recording open in another tab (**REPLAY** badge visible).
 - [ ] Hotspot on: ⟨fill: hotspot name⟩. Emergency laptop backend running: ⟨fill: emergency URL⟩.
-- [ ] Three portions laid out: nori sheet, rice, cucumber sticks, bowl of water, wipes.
+- [ ] Bread, spread, lettuce and filling portions laid out for three runs (fillings kept cool); wet wipes. Kit list: `docs/DEMO-AND-SUBMISSION.md`.
 
 ## The demo (~100 s)
 
 | # | Wearer does | They should see / hear | Presenter says |
 |---|---|---|---|
-| 1 | Puts on glasses, looks down at the mat | Step card "3/6 Spread rice" with the chef's reference | "A chef recorded this once, wearing the same glasses." |
-| 2 | **Scripted mistake:** spreads a thick layer of rice right to every edge, no bare strip at the top | — | "Our volunteer has never rolled sushi." |
-| 3 | Keeps working | Amber "Too much rice" + reference + one spoken sentence | "Nobody asked. The glasses compared this view with the chef's and spoke first." |
-| 4 | Removes rice, leaves ~2 cm of bare nori at the far edge | Warning clears | "One instruction, in the chef's words." |
-| 5 | Pinches, or says "check" | "Checking…" → green "Looks right" | "Now they ask, and it passes." |
-| 6 | Asks aloud: **"Why do I wet my hands?"** ⟨confirm against the real chef transcript: the current fixture narration is a placeholder⟩ | Caption + spoken answer | "The answer comes from the chef's own narration." |
-| 7 | Covers the mat with a hand, then checks | "Can't tell — look straight down at mat" | "When it can't see, it says so instead of guessing." |
+| 1 | Puts on glasses, looks down at the board with the bread already spread | Step card "4/6 Add fillings" with the chef's reference | "A chef recorded this once, wearing the same glasses." |
+| 2 | **Scripted mistake:** piles all the ham and cheese in the middle of the slice, bare bread all around | — | "Our volunteer is making this sandwich the chef's way for the first time." |
+| 3 | Keeps working | ⚠ "Filling piled up" / "Spread it to the edges" + reference + one spoken sentence (icon and words: the lens has no amber or green) | "Nobody asked. The glasses compared this view with the chef's and spoke first." |
+| 4 | Spreads the filling out in an even layer to the edges | Warning clears | "One instruction, in the chef's words." |
+| 5 | Pinches, or says "check" | "Checking…" → ✓ "Looks right" + chime | "Now they ask, and it passes." |
+| 6 | Asks aloud: **"Why spread it to the edges?"** ⟨confirm against the real chef transcript: the current fixture narration is a placeholder⟩ | Caption + spoken answer | "The answer comes from the chef's own narration." |
+| 7 | Covers the bread with a hand, then checks | "Can't tell — look at the board" | "When it can't see, it says so instead of guessing." |
 | 8 | — | — | Evidence slide: measured numbers only, pilot, what's next |
 
 Short slot: drop 6 and 7. Watcher cut: beat 3 becomes beat 5 doing the catch.
@@ -48,11 +48,10 @@ Short slot: drop 6 and 7. Watcher cut: beat 3 becomes beat 5 doing the catch.
 
 ## Reset between runs (target < 30 s)
 
-1. Fresh nori sheet on the mat; old one in the bin.
-2. App: **Restart session**.
-3. Check the monitor re-attached to the new session (LIVE, step 1).
+1. Two fresh slices of bread on the board, already spread; the old sandwich off the board.
+2. App: **Restart session** (Demo menu). With Settings → Demo set to start at step 4, it lands on step 4.
+3. Check the monitor re-attached to the new session (LIVE, on the same step as the app).
 4. Wearer wipes hands.
-5. App to step 3 if the slot starts there.
 
 ## When something breaks — decide, don't debug
 

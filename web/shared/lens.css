@@ -1,13 +1,13 @@
 /* The lens card: what the wearer sees in the right lens.
    Black is transparent on the glasses, so: black panel, bright elements only.
+   Two text colours only, like the real display (Meta DAT SDK 1.0.1 text is primary or
+   secondary; no amber or green): state is carried by the icon and the words, matching
+   ios/GhostChef/Glasses/GlassesLogic.swift (GlassesLensLayout).
    Sizes use container units so the same card works small (simulator) and large (monitor). */
 
 .lens {
   --lens-fg: #ffffff;
   --lens-dim: #c9d3da;
-  --lens-amber: var(--echo-amber, #ffb020);
-  --lens-green: var(--echo-green, #34d27b);
-  --lens-sky: #4fb0ff;
 
   container-type: inline-size;
   position: relative;
@@ -58,9 +58,13 @@
   background: #2a2f33;
 }
 
+/* 16:10 like the glasses card (a portrait still would push the key line off);
+   it may shrink when the text needs the room, as the real card's image does. */
 .lens-ref {
   position: relative;
-  flex: 1;
+  flex: 0 1 auto;
+  width: 100%;
+  aspect-ratio: 16 / 10;
   min-height: 0;
   border-radius: 3.5cqw;
   overflow: hidden;
@@ -109,34 +113,11 @@
 }
 
 .lens-watch[data-state="active"] {
-  color: var(--lens-green);
+  color: var(--lens-fg);
 }
 
 .lens-watch[data-state="active"] .lens-dot {
-  background: var(--lens-green);
-}
-
-/* tone */
-
-.lens[data-tone="fix"] .lens-title {
-  color: var(--lens-amber);
-}
-
-.lens[data-tone="fix"] .lens-ref::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 0 0 1.2cqw var(--lens-amber);
-  pointer-events: none;
-}
-
-.lens[data-tone="pass"] {
-  --lens-accent: var(--lens-green);
-}
-
-.lens[data-tone="unsure"] .lens-title {
-  color: var(--lens-sky);
+  background: var(--lens-fg);
 }
 
 /* big centred states: pass, unsure, done, notice */
@@ -162,14 +143,6 @@
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.02em;
-}
-
-.lens[data-tone="pass"] .lens-center {
-  color: var(--lens-green);
-}
-
-.lens[data-tone="unsure"] .lens-center .icon {
-  color: var(--lens-sky);
 }
 
 .lens[data-tone="notice"] .lens-center .icon {

@@ -34,7 +34,7 @@ The comparison is like with like: the chef's reference and the learner's frame a
 
 ## Capabilities and Constraints
 
-- The lens card looks the same everywhere: black background, bright elements, at most two short text lines, amber for fix, green for pass.
+- The lens card looks the same everywhere: black background, bright elements, at most two short text lines, white and grey text only (the real display has no amber or green); fix, pass and can't-tell are told apart by icon (⚠ / ✓ / ?) and words, as on the glasses.
 - Every page shows what it is connected to (API base, `ai_mode`, `storage`), turning red when `ai_mode` is `fake`.
 - Review supports the Chef-mode recording → extracted draft → chef edits/reference selection → published lesson flow, with an explicitly labelled MP4 development fallback. The homepage explains that the chef wears the glasses once to demonstrate and narrate the method. Real chef-take and physical-device validation remain pending.
 - Anything not live carries a visible `REPLAY` badge.
@@ -44,7 +44,7 @@ The comparison is like with like: the chef's reference and the learner's frame a
 ## Brand Commitments
 
 - Working name **Echo** (see Open above).
-- Visual direction updated by the user on 2026-11-14: blue titanium metallic material for the hero only; the rest of the page retains its navy/cobalt/cyan background, translucent glass cards and white Manrope typography. Amber and green remain lens status colours.
+- Visual direction updated by the user on 2026-11-14: blue titanium metallic material for the hero only; the rest of the page retains its navy/cobalt/cyan background, translucent glass cards and white Manrope typography. The lens mock stays two-colour (white and grey) to match the glasses.
 - Hero copy: “Cook from the chef’s point of view,” describing step-by-step, hands-free cooking guidance.
 - Hero product: a transparent cutout edited from the user-supplied floating Meta Display glasses photo, flipped horizontally toward the headline. The readable Ray-Ban lens mark is placed back on the viewer-left lens. The glasses are shifted left toward the hero centre and slightly reduced in size. The original crossed open temples are preserved. The band is removed and the glasses are centered; cool blue-silver frame reflections match the hero lighting. The glowing illustrative recipe card sits inside the receding lens, tilted and foreshortened to match the product. The glasses and illustrative card form one fixed SVG composition, so the card lettering scales proportionally without stretching. The product image uses normal rendering without blend effects.
 - Selected Echo mark: three concentric open circular arcs, with a smaller symbol beside the wordmark. Subtle entrance, scroll-reveal and floating-product animation must respect reduced-motion preferences.

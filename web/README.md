@@ -56,7 +56,7 @@ web/
 
 ## Design rules for the three apps
 
-- **The lens card looks the same everywhere.** `shared/lens.js` renders the display spec from [../docs/TECH-SPEC.md](../docs/TECH-SPEC.md): black background, bright elements, at most two short text lines, amber for fix, green for pass. The simulator and the monitor both use it.
+- **The lens card looks the same everywhere.** `shared/lens.js` renders the display spec from [../docs/TECH-SPEC.md](../docs/TECH-SPEC.md): black background, bright elements, at most two short text lines, white and grey only, with state shown by icon (⚠ / ✓ / ?) and words. The real display has no amber or green text (Meta DAT SDK 1.0.1), so the mock must not suggest it. The simulator and the monitor both use it.
 - **Client rules are the contract's rules.** The simulator implements the stale-result rule (§3.4) and the watcher rules (§3.3) exactly as the iOS app does.
 - **Always show what you are connected to.** Every page has a footer strip with the API base, `ai_mode`, and `storage` from `/health`, turning red when `ai_mode` is `fake`.
 - **Readable from three metres.** The monitor is shown on a laptop to people standing at a table: large type, high contrast, no clutter.
