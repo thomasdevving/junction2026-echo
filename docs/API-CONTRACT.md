@@ -19,12 +19,20 @@ Who implements what:
 ## 1. Conventions
 
 - **Base URL:** local `http://<laptop-LAN-IP>:8000`, production `https://<railway-app>.up.railway.app` (recorded in `backend/STATUS.md` once it exists). No path prefix.
-- **Auth:** every endpoint except `GET /health` requires header `X-Demo-Key: <DEMO_API_KEY>`. Missing or wrong key → `401 unauthorized`. Signed Storage URLs returned by the API need no header.
+- **Auth:** protected API endpoints accept `X-Demo-Key: <DEMO_API_KEY>` (iPhone/development clients) or the same-origin browser session below. Missing or invalid credentials → `401 unauthorized`. `GET /health`, static `/app/` assets, browser login/session routes, and signed Storage URLs need no API-key header. Latest-frame images retain their existing per-session URL token.
 - **Bodies:** JSON (`application/json; charset=utf-8`) unless marked *multipart*. Field names are `snake_case`.
 - **IDs:** UUID v4 strings. **Times:** ISO 8601 UTC, e.g. `2026-11-14T09:30:00Z`. **Durations:** seconds as numbers (`timestamp_s`) or milliseconds as integers (`latency_ms`).
 - **`request_id`:** a UUID the *client* generates for every `/check` and `/watch` call. The server echoes it. The client uses it to drop stale answers (§3.4).
 - **CORS:** the backend allows all origins in development and the deployed web origin in production, with `X-Demo-Key` and `Content-Type` as allowed headers.
 - **Unknown fields:** clients must ignore response fields they don't know. Servers must ignore request fields they don't know. This is what makes additive changes safe.
+
+### Browser-session extension (additive; core contract version remains 2.0)
+
+- `GET /app/auth/session` returns `{authenticated, expires_at, login_available}`; `expires_at` is ISO UTC or null. It never returns credentials.
+- `POST /app/auth/login` accepts `{code}` matched against private `WEB_LOGIN_CODE`. Success returns `{authenticated: true, expires_at}` and sets an opaque `__Host-echo_session` cookie (HttpOnly, Secure, SameSite=Strict, Path=/, no Domain). Wrong code → 401; disabled login → 503 `login_unavailable`; excessive attempts → 429 `login_rate_limited`. Body limit: 4 KB.
+- `POST /app/auth/logout` revokes the session and clears the cookie, returning `{authenticated: false}`.
+- All browser-auth routes and cookie-authorized API requests require `X-Echo-Browser: 1`, HTTPS, and same-origin access. Unsafe methods additionally require exact `Origin`; cross-site requests are rejected. Loopback HTTP development uses `echo_local_session` without Secure. No cross-origin cookie/CORS integration is provided.
+- Browser-auth and cookie-authorized API responses use `Cache-Control: no-store, private`. The default lifetime is four hours (`WEB_SESSION_TTL_S`); expiry, logout, re-login and server restart invalidate sessions. The current single-worker implementation stores sessions in memory. Existing `X-Demo-Key` clients and response shapes are unchanged.
 
 ### 1.1 Error format
 
@@ -600,6 +608,7 @@ Rules:
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 2026-11-13 | Initial contract derived from TECH-SPEC.md. |
+| 2.0 (browser extension) | 2026-11-14 | User-requested additive same-origin access-code login, opaque cookie sessions and sign-out. Railway API credentials stay server-side; existing header clients remain compatible. |
 | 2.0 (no change) | 2026-11-14 | **Examples only, no interface change:** the JSON examples now use the sandwich lesson (D-19) instead of the maki roll; the fixture path is unchanged. |
 | 2.0 | 2026-11-14 | **Breaking**, following the TECH-SPEC update (iOS Chef mode + review-only web page). `POST /recipes` becomes JSON and returns a signed Storage upload URL instead of taking a multipart video; new `POST /recipes/{id}/process`; new status `uploading`; new `step_marks_s` (request, recipe response, `recipes` column, `extract_recipe` argument); new error `409 upload_missing`; Cook mode prefetches clips as well as images. Requested by the team. |
 
