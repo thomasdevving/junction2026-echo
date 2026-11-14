@@ -23,9 +23,9 @@ One volunteer (ideally not a team member) wears the glasses. One operator runs t
 |---|---|---|---|---|---|
 | 1 | Setup (10 s) | Puts on glasses, looks down at the board with the bread already spread | Step card "Add fillings" with the chef's reference | Chef reference + live wearer frame, "LIVE" badge | "A chef recorded this once, wearing the same glasses." |
 | 2 | Mistake (15 s) | Piles all the ham and cheese in the middle of the slice, bare bread all around | — | Live frame | "Our volunteer is making this sandwich the chef's way for the first time." |
-| 3 | Proactive catch (10 s) | Keeps working | Amber "⚠ Filling piled up" + reference + one spoken sentence | Warning event, mistake id, confidence, latency | "Nobody asked. The glasses compared this view with the chef's and spoke first." |
+| 3 | Proactive catch (10 s) | Keeps working | ⚠ "Filling piled up" / "Spread it to the edges" + reference + one spoken sentence (icon and words: the lens text has no amber or green) | Warning event, mistake id, confidence, latency | "Nobody asked. The glasses compared this view with the chef's and spoke first." |
 | 4 | Fix (15 s) | Spreads the filling out in an even layer to the edges | Warning clears | Live frame | "One instruction, in the chef's words." |
-| 5 | Check (10 s) | Pinches / says "check" | "Checking…" → green ✓ "Looks right" + chime | Pass event with latency | "Now they ask, and it passes." |
+| 5 | Check (10 s) | Pinches / says "check" | "Checking…" → ✓ "Looks right" + chime | Pass event with latency | "Now they ask, and it passes." |
 | 6 | Question (20 s) | Asks aloud, e.g. "Why spread it to the edges?" | Mic icon, caption, spoken answer | Question event | "The answer comes from the chef's own narration." |
 | 7 | Honest limit (10 s) | Covers the bread with a hand and checks | "Can't tell — look at the board" | `unsure` event | "When it can't see, it says so instead of guessing." |
 | 8 | Close (10 s) | — | — | Evidence slide | Measured numbers, proposed pilot, what's next |
