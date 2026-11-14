@@ -242,3 +242,11 @@ G1 only needs one thing from you beyond BE-01: run with `ECHO_AI_FAKE=0` as soon
 - **Measure, don't guess.** `latency_ms` is measured around the AI call with a monotonic clock and reported in every response.
 - Do not edit `ai/` or `web/`. If `echo_ai` misbehaves, write it in [STATUS.md](STATUS.md) under "Needs from other tracks" and tell the AI owner.
 - Deploying, creating cloud projects, and setting secrets are done by **you, the human owner**, in the provider's dashboard or CLI. Claude prepares the files and tells you the exact steps.
+
+## Browser sign-in
+
+Set `WEB_LOGIN_CODE` privately in Railway service variables to enable the same-origin web app's **Sign in** dialog. Keep `DEMO_API_KEY`, Gemini and Supabase credentials on the server; no endpoint returns them. iPhone and separate development clients continue using `X-Demo-Key`.
+
+The login issues an opaque HttpOnly, Secure, SameSite=Strict cookie over HTTPS. HTTP is allowed only on localhost for development. Browser requests require `X-Echo-Browser: 1`; unsafe requests also require an exact same-origin `Origin`. Login bodies are capped at 4 KB and attempts are rate limited. Responses use `Cache-Control: no-store, private`.
+
+Sessions expire after `WEB_SESSION_TTL_S` (default 14,400 seconds, allowed 300–28,800), are revoked on sign-out/re-login, and reset on deployment/restart. The existing one-worker deployment stores at most 256 sessions in memory; multiple workers/replicas would require a shared session store. Login codes are never written into the repository.

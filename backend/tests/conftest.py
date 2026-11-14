@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 os.environ.setdefault("ECHO_AI_FAKE", "1")
 os.environ.setdefault("ECHO_AI_FAKE_DELAY", "0")
 
-from app import ai, faults, metrics  # noqa: E402
+from app import ai, browser_sessions, faults, metrics  # noqa: E402
 from app.config import get_settings  # noqa: E402
 from app.deps import reset_store  # noqa: E402
 
@@ -91,6 +91,8 @@ def _env(tmp_path, monkeypatch) -> Iterator[None]:
     reset_store()
     metrics.reset()
     faults.reset()
+    browser_sessions.reset()
+    monkeypatch.delenv("WEB_LOGIN_CODE", raising=False)
     monkeypatch.delenv("FAULT_INJECT", raising=False)
     monkeypatch.delenv("FAULT_INJECT_ENABLED", raising=False)
     if ai.available():

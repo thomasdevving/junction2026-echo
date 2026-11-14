@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     )
 
     demo_api_key: SecretStr = SecretStr("dev-key")
+    web_login_code: SecretStr | None = None
+    web_session_ttl_s: int = Field(default=14400, ge=300, le=28800)
     storage: Literal["memory", "supabase"] = "memory"
     data_dir: Path = Path(".data")
 
@@ -51,7 +53,7 @@ class Settings(BaseSettings):
     def _fault_normalised(cls, v: object) -> object:
         return v.strip() if isinstance(v, str) else v
 
-    @field_validator("supabase_service_key", "gemini_api_key", mode="before")
+    @field_validator("supabase_service_key", "gemini_api_key", "web_login_code", mode="before")
     @classmethod
     def _empty_secret_to_none(cls, v: object) -> object:
         if isinstance(v, str) and not v.strip():

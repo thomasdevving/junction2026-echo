@@ -22,7 +22,17 @@ from app.jobs import ingest
 from app.logs import setup_logging
 from app.media import videocache
 from app.request_ctx import request_base_url
-from app.routers import frames, health, latest_frame, live, local, recipes, sessions, steps
+from app.routers import (
+    browser_auth,
+    frames,
+    health,
+    latest_frame,
+    live,
+    local,
+    recipes,
+    sessions,
+    steps,
+)
 from app.seed import seed_fixture
 from app.store.base import Store
 
@@ -123,6 +133,7 @@ def create_app() -> FastAPI:
 
     auth = [Depends(require_demo_key)]
     app.include_router(health.router)
+    app.include_router(browser_auth.router)
     app.include_router(latest_frame.router)  # token-authorised, see the module
     for module in (recipes, steps, frames, sessions, live):
         app.include_router(module.router, dependencies=auth)

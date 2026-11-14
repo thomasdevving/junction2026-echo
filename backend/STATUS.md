@@ -375,3 +375,9 @@ Whole-track check against the docs, run in this session and seen:
 - **Web (WEB-02):** the review page can now be tested end to end against a local server (memory store): upload, poll to `review`, re-pick a frame with `PATCH /steps`, publish.
 - **iOS (IOS-07):** BE-07.1 showed long client-side stalls on the venue Wi-Fi (server and model fast). Please confirm the watcher's 4 s timeout + skip-tick behaviour and the check's 10 s timeout/retry are in place (ARCHITECTURE §6). Also: a storage-only outage gives `500 internal` after ~7 s while `/health` stays 200, so treat repeated 500s as "server problem" too.
 - **iOS (IOS-01.2):** emergency mode serves plain `http://<lan-ip>:8000`. The app needs local-network permission and an App Transport Security exception for HTTP to reach it (see README → "Emergency mode").
+
+## Browser session login (2026-11-14)
+
+Added user-requested same-origin login using private `WEB_LOGIN_CODE`, without returning Railway/API credentials. Opaque HttpOnly/Secure/SameSite=Strict cookies authorize existing endpoints alongside unchanged `X-Demo-Key` clients. Exact-origin checks, a required browser header, 4 KB login limit, per-client/global attempt limits, bounded sessions, expiry, rotation and logout are covered by tests. Sessions are in-process on the existing single worker and reset on deployment.
+
+Observed: targeted browser-auth/security tests **34 passed**; changed Python files pass Ruff. Local fake-AI/memory Chromium sign-in loads the lesson library, and reload restores the session. No production recipe mutation, Gemini call or physical-glasses check was used for this verification.

@@ -15,7 +15,7 @@ from app.deps import get_store
 from app.logs import JsonFormatter, RedactQueryFilter, redact
 
 OPEN_PATH = re.compile(
-    r"^(/health|/local-files/.*|/local-upload/.*|/sessions/[^/]+/latest-frame\.jpg)$"
+    r"^(/health|/app/auth/(session|login|logout)|/local-files/.*|/local-upload/.*|/sessions/[^/]+/latest-frame\.jpg)$"
 )
 
 
@@ -58,6 +58,9 @@ def test_every_route_but_the_open_ones_needs_the_key(client, app):
 def test_open_routes_are_exactly_the_documented_ones(app):
     open_paths = sorted(p for _, p in _routes(app) if OPEN_PATH.match(_fill(p)))
     assert open_paths == [
+        "/app/auth/login",
+        "/app/auth/logout",
+        "/app/auth/session",
         "/health",
         "/local-files/{bucket}/{path:path}",
         "/local-upload/{bucket}/{path:path}",
