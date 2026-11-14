@@ -1,6 +1,6 @@
 # Track: `ios/` — the app on the iPhone and the glasses
 
-**Owner: Thomas**
+**Owners: Thomas and Türker**
 
 You own everything the wearer experiences: frames from the glasses, the cards in the lens, gestures and voice, the watcher loop, and how the app behaves when something drops. This track **must run on the Mac** (Xcode) with a physical iPhone, and it carries the project's highest risk: integration with borrowed glasses. Prove the device path early (IOS-02), before polishing anything.
 
