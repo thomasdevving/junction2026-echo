@@ -138,7 +138,7 @@ def test_size_limit(client, auth, testsrc_bytes, monkeypatch):
     assert client.post(f"/recipes/{rid}/process", headers=auth).status_code == 202
     body = _wait(client, auth, rid)
     assert body["status"] == "failed"
-    assert body["error"] == "video larger than 1 MB"
+    assert body["error"] == "video larger than 1 MiB"
     assert calls == []
 
 

@@ -38,7 +38,10 @@ class Settings(BaseSettings):
     check_budget_s: float = Field(default=8.0, gt=0)
     watch_budget_s: float = Field(default=3.5, gt=0)
     signed_url_ttl_s: int = Field(default=7200, gt=0)
-    max_video_mb: int = Field(default=500, gt=0)
+    # MiB. Default 50 = Supabase Free plan's global upload limit (52,428,800 bytes, measured
+    # 2026-11-14); the 500 MB `videos` bucket limit cannot exceed it. Returned to clients as
+    # `upload_max_bytes` by POST /recipes.
+    max_video_mb: int = Field(default=50, gt=0)
     cors_origins: str = "*"
     # Failure rehearsal (BE-07.2): active only with FAULT_INJECT_ENABLED=1 and a request header.
     fault_inject: Literal["", "timeout", "quota", "unavailable"] = ""

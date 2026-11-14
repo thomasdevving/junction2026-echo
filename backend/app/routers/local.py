@@ -70,7 +70,7 @@ async def local_upload(
     limit = settings.max_video_bytes
     declared = request.headers.get("content-length")
     if declared and declared.isdigit() and int(declared) > limit:
-        raise ApiError(413, "payload_too_large", f"upload exceeds {settings.max_video_mb} MB")
+        raise ApiError(413, "payload_too_large", f"upload exceeds {settings.max_video_mb} MiB")
 
     _in_flight.add((bucket, path))
     try:
@@ -83,7 +83,7 @@ async def local_upload(
                 total += len(chunk)
                 if total > limit:
                     raise ApiError(
-                        413, "payload_too_large", f"upload exceeds {settings.max_video_mb} MB"
+                        413, "payload_too_large", f"upload exceeds {settings.max_video_mb} MiB"
                     )
                 await asyncio.to_thread(fh.write, chunk)
         except BaseException:

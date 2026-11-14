@@ -27,12 +27,14 @@ Status words: `DONE`, `DONE (fake)`, `PARTIAL`, `BLOCKED`, `NOT STARTED` (define
 
 The demo key is shared privately, never written here.
 
+**Video upload limit (all Supabase environments): 52,428,800 bytes (50 MiB) per file.** Supabase Free plan, project-wide limit; the `videos` bucket's 500 MB does not apply above it. Measured on production 2026-11-14 (see "Upload limit" below). A larger file is refused by Supabase itself (TUS create `413`, simple `PUT` `400` with `EntityTooLarge`), never reaching FastAPI. Contract 2.2 (proposed) states this limit and adds `upload_max_bytes` to `POST /recipes`; the field is in the code but **not deployed yet**. Memory mode: `MAX_VIDEO_MB` (default now 50).
+
 ## Contract conformance
 
 | Endpoint group | Implemented | Tested | Notes |
 |---|---|---|---|
 | `/health` | yes | yes | Without `echo_ai` installed `ai_mode` would be `unavailable` (not a contract value; broken setup only) |
-| Recipes and steps (§2) | yes | yes | Supabase mode: signed upload URL + `resumable_endpoint` (`https://trfaijfrgfyrjvhocqif.storage.supabase.co/storage/v1/upload/resumable/sign`, fixed in the full check below); simple `PUT` and TUS with the iOS headers both run and work. Memory mode: upload via `PUT /local-upload` (`resumable_endpoint: null`). BE-06: `/process` runs the real job (download, size check, probe, `extract_recipe`, ffmpeg stills and clips); `PATCH /steps` re-extracts the still when `timestamp_s` changes (except on a recipe with no source video, such as the seed: stored, not re-extracted). `DELETE` of the seeded recipe needs `?force=true` (else `409 recipe_not_ready`). `/health` has an extra `ffmpeg` field. Publishing an already-published recipe returns 200 |
+| Recipes and steps (§2) | yes | yes | Real per-file upload limit 52,428,800 bytes (Supabase Free global limit); `upload_max_bytes` in the 201 (contract 2.2, code only, not deployed). Supabase mode: signed upload URL + `resumable_endpoint` (`https://trfaijfrgfyrjvhocqif.storage.supabase.co/storage/v1/upload/resumable/sign`, fixed in the full check below); simple `PUT` and TUS with the iOS headers both run and work. Memory mode: upload via `PUT /local-upload` (`resumable_endpoint: null`). BE-06: `/process` runs the real job (download, size check, probe, `extract_recipe`, ffmpeg stills and clips); `PATCH /steps` re-extracts the still when `timestamp_s` changes (except on a recipe with no source video, such as the seed: stored, not re-extracted). `DELETE` of the seeded recipe needs `?force=true` (else `409 recipe_not_ready`). `/health` has an extra `ffmpeg` field. Publishing an already-published recipe returns 200 |
 | `/check`, `/watch` (§3) | yes | yes | BE-03 complete: 413/415/422 validation, downscaling, 504 budget, `/watch` one in flight per session → 429. Guard-level 401/413 and framework-level 422s carry `request_id: null` (the body is not parsed yet at that point) |
 | Sessions, events, monitor (§4) | yes | yes | BE-05: `active=true` = unfinished **and** started in the last 3 h. `session_end` is idempotent (a repeat returns the first event id). `steps_passed_first_try` ignores `check_unsure`. The monitor's last frame, result and latency live in process memory and are lost on restart. Session, title and steps are cached for 3 s |
 | `/tts-token` (§5.4, contract 2.1) | yes | yes (mocked + production) | ElevenLabs single-use `tts_websocket` token + `voice_id`, `model_id`, `output_format: pcm_24000`. Not configured / ElevenLabs 401, 5xx, timeout, bad body → `503 model_unavailable`; ElevenLabs 429 or >30 tokens per minute per credential → `429 quota_exhausted`. The credential is the one that authorised the request (valid demo key, else the validated browser-session cookie). Key and token never logged. 21 tests with the HTTP call mocked |
@@ -74,7 +76,7 @@ Fake-mode latencies: they measure `ECHO_AI_FAKE_DELAY` (0.3 s default), not Gemi
 
 | Service | Project name | Owner | Region / plan |
 |---|---|---|---|
-| Supabase | Echo (`trfaijfrgfyrjvhocqif`) | Stelios | eu-north-1, created 2026-11-14; `migrations/001_init.sql` applied 2026-11-14 |
+| Supabase | Echo (`trfaijfrgfyrjvhocqif`) | Stelios | eu-north-1, created 2026-11-14; `migrations/001_init.sql` applied 2026-11-14. **Plan: Free** (organisation `tier_free`, read through the Supabase MCP 2026-11-14). Global upload file size limit: **52,428,800 bytes (50 MiB)**, measured (the dashboard field itself was not read: no Management API token here); Free cannot go higher. Team decision 2026-11-14: stay on Free, contract max → 50 MiB |
 | Railway | `gracious-miracle`, service `statai` | Stelios | EU West (`europe-west4-drams3a`), 1 replica, 2 vCPU / 1 GB limit; created 2026-11-14. A second, unused project `zestful-passion` (only failed deploys) also exists |
 
 ## Recovery tests (BE-07)
@@ -138,7 +140,7 @@ Design notes:
 
 Not verified / known limits:
 - ~~TUS resumable upload is untested~~ Tested in the full check (2026-11-14): it failed until the endpoint got its `/sign` suffix; now works.
-- On the free plan the global upload limit may be below the bucket's 500 MB. A large-video upload has not been tried.
+- ~~On the free plan the global upload limit may be below the bucket's 500 MB.~~ Confirmed 2026-11-14: it is 50 MiB; see "Upload limit".
 - **Signed URLs in a browser:** the smoke script and the tests fetched them with httpx (200 `image/jpeg`). They were not opened in a browser by hand.
 - **Rows in the table editor:** rows and frames were confirmed by SQL counts, not looked at in the dashboard UI.
 
@@ -378,8 +380,31 @@ Whole-track check against the docs, run in this session and seen:
 - **Verified:** full suite 303 passed, 5 skipped; independent review (3 rounds) found a rate-limit bypass via junk `X-Demo-Key` + cookie and via a second cookie name, both fixed with tests that fail on the old code; final pass clean. Production: see "Last smoke run" (19:46 UTC rows). Production log line for a mint contains only `voice_id`, `model`, `expires_at`.
 - **Not measured:** `/tts-token` latency beyond n=1 (2.3 s, includes the ElevenLabs round trip from Railway EU West); audio was not listened to, only byte counts checked.
 
+## Upload limit (2026-11-14)
+
+Trigger: the iOS owner's ~90 MB Chef take (2 min at 6 Mbit/s) was refused with HTTP 413 "Payload too large" by Supabase. iOS now records at ~1.3 Mbit/s (`0cc6f9a`), ~10.5 MB/min.
+
+Run in this session and seen:
+- **Plan:** Supabase organisation plan `free` (`tier_free`). Supabase docs (Storage → Limits, read 2026-11-14): global file size limit max 50 MB on Free, 500 GB on Pro; a bucket limit cannot exceed it. Bucket `videos` still says 524,288,000 bytes, `{video/mp4}`.
+- **Exact limit, bisected with TUS create requests only (`Upload-Length`, no data, accepted uploads cancelled):** 52,428,800 → 201, **52,428,801 → 413**. So the limit is exactly 50 MiB.
+- **Direct to Supabase** (signed upload URL minted with the local service key, same project, objects removed afterwards): 53,014,636 B → TUS create `413 "Maximum size exceeded"`; `PUT` → `400` body `{"statusCode":"413","error":"Payload too large","code":"EntityTooLarge"}`. 45,514,534 B → TUS 201 + 8 × 204 (5.5 s), `PUT` 200 (4.2 s).
+- **Production end to end** (`scripts/upload_limit_probe.py --base https://statai-production.up.railway.app --mb 53 --mb 45`, deployment `511e7880`, generated 60 s 1280×720 `testsrc2` CBR MP4s, not chef video):
+
+  | File | Path | Upload result | `/process` | Final status | Cleanup |
+  |---|---|---|---|---|---|
+  | 53,029,518 B (50.57 MiB) | TUS | create `413 Maximum size exceeded` | `409 upload_missing` | stays `uploading` | `DELETE` 204, then 404 |
+  | 53,029,518 B | `PUT` | `400` (`statusCode` "413", `EntityTooLarge`), 5.7 s | `409 upload_missing` | stays `uploading` | 204, then 404 |
+  | 45,034,538 B (42.95 MiB) | TUS | create 201, 8 × 204, 5.1 s | `202 processing` | `review` after 30 s, 6 steps | 204, then 404 |
+  | 45,034,538 B | `PUT` | 200, 3.7 s | `202 processing` | `review` after 27 s, 6 steps | 204, then 404 |
+
+  Afterwards: `videos` bucket empty, `media` back to the 6 seed stills. A leftover probe recipe from an interrupted earlier attempt ("upload-probe put 53014636", `uploading`) was deleted the same way (204, then 404). Recipe `cc8bcefd…` "Ham and Cheese sandwich" (`uploading`, 20:38 UTC) was left alone: probably the refused iOS take; the startup sweep marks it `failed` after 2 h.
+- **Railway side (code read, not measured):** production runs `STORAGE=supabase`, so the phone's bytes never pass through Railway; `PUT /local-upload` (memory mode only) bypasses the guard's body caps and is capped only by `MAX_VIDEO_MB` (streamed, `413` past it). `/process` has no body; ingestion streams the download with the same `MAX_VIDEO_MB` cap (`app/jobs/ingest.py`, `app/store/supabase_store.py::download_to_file`). **Not checked:** the `MAX_VIDEO_MB` value set on Railway (owner checks the Variables tab; unset = code default). The 45 MB run reaching `review` shows it is at least 43 MiB.
+- **Code (not deployed):** `MAX_VIDEO_MB` default 500 → 50; `POST /recipes` 201 gains `upload_max_bytes` (= `MAX_VIDEO_MB` × 1,048,576); `contract_version` 2.2; `openapi.json` re-exported; `ruff` clean, `pytest -q` 304 passed, 5 skipped. New `scripts/upload_limit_probe.py`. Contract 2.2 drafted in `docs/API-CONTRACT.md` for its own `[docs]` commit; needs a yes from iOS and web before it is pushed (§9).
+- **Not done:** the existing ~90 MB take cannot be uploaded on Free. It must be re-encoded on the phone or laptop below 50 MiB (e.g. ffmpeg at ~1.3 Mbit/s) or re-recorded.
+
 ## Needs from other tracks
 
+- **iOS + Web (contract 2.2, §9):** please agree to the max video size of 50 MiB (52,428,800 bytes) and the new `upload_max_bytes` field on `POST /recipes`. iOS: check the file size before TUS/PUT and show a message instead of uploading; treat TUS `413` and `PUT` `400` with `statusCode` `"413"` as "video too large", not as a reason to retry or fall back. At ~1.3 Mbit/s the limit is ~4.5 min. Web dev fallback: same check before `PUT`. Done in `web/` at the user's request (50 MiB + `upload_max_bytes` check before `PUT`, see `web/STATUS.md`).
 - **AI (D-19):** the sandwich fixture is in and seeded on production. Still needed: real reference stills and narration from the expert take (AI-03.5); tell the backend owner so production is re-seeded.
 - ~~**AI (AI-05):** `mint_live_token` missing~~ Resolved: AI-05 is on `main` (`96e105e`) and a real token was minted through the backend locally on 2026-11-14. Production redeployed (`fc21d115`) and smoke passed without `--allow-live-errors`.
 - **AI (AI-03):** a few labelled dev frames, including at least one mistake, so that `/check` → `fix` with the right `mistake_id` can be shown end to end. BE-03 used two Commons photos without mistakes.

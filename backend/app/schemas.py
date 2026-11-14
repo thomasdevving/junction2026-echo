@@ -182,6 +182,7 @@ class RecipeCreated(BaseModel):
     object_path: str
     resumable_endpoint: str | None
     upload_expires_at: datetime
+    upload_max_bytes: int
 
 
 class ProcessStarted(BaseModel):

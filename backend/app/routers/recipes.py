@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Response
 
 from app import metrics
+from app.config import get_settings
 from app.deps import get_store
 from app.errors import ApiError
 from app.jobs import ingest
@@ -51,6 +52,7 @@ async def create_recipe(body: RecipeCreate, store: StoreDep) -> RecipeCreated:
         object_path=recipe.video_path,
         resumable_endpoint=up["resumable_endpoint"],
         upload_expires_at=up["expires_at"],
+        upload_max_bytes=get_settings().max_video_bytes,
     )
 
 

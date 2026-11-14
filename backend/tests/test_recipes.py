@@ -104,6 +104,19 @@ def _create(client, auth, **over):
     return client.post("/recipes", headers=auth, json=body)
 
 
+def test_upload_max_bytes_follows_max_video_mb(client, auth, monkeypatch):
+    from app.config import Settings, get_settings
+
+    monkeypatch.delenv("MAX_VIDEO_MB", raising=False)
+    # Default = Supabase Free plan's global upload limit, 50 MiB (contract 2.2, §2).
+    assert Settings(_env_file=None).max_video_bytes == 52_428_800
+    monkeypatch.setenv("MAX_VIDEO_MB", "7")
+    get_settings.cache_clear()
+    r = _create(client, auth)
+    assert r.status_code == 201
+    assert r.json()["upload_max_bytes"] == 7 * 1024 * 1024
+
+
 def test_create_recipe_shape(client, auth):
     r = _create(client, auth)
     assert r.status_code == 201
@@ -117,7 +130,11 @@ def test_create_recipe_shape(client, auth):
         "object_path",
         "resumable_endpoint",
         "upload_expires_at",
+        "upload_max_bytes",
     }
+    from app.config import get_settings
+
+    assert body["upload_max_bytes"] == get_settings().max_video_bytes
     assert body["status"] == "uploading"
     assert body["bucket"] == "videos"
     assert body["object_path"] == f"{body['recipe_id']}/source.mp4"

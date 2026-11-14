@@ -105,7 +105,7 @@ def create_app() -> FastAPI:
     # to backend/openapi.json instead.
     app = FastAPI(
         title="Echo API",
-        version="2.1",
+        version="2.2",
         lifespan=lifespan,
         docs_url=None,
         redoc_url=None,

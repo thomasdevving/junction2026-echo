@@ -153,7 +153,7 @@ async def _download_and_probe(store: Store, video_path: str, src: Path) -> Probe
     try:
         found = await store.download_to_file("videos", video_path, src, settings.max_video_bytes)
     except BlobTooLarge:
-        raise IngestError(f"video larger than {settings.max_video_mb} MB") from None
+        raise IngestError(f"video larger than {settings.max_video_mb} MiB") from None
     if not found:
         raise IngestError("uploaded video is missing")
     try:
