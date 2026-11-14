@@ -1,83 +1,40 @@
-// Renders the MockDeviceKit camera feed used on the simulator (which has no camera):
-// a 6 s, 720×1280, 24 fps HEVC clip that slowly pans over a fixture reference image.
+// Builds the MockDeviceKit camera feed used on the simulator (which has no camera) from the team's
+// real chef take: 20 s of the sandwich lesson, re-encoded as HEVC (MockDeviceKit accepts h.265
+// video files as a mock camera feed, SDK 1.0.1 docs).
 //
 // Usage (from ios/):  swift scripts/make-mock-feed.swift
-// Output:             Echo/Resources/MockFeed/mock-feed.mp4
-//
-// MockDeviceKit accepts h.265 (HEVC) video files as a mock camera feed (SDK 1.0.1 docs).
+// Input:              $ECHO_REAL_TAKE, else ../ai/footage/chef-take-sandwich.mp4
+//                     (not in git: the repository is public; get the take privately)
+// Output:             Echo/Resources/MockFeed/mock-feed.mp4 (git-ignored, like all mp4s)
 
 import AVFoundation
-import CoreImage
 import Foundation
 
-let width = 720
-let height = 1280
-let fps: Int32 = 24
-let seconds = 6
-let source = URL(fileURLWithPath: "Echo/Resources/Fixtures/images/step-3.jpg")
+func fail(_ m: String) -> Never { FileHandle.standardError.write(Data("error: \(m)\n".utf8)); exit(1) }
+
+let env = ProcessInfo.processInfo.environment
+let input = URL(fileURLWithPath: env["ECHO_REAL_TAKE"] ?? "../ai/footage/chef-take-sandwich.mp4")
+guard FileManager.default.fileExists(atPath: input.path) else {
+    fail("Real chef take missing: \(input.path) (not in git; set ECHO_REAL_TAKE or copy it there)")
+}
 let outDir = URL(fileURLWithPath: "Echo/Resources/MockFeed", isDirectory: true)
 let output = outDir.appendingPathComponent("mock-feed.mp4")
-
-guard let base = CIImage(contentsOf: source) else {
-    FileHandle.standardError.write(Data("error: cannot read \(source.path)\n".utf8))
-    exit(1)
-}
 try FileManager.default.createDirectory(at: outDir, withIntermediateDirectories: true)
 try? FileManager.default.removeItem(at: output)
 
-let writer = try AVAssetWriter(outputURL: output, fileType: .mp4)
-let input = AVAssetWriterInput(
-    mediaType: .video,
-    outputSettings: [
-        AVVideoCodecKey: AVVideoCodecType.hevc,
-        AVVideoWidthKey: width,
-        AVVideoHeightKey: height,
-        AVVideoCompressionPropertiesKey: [AVVideoAverageBitRateKey: 1_200_000],
-    ])
-input.expectsMediaDataInRealTime = false
-let adaptor = AVAssetWriterInputPixelBufferAdaptor(
-    assetWriterInput: input,
-    sourcePixelBufferAttributes: [
-        kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
-        kCVPixelBufferWidthKey as String: width,
-        kCVPixelBufferHeightKey as String: height,
-    ])
-writer.add(input)
-guard writer.startWriting() else {
-    FileHandle.standardError.write(Data("error: \(String(describing: writer.error))\n".utf8))
-    exit(1)
-}
-writer.startSession(atSourceTime: .zero)
+/// 60–80 s: lettuce, ham and cheese going on; hands and food change every few seconds.
+let start = CMTime(seconds: 60, preferredTimescale: 600)
+let length = CMTime(seconds: 20, preferredTimescale: 600)
 
-let context = CIContext()
-let total = Int(fps) * seconds
-// Scale the image to cover the frame with 15% headroom, then pan diagonally across it.
-let cover = max(CGFloat(width) / base.extent.width, CGFloat(height) / base.extent.height) * 1.15
-let scaled = base.transformed(by: CGAffineTransform(scaleX: cover, y: cover))
-let slackX = scaled.extent.width - CGFloat(width)
-let slackY = scaled.extent.height - CGFloat(height)
-
-for frame in 0..<total {
-    while !input.isReadyForMoreMediaData { usleep(1000) }
-    let t = CGFloat(frame) / CGFloat(total - 1)
-    let shifted = scaled.transformed(
-        by: CGAffineTransform(translationX: -slackX * t, y: -slackY * (1 - t)))
-    var buffer: CVPixelBuffer?
-    CVPixelBufferPoolCreatePixelBuffer(nil, adaptor.pixelBufferPool!, &buffer)
-    guard let pixels = buffer else { exit(1) }
-    context.render(
-        shifted, to: pixels, bounds: CGRect(x: 0, y: 0, width: width, height: height),
-        colorSpace: CGColorSpaceCreateDeviceRGB())
-    adaptor.append(pixels, withPresentationTime: CMTime(value: CMTimeValue(frame), timescale: fps))
+let asset = AVURLAsset(url: input)
+let duration = try await asset.load(.duration)
+guard duration >= CMTimeAdd(start, length) else { fail("the take is shorter than 80 s") }
+guard let export = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHEVCHighestQuality) else {
+    fail("this Mac cannot export HEVC")
 }
+export.timeRange = CMTimeRange(start: start, duration: length)
+export.shouldOptimizeForNetworkUse = true
+try await export.export(to: output, as: .mp4)
 
-input.markAsFinished()
-let done = DispatchSemaphore(value: 0)
-writer.finishWriting { done.signal() }
-done.wait()
-guard writer.status == .completed else {
-    FileHandle.standardError.write(Data("error: \(String(describing: writer.error))\n".utf8))
-    exit(1)
-}
 let size = (try? FileManager.default.attributesOfItem(atPath: output.path)[.size] as? Int) ?? 0
-print("Wrote \(output.path) (\(size) bytes, \(total) frames, HEVC \(width)x\(height) @ \(fps) fps)")
+print("Wrote \(output.path) (\(size / 1024) KB, 20 s of the real take from 60 s, HEVC)")

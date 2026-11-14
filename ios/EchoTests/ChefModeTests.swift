@@ -732,27 +732,31 @@ struct ChefUploadShrinkTests {
 
 @Suite("Take shrinker")
 struct TakeShrinkerTests {
-    /// The real AVFoundation path on a real 2 s MP4: the file is replaced by a valid, playable
-    /// video with both tracks.
-    @Test func shrinksARealTakeInPlace() async throws {
+    /// The team's real chef take (2:14, 720x1280, with audio). Not in git: the repository is
+    /// public. Each Mac keeps a private copy at ai/footage/chef-take-sandwich.mp4 (git-ignored).
+    static let realTake = URL(fileURLWithPath: #filePath)
+        .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        .appendingPathComponent("ai/footage/chef-take-sandwich.mp4")
+
+    /// The real AVFoundation path on the real take: a copy is shrunk in place to fit 10 MB and
+    /// stays a playable video of the same length with both tracks.
+    @Test func shrinksTheRealTakeInPlace() async throws {
+        guard FileManager.default.fileExists(atPath: Self.realTake.path) else {
+            Issue.record("Real chef take missing: \(Self.realTake.path). Get it privately from the team (not in git).")
+            return
+        }
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("shrink-\(UUID().uuidString).mp4")
         defer { try? FileManager.default.removeItem(at: url) }
-        let writer = TakeWriter(url: url)
-        let start = CMTime(seconds: 50, preferredTimescale: 600)
-        for i in 0..<48 {
-            let t = CMTimeAdd(start, CMTime(value: CMTimeValue(i * 25), timescale: 600))
-            writer.appendVideo(try bgraFrame(320, 240, shade: UInt8(i * 5)), at: t)
-            if i % 2 == 0, i < 46 {
-                writer.appendAudio(try audioSample(at: CMTimeAdd(start, CMTime(seconds: Double(i) / 24, preferredTimescale: 600))))
-            }
-            try await Task.sleep(for: .milliseconds(41))
-        }
-        _ = try await writer.finish()
+        try FileManager.default.copyItem(at: Self.realTake, to: url)
+        let original = try await AVURLAsset(url: url).load(.duration).seconds
 
         let progress = ProgressLog()
-        try await AVTakeShrinker().shrink(url, toFit: 1_000, progress: { progress.add($0) })
+        try await AVTakeShrinker().shrink(url, toFit: 10_000_000, progress: { progress.add($0) })
+
+        let size = (try FileManager.default.attributesOfItem(atPath: url.path)[.size] as? NSNumber)?.intValue ?? 0
+        #expect(size < 10_000_000, "\(size) bytes")
         let asset = AVURLAsset(url: url)
-        #expect(abs(try await asset.load(.duration).seconds - 2.0) < 0.3)
+        #expect(abs(try await asset.load(.duration).seconds - original) < 0.5)
         #expect(try await asset.loadTracks(withMediaType: .video).count == 1)
         #expect(try await asset.loadTracks(withMediaType: .audio).count == 1)
         #expect(progress.values.last == 1)
