@@ -22,7 +22,7 @@ Status words: `DONE`, `DONE (fake)`, `PARTIAL`, `BLOCKED`, `NOT STARTED` (define
 |---|---|---|---|---|
 | Owner's laptop on the LAN | `http://192.168.200.152:8000` (when the owner runs it; IP may change) | `fake` | `memory` | 2026-11-14 |
 | Owner's laptop, Supabase store (local test only) | `http://localhost:8001` (started for BE-02 verification, then stopped) | `fake` | `supabase` | 2026-11-14 |
-| Production (Railway) | `https://statai-production.up.railway.app` (deployment `1360f34e` = commit `287f2d1`, 21:16 UTC; contract 2.2: `upload_max_bytes` 52,428,800, `MAX_VIDEO_MB=50` set on Railway) | `gemini` | `supabase` | 2026-11-14 |
+| Production (Railway) | `https://statai-production.up.railway.app` (deployment `f5850324` = commit `280f664`, 2026-11-14 23:14 UTC; contract 2.2; image carries the real-take fixture, but the Supabase seed recipe is not re-seeded yet) | `gemini` | `supabase` | 2026-11-14 |
 | Emergency laptop (hotspot) | `scripts/emergency.sh` prints `http://<lan-ip>:8000`. **NOT REHEARSED** on a hotspot with a phone | `gemini` | `memory` | — |
 
 The demo key is shared privately, never written here.
@@ -72,6 +72,7 @@ The demo key is shared privately, never written here.
 | 2026-11-14 19:07 UTC | production, deployment `39c32e5d` = commit `21b7479` (key restored), default fixture frame, `--fast` | OK, every status as expected; `/live-token` 200 (`gemini-3.8-live`, locked, `v1beta`); checks `unsure` on the placeholder frame | 1164 / 1520 (n=2) | 740 / 920 (n=6) |
 | 2026-11-14 19:46 UTC | production, deployment `511e7880` = commit `33e4910` (`/tts-token`), default fixture frame, `--fast` | OK, every status as expected; `/health` `contract_version` `2.1`; `/live-token` 200 | 1063 / 1251 (n=2) | 713 / 887 (n=6) |
 | 2026-11-14 21:17 UTC | production, deployment `1360f34e` = commit `287f2d1` (contract 2.2), default fixture frame, `--fast` | OK, every status as expected; `/health` `contract_version` `2.2` | 916 / 949 (n=2) | 661 / 845 (n=6) |
+| 2026-11-14 23:15 UTC | production, deployment `f5850324` = commit `280f664` (real-take fixture in the image), default fixture frame, `--fast` | OK, every status as expected; `/health` 2.2; `/live-token`, `/tts-token` 200; `/app/`, `/app/sim/`, `/app/review/`, `/app/monitor/` 200. Deployment triggered by hand: the push did not auto-deploy | 1128 / 1388 (n=2) | 636 / 816 (n=6) |
 | 2026-11-14 19:46 UTC | production `/tts-token` smoke (scratch script, token never printed) | no key → 401; with key → 200 in 2,329 ms (n=1), all five fields, `eleven_flash_v2_5`, `pcm_24000`, `expires_at` +15 min. The token opened `wss://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream-input` once: 69,102 bytes of audio (~1.4 s) for one sentence, first audio 1,805 ms after connect start (n=1). Second open with the same token → close 1008 `invalid_token` ("Token not found or has expired"): single use confirmed | — | — |
 Fake-mode latencies: they measure `ECHO_AI_FAKE_DELAY` (0.3 s default), not Gemini.
 
