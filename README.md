@@ -99,7 +99,7 @@ Each track folder has a `README.md` (setup, design, rules), a `STATUS.md` (what 
 - One folder per person. Shared documents change deliberately, in their own commit.
 - Change an interface in [docs/API-CONTRACT.md](docs/API-CONTRACT.md) first, then in code.
 - Write down only what you ran and saw. Targets and results are kept apart.
-- The repository is public: no keys, tokens, faces, or raw footage.
+- The repository is public: no keys, tokens, faces, or raw footage. One exception: `ai/footage/chef-take-sandwich.mp4`, the real sandwich lesson recorded through the glasses, published by its chef (Thomas, 2026-11-15) because the video tests in `backend/`, `ai/` and `ios/` use it. Any other footage needs the agreement of everyone on camera or audible.
 - When time runs out, cut from the top of the [cut order](docs/PLAN.md#6-cut-order), never the core loop.
 
 ## Licence

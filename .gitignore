@@ -39,7 +39,10 @@ node_modules/
 *.mov
 *.mp4
 !ai/fixtures/**/*.mp4
-ai/footage/
+# Footage stays private, except the one chef take published by its chef (Thomas, 2026-11-15)
+# so every laptop's tests can use it. Add nothing else here without the person on camera agreeing.
+ai/footage/*
+!ai/footage/chef-take-sandwich.mp4
 ai/eval/frames/raw/
 backend/.data/
 backend/tmp/
