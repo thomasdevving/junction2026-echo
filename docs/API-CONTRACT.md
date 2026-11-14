@@ -3,7 +3,7 @@
 > **This file is the single source of truth for every interface between the four tracks.**
 > It refines the "Backend API" and "Data model" sections of [TECH-SPEC.md](TECH-SPEC.md). Where the two differ, this file wins; every difference is listed in [§10 Differences from TECH-SPEC](#10-differences-from-tech-spec).
 >
-> `contract_version: 2.1` · frozen 2026-11-14 (v1.0 frozen 2026-11-13) · change it only through [§9 Change protocol](#9-change-protocol).
+> `contract_version: 2.2` · frozen 2026-11-14 (v1.0 frozen 2026-11-13) · change it only through [§9 Change protocol](#9-change-protocol).
 
 Who implements what:
 
@@ -63,7 +63,7 @@ Every non-2xx response has this body:
 ### `GET /health` (no auth)
 
 ```json
-{ "status": "ok", "contract_version": "2.1", "ai_mode": "fake", "storage": "memory" }
+{ "status": "ok", "contract_version": "2.2", "ai_mode": "fake", "storage": "memory" }
 ```
 
 `ai_mode` is `fake` or `gemini`. `storage` is `memory` or `supabase`. Clients show these in their debug/settings view so nobody demos against a fake by accident.
@@ -94,7 +94,8 @@ Request (JSON):
   "bucket": "videos",
   "object_path": "<recipe_id>/source.mp4",
   "resumable_endpoint": "https://<project>.storage.supabase.co/storage/v1/upload/resumable",
-  "upload_expires_at": "…"
+  "upload_expires_at": "…",
+  "upload_max_bytes": 52428800
 }
 ```
 
@@ -103,7 +104,7 @@ How the client uploads (pick one):
 - **Simple:** `PUT upload_url` with the raw MP4 bytes as the body and `Content-Type: video/mp4`. No `X-Demo-Key`. Used by the web dev fallback.
 - **Resumable (iOS, venue Wi-Fi):** TUS against `resumable_endpoint` with header `x-signature: <upload_token>`, metadata `bucketName = bucket`, `objectName = object_path`, `contentType = video/mp4`, chunk size **exactly 6 MB**. Supabase documents this presigned-resumable path **[VERIFIED-DOC 2026-11-14, untested by us]**; if it fails on device, fall back to the simple `PUT`.
 
-`resumable_endpoint` is `null` when the backend runs with `STORAGE=memory`; then `upload_url` points at the backend's own dev-only upload route and only the simple `PUT` works. `upload_url` is valid until `upload_expires_at` (Supabase default: 2 hours). Max video size is 500 MB; the backend enforces it when processing.
+`resumable_endpoint` is `null` when the backend runs with `STORAGE=memory`; then `upload_url` points at the backend's own dev-only upload route and only the simple `PUT` works. `upload_url` is valid until `upload_expires_at` (Supabase default: 2 hours). Max video size is **`upload_max_bytes` (52,428,800 bytes = 50 MiB in production)**: the Supabase Free plan's project-wide upload limit, measured 2026-11-14; the `videos` bucket's 500 MB setting cannot raise it. Clients should check the file size against `upload_max_bytes` before uploading and tell the chef instead of starting an upload that cannot succeed. Above the limit Supabase refuses the upload itself: TUS create → `413` ("Maximum size exceeded"), simple `PUT` → `400` with a JSON body whose `statusCode` is `"413"` (`EntityTooLarge`). The backend enforces the same limit when processing. At the iOS recording rate of ~1.3 Mbit/s that is about 4.5 minutes of video.
 
 Errors: `422` (including `consent` not `true`).
 
@@ -629,6 +630,7 @@ Rules:
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 2026-11-13 | Initial contract derived from TECH-SPEC.md. |
+| 2.2 | 2026-11-14 | **Additive field + corrected limit:** `POST /recipes` `201` gains `upload_max_bytes`. The stated max video size drops from 500 MB to 50 MiB (52,428,800 bytes), the Supabase Free plan's global upload limit, which was always the real limit (a ~90 MB Chef take was refused with 413). Team decision: stay on the Free plan. Needs a yes from `ios/` and `web/`. |
 | 2.1 | 2026-11-14 | **Additive:** new `GET /tts-token` (§5.4) so the app speaks with an ElevenLabs voice without holding the ElevenLabs key; §5.3 rewritten: fixed lines are pre-rendered ElevenLabs audio, other result sentences and Live answers (from Live's output transcription) go through ElevenLabs, on-device TTS is the fallback. Agreed by `ios/`. |
 | 2.0 (browser extension) | 2026-11-14 | User-requested additive same-origin access-code login, opaque cookie sessions and sign-out. Railway API credentials stay server-side; existing header clients remain compatible. |
 | 2.0 (no change) | 2026-11-14 | **Examples only, no interface change:** the JSON examples now use the sandwich lesson (D-19) instead of the maki roll; the fixture path is unchanged. |
