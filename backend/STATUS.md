@@ -22,7 +22,7 @@ Status words: `DONE`, `DONE (fake)`, `PARTIAL`, `BLOCKED`, `NOT STARTED` (define
 |---|---|---|---|---|
 | Owner's laptop on the LAN | `http://192.168.200.152:8000` (when the owner runs it; IP may change) | `fake` | `memory` | 2026-11-14 |
 | Owner's laptop, Supabase store (local test only) | `http://localhost:8001` (started for BE-02 verification, then stopped) | `fake` | `supabase` | 2026-11-14 |
-| Production (Railway) | `https://statai-production.up.railway.app` (deployment `09842581` = commit `63bb638`, TUS fix) | `gemini` | `supabase` | 2026-11-14 |
+| Production (Railway) | `https://statai-production.up.railway.app` (deployment `39c32e5d` = commit `21b7479`, 19:06 UTC; Echo rename live) | `gemini` | `supabase` | 2026-11-14 |
 | Emergency laptop (hotspot) | `scripts/emergency.sh` prints `http://<lan-ip>:8000`. **NOT REHEARSED** on a hotspot with a phone | `gemini` | `memory` | — |
 
 The demo key is shared privately, never written here.
@@ -63,6 +63,8 @@ The demo key is shared privately, never written here.
 | 2026-11-14 | `http://127.0.0.1:8050` (fake, memory), full check | OK, every status as expected | 750 / 751 (n=2) | 300 / 301 (n=6) |
 | 2026-11-14 | `https://statai-production.up.railway.app` (**gemini, supabase**), deployment `1befa7f0`, full check, default fixture frame, `--fast` | OK, every status as expected; `/live-token` 200 | 1130 / 1448 (n=2) | 693 / 785 (n=6) |
 | 2026-11-14 | `https://statai-production.up.railway.app` (**gemini, supabase**), deployment `1befa7f0` = commit `f023c9e` (BE-07 code), default fixture frame, `--fast` | OK, every status as expected. CORS preflight now lists `X-Fault` (new code live); `dev-key` → 401; startup log has no fault-injection warning; Railway variables contain no `FAULT_INJECT*` | 1076 / 1305 (n=2) | 839 / 1017 (n=6) |
+| 2026-11-14 18:5x–19:02 UTC | production, deployment `05ac5f8b` = commit `21b7479`, **`GEMINI_API_KEY` missing**, default fixture frame, `--fast` | **FAIL (AI down):** every `/check`, `/watch`, `/live-token` → 503 `model_unavailable`; log `AIUnavailable: GEMINI_API_KEY is not set`. `/health` still said `gemini`. Non-AI endpoints 200 | — | — |
+| 2026-11-14 19:07 UTC | production, deployment `39c32e5d` = commit `21b7479` (key restored), default fixture frame, `--fast` | OK, every status as expected; `/live-token` 200 (`gemini-3.8-live`, locked, `v1beta`); checks `unsure` on the placeholder frame | 1164 / 1520 (n=2) | 740 / 920 (n=6) |
 Fake-mode latencies: they measure `ECHO_AI_FAKE_DELAY` (0.3 s default), not Gemini.
 
 ## Accounts (who holds them; no secrets here)
@@ -360,7 +362,8 @@ Whole-track check against the docs, run in this session and seen:
 
 - "Ghost Chef" → "Echo" everywhere, identifiers included: env vars `GHOSTCHEF_*` → `ECHO_*`, packages `echo-backend` / `echo_ai`, loggers `echo` / `echo.calls` / `echo.images` / `echo.live`, Docker tag `echo-backend`.
 - Verified locally: `pytest -q` 274 passed, 5 skipped; Docker image builds, `/health` 200 (fake, memory).
-- Railway production: `ECHO_AI_FAKE` and `ECHO_MODEL_CHECK|LIVE|VIDEO|WATCH` added as references to the old `GHOSTCHEF_*` values (`${{GHOSTCHEF_…}}`). **Do not delete the `GHOSTCHEF_*` variables yet**: replace each `ECHO_*` reference with its literal value in the dashboard first, then delete the old five.
+- Railway production: `ECHO_AI_FAKE` and `ECHO_MODEL_CHECK|LIVE|VIDEO|WATCH` were first added as references to the old `GHOSTCHEF_*` values, then replaced with literal values by the owner; the old `GHOSTCHEF_*` variables are deleted. Production `/health` → `gemini`, `supabase` afterwards.
+- **Incident, 2026-11-14 ~18:58–19:06 UTC:** during that variable cleanup `GEMINI_API_KEY` was removed from Railway too. Every AI endpoint (`/check`, `/watch`, `/live-token`, ingestion) returned 503 `model_unavailable` for about 8 minutes; `/health` kept reporting `ai_mode: gemini` because it does not check the key. Key re-added (staged, then deployed as `39c32e5d`); production smoke passed at 19:07 (see smoke table). The two smoke sessions were deleted by id afterwards; four other sessions from 18:58–18:59 were left alone. **Lesson:** after any Railway variable change, run `scripts/smoke.py` against production, not only `/health`.
 - Local `.env` files: rename `GHOSTCHEF_*` keys to `ECHO_*`, then `pip install -e ../ai -e .` again.
 
 ## Needs from other tracks
