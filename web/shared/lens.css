@@ -2,7 +2,7 @@
    Black is transparent on the glasses, so: black panel, bright elements only.
    Two text colours only, like the real display (Meta DAT SDK 1.0.1 text is primary or
    secondary; no amber or green): state is carried by the icon and the words, matching
-   ios/GhostChef/Glasses/GlassesLogic.swift (GlassesLensLayout).
+   ios/Echo/Glasses/GlassesLogic.swift (GlassesLensLayout).
    Sizes use container units so the same card works small (simulator) and large (monitor). */
 
 .lens {
