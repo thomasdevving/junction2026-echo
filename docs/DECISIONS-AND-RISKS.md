@@ -1,4 +1,4 @@
-# Ghost Chef — decisions, risks, open questions
+# Echo — decisions, risks, open questions
 
 > Decisions are settled unless the team changes them here. Risks each have an owner and a next test. Open questions are things only a person on site or an account owner can answer.
 > Last updated 2026-11-14.
@@ -16,7 +16,7 @@
 | D-07 | The proactive watcher is a **polling classifier with debounce**, not Gemini Live | TECH-SPEC | Live over-talks or stays silent; polling is controllable | Settled |
 | D-08 | One **seeded, pre-ingested recipe** (the sandwich lesson, D-19); the demo never depends on live ingestion | TECH-SPEC | Demo safety | Settled |
 | D-09 | Work is split into **four tracks = four folders** (`ios/`, `backend/`, `ai/`, `web/`), one laptop each, no shared files | Team (2026-11-13) | Four laptops in parallel without merge conflicts | Settled |
-| D-10 | Contract additions over TECH-SPEC: `unsure` verdict, `request_id` + stale-result rule, `watch_fors` ids, publish/delete/consent, monitor endpoints, Live function calls, the `ghostchef_ai` package boundary | Proposed in this plan; listed in [API-CONTRACT §10](API-CONTRACT.md#10-differences-from-tech-spec) | Needed to make the spec buildable in parallel and to cover the trust criterion | **Yes — team should confirm or strike individual items** |
+| D-10 | Contract additions over TECH-SPEC: `unsure` verdict, `request_id` + stale-result rule, `watch_fors` ids, publish/delete/consent, monitor endpoints, Live function calls, the `echo_ai` package boundary | Proposed in this plan; listed in [API-CONTRACT §10](API-CONTRACT.md#10-differences-from-tech-spec) | Needed to make the spec buildable in parallel and to cover the trust criterion | **Yes — team should confirm or strike individual items** |
 | D-11 | A **web simulator** and a **demo monitor** are added to the `web/` track | Proposed in this plan | End-to-end testing without the Mac; the audience cannot see a lens | Yes. Monitor polish is item 7 in the cut order |
 | D-12 | `spoken` results use **on-device text-to-speech**; Gemini Live speaks only answers to questions | Proposed in this plan | One deterministic path; works when Live is down; no double speech | Yes |
 | D-13 | **Mock-first**: fake-mode AI package and a full mock API in the first hours | Proposed in this plan | Nobody waits for anybody | Yes |
@@ -25,7 +25,7 @@
 | D-16 | The web page is **review / edit / publish only**, plus an MP4 upload as a dev fallback | TECH-SPEC update (2026-11-14) | Recording happens on the glasses; the browser does not need a full upload studio | Settled |
 | D-17 | Video goes **directly from client to Supabase Storage** through a signed upload URL (resumable on iOS); FastAPI never receives the bytes. `POST /recipes` → upload → `POST /recipes/{id}/process`. Contract v2.0 | TECH-SPEC update (2026-11-14) | Venue Wi-Fi; Railway request limits; resumable uploads | Settled |
 | D-18 | Cook mode **prefetches every image and clip** before cooking; all published recipes visible to everyone, no accounts | TECH-SPEC update (2026-11-14) | Instant step changes on bad Wi-Fi | Settled |
-| D-19 | **The seeded lesson is an assembly-only sandwich, not sushi.** No cooking, no heat. Six steps: lay out bread → spread → add lettuce → add fillings → close → cut. The scripted demo mistake is `filling_piled_center` ("Filling piled up" / "Spread it to the edges") on "Add fillings"; the second listed mistake is `spread_misses_edges` on "Spread". The fixture keeps its path `ai/fixtures/sushi_recipe.json` (historical name) so no code path changes; only its contents change | Team (2026-11-14) | The team cannot cook at the venue; a sandwich can be filmed and demoed anywhere, keeps the chef → learner story and the Ghost Chef name, and its mistakes are visible in one frame | Yes, by the team. Renaming the fixture file is optional, after the demo |
+| D-19 | **The seeded lesson is an assembly-only sandwich, not sushi.** No cooking, no heat. Six steps: lay out bread → spread → add lettuce → add fillings → close → cut. The scripted demo mistake is `filling_piled_center` ("Filling piled up" / "Spread it to the edges") on "Add fillings"; the second listed mistake is `spread_misses_edges` on "Spread". The fixture keeps its path `ai/fixtures/sushi_recipe.json` (historical name) so no code path changes; only its contents change | Team (2026-11-14) | The team cannot cook at the venue; a sandwich can be filmed and demoed anywhere, keeps the chef → learner story and the Echo name, and its mistakes are visible in one frame | Yes, by the team. Renaming the fixture file is optional, after the demo |
 
 ## 2. Risks
 
@@ -69,4 +69,4 @@ Likelihood / impact: H, M, L. Ordered by how much they threaten the core demo.
 | Q-09 | Are food (assembly only, no cooking) and knives allowed at the stand and on stage? | Organizers | Demo |
 | Q-10 | Is there a real cooking instructor we can talk to before Sunday? | Team's network | Pilot claim |
 | Q-11 | `CONCEPT.md`, referenced by TECH-SPEC, is not in the repository | Team | Nothing critical; add it if it exists |
-| Q-12 | Is the product name "Ghost Chef" final? (The repository is named `statai`) | Team | Submission title |
+| Q-12 | Is the product name "Echo" final? (The repository is named `statai`) | Team | Submission title |

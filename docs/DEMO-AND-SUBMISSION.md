@@ -1,4 +1,4 @@
-# Ghost Chef — demo and submission
+# Echo — demo and submission
 
 > The demo script, what the audience sees, what to do when something breaks, the deck outline, and the submission checklist.
 > Owned by the `web/` track ([web/tasks/04](../web/tasks/04-user-evidence-and-pitch-pack.md), [web/tasks/05](../web/tasks/05-demo-ops-and-submission.md)). Live state of the checklists is kept in `web/STATUS.md`.
@@ -98,7 +98,7 @@ Decide in advance; do not debug in front of judges.
 Keep it to the slot length once known. One idea per slide.
 
 1. **The moment.** Hands full of bread and filling, phone propped on a jar, no idea if it's right.
-2. **Ghost Chef in one sentence** + the live demo.
+2. **Echo in one sentence** + the live demo.
 3. **Why glasses.** Same viewpoint as the chef; hands stay on the food; the system can speak first.
 4. **How it works.** One diagram: glasses → phone → backend → Gemini; the four Gemini jobs.
 5. **Evidence.** Measured counts and latency from [EVALUATION.md](EVALUATION.md); the ablation; what it cannot do.

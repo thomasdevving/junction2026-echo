@@ -1,4 +1,4 @@
-# Ghost Chef — agent guidance
+# Echo — agent guidance
 
 Junction 2026 hackathon project. Four people work in parallel on four laptops, one folder each. Keep this file short; the documents it points to are the sources of truth.
 

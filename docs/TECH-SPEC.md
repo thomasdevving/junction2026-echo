@@ -1,4 +1,4 @@
-# Ghost Chef — Technical Spec
+# Echo — Technical Spec
 
 > Junction 2026 · Meta track (Meta Ray-Ban Display) · Google AI / Gemini track
 > Companion to [CONCEPT.md](CONCEPT.md). Decisions agreed 2026-11-13.
@@ -27,7 +27,7 @@ A chef records a recipe once while wearing Meta Ray-Ban Display glasses. Gemini 
 
 ### Why these choices
 
-- **DAT, not Web Apps:** the Web Apps path for Ray-Ban Display exposes motion, GPS, Neural Band, and local storage, but no camera. Ghost Chef needs the camera, so the native DAT SDK is required.
+- **DAT, not Web Apps:** the Web Apps path for Ray-Ban Display exposes motion, GPS, Neural Band, and local storage, but no camera. Echo needs the camera, so the native DAT SDK is required.
 - **iOS:** teammate has Mac + iPhone and owns the app. Backend dev works on Linux.
 - **Thin backend:** keeps the Gemini API key off the phone, handles long video jobs (no serverless timeouts), and runs ffmpeg.
 - **Gemini Live directly from phone:** lowest latency for voice. Backend only mints short-lived ephemeral tokens.

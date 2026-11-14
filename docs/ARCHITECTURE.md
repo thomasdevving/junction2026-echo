@@ -1,4 +1,4 @@
-# Ghost Chef — architecture
+# Echo — architecture
 
 > How the pieces fit, what each technology is responsible for, what we assume about devices and APIs, and how the system behaves when something fails.
 > Interfaces are specified in [API-CONTRACT.md](API-CONTRACT.md). The product concept is [TECH-SPEC.md](TECH-SPEC.md).
@@ -10,8 +10,8 @@
 | Folder | Component | Runs on | Talks to |
 |---|---|---|---|
 | [`ios/`](../ios/README.md) | iOS app (Swift, SwiftUI, Meta DAT SDK), **one app with two modes: Chef (record a recipe) and Cook (follow along)** | iPhone paired with the glasses | Glasses (DAT over Bluetooth), backend (HTTPS), Supabase Storage (one signed upload per recording), Gemini Live (WebSocket) |
-| [`backend/`](../backend/README.md) | FastAPI service: recipes, check, watch, sessions, live tokens, ffmpeg, storage | Laptop in development, Railway in production | Supabase, `ghostchef_ai` package |
-| [`ai/`](../ai/README.md) | Python package `ghostchef_ai`: every prompt and every Gemini call; fixture recipe; evaluation | Imported by the backend; CLI on a laptop | Gemini API |
+| [`backend/`](../backend/README.md) | FastAPI service: recipes, check, watch, sessions, live tokens, ffmpeg, storage | Laptop in development, Railway in production | Supabase, `echo_ai` package |
+| [`ai/`](../ai/README.md) | Python package `echo_ai`: every prompt and every Gemini call; fixture recipe; evaluation | Imported by the backend; CLI on a laptop | Gemini API |
 | [`web/`](../web/README.md) | Static web app: cook-along **simulator**, recipe **review page** (review / edit / publish, plus a dev-fallback MP4 upload), demo **monitor**; plus the pitch pack | Any browser; served by the backend at `/app/` | Backend (HTTPS); Supabase Storage only for the dev-fallback upload |
 
 ```
@@ -37,7 +37,7 @@
                                            ▼          ▼
                               ┌────────────────┐   ┌──────────────────────┐
                               │ ai/            │   │ Supabase             │
-                              │ ghostchef_ai   │   │ Postgres + Storage   │
+                              │ echo_ai   │   │ Postgres + Storage   │
                               └───────┬────────┘   └──────────────────────┘
                                       ▼
                               Gemini API (video, vision, token minting)
@@ -69,7 +69,7 @@ Two things in this diagram are additions to TECH-SPEC, both for the weekend's pr
 1. **Record (iOS, Chef mode).** The chef cooks wearing the glasses and narrates. The app writes the DAT camera stream and mic audio to an MP4 on the phone (no clip-length limit, unlike the glasses' built-in capture). The lens shows "● REC 03:12". Each Neural Band pinch saves a **step mark** (seconds since start) into `step_marks_s`.
 2. **Create.** On stop: `POST /recipes` with title, `step_marks_s`, consent → `201 uploading` + a signed Supabase Storage upload URL.
 3. **Upload.** The app uploads the MP4 **directly to Supabase Storage** (resumable TUS, because of venue Wi-Fi), never through FastAPI. Dev fallback: the review page uploads any MP4 through the same signed URL with a simple `PUT`.
-4. **Process.** `POST /recipes/{id}/process` → `processing`. The background job downloads the video from Storage and calls `ghostchef_ai.extract_recipe(video_path, step_marks_s=…)` → `RecipeDraft` (steps, timestamps, transcript); the marks are hints.
+4. **Process.** `POST /recipes/{id}/process` → `processing`. The background job downloads the video from Storage and calls `echo_ai.extract_recipe(video_path, step_marks_s=…)` → `RecipeDraft` (steps, timestamps, transcript); the marks are hints.
 5. Backend runs ffmpeg per step: reference still at `timestamp_s`, optional clip `clip_start_s…clip_end_s`; uploads them to Storage; sets status `review` (or `failed` with `error`).
 6. **Review (web page).** The chef or a teammate opens the review page on a laptop, which polls the status, edits text / re-picks timestamps → `PATCH /steps/{id}` → `POST /recipes/{id}/publish` → `published`.
 
@@ -102,7 +102,7 @@ Session start → `GET /live-token` → phone opens the Live WebSocket with the 
 
 | Environment | Backend | Storage | AI | Used for |
 |---|---|---|---|---|
-| **Mock** | Laptop, `uvicorn` | `STORAGE=memory` | `GHOSTCHEF_AI_FAKE=1` | First hours; UI work; tests |
+| **Mock** | Laptop, `uvicorn` | `STORAGE=memory` | `ECHO_AI_FAKE=1` | First hours; UI work; tests |
 | **Local real** | Laptop, reachable on the LAN | `memory` or `supabase` | Real Gemini | Integration at the table |
 | **Production** | Railway | Supabase | Real Gemini | The demo |
 | **Emergency** | A laptop on a phone hotspot | `memory` + local files | Real Gemini | Venue Wi-Fi or Railway failure |

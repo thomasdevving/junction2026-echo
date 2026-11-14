@@ -10,7 +10,7 @@ Purpose: provide another chat with enough reliable background to combine this re
 
 The team values a compelling real problem, originality, a working prototype, and a convincing live demonstration. Prizes are secondary. The glasses are shared or borrowed; specific hardware availability and successful integration have not been established in this conversation. A Meta representative previously suggested combining glasses and Arduino, but that suggestion was superseded by the team's decision to exclude Arduino.
 
-An earlier concept was called **Ghost Chef**: an expert records a cooking lesson; AI extracts steps and visual references; a learner wearing glasses receives hands-free guidance and asks for checks against the expert's method. This is historical context only. **The final concept supplied with the next message supersedes this earlier description and any previous assistant recommendations.** Do not assume sushi, a particular number of checkpoints, a fixed architecture, or a particular audience has been finally chosen.
+An earlier concept was called **Echo**: an expert records a cooking lesson; AI extracts steps and visual references; a learner wearing glasses receives hands-free guidance and asks for checks against the expert's method. This is historical context only. **The final concept supplied with the next message supersedes this earlier description and any previous assistant recommendations.** Do not assume sushi, a particular number of checkpoints, a fixed architecture, or a particular audience has been finally chosen.
 
 **Unknown team facts:** member count and names, skills, available hours, repository URL/path, current code, devices actually booked, phone OS, development accounts, API access, budget, and final feature scope. The role model below is a recommendation, not a description of the actual team.
 
@@ -356,11 +356,11 @@ Questions to rehearse include: Why glasses? Why this model integration? Why is t
 
 ## 13. Product-specific context to retain only if the final concept still matches
 
-The earlier Ghost Chef discussion identified a strong potential demonstration: a learner makes a visible, reversible mistake, receives a correction grounded in a specific expert lesson, fixes it, and obtains a fresh check.
+The earlier Echo discussion identified a strong potential demonstration: a learner makes a visible, reversible mistake, receives a correction grounded in a specific expert lesson, fixes it, and obtains a fresh check.
 
 The unresolved product issue is the meaning of “correct.” Similar-looking food can differ in quantity, consistency, temperature, or other hidden properties. A shared first-person style does not make two camera views identical. Choose observable criteria; qualify uncertainty; distinguish expert statements from model inference.
 
-The core category is not unprecedented. AROMA is a research system connecting a wearable camera, recipe video, and contextual cooking assistance for blind and low-vision users. It is relevant prior art, not proof that every Ghost Chef interaction has already been built. [AROMA paper](https://arxiv.org/abs/2507.10963)
+The core category is not unprecedented. AROMA is a research system connecting a wearable camera, recipe video, and contextual cooking assistance for blind and low-vision users. It is relevant prior art, not proof that every Echo interaction has already been built. [AROMA paper](https://arxiv.org/abs/2507.10963)
 
 **RECOMMENDATION:** Compare the final concept against existing visual assistants and recipe guidance. A possible distinction is expert-approved checkpoints with source evidence and a measured correction loop. Treat that distinction as a hypothesis to demonstrate. Avoid absolute “first,” “only,” or universal correctness claims.
 

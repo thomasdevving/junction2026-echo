@@ -1,4 +1,4 @@
-# Ghost Chef — build plan
+# Echo — build plan
 
 > Who builds what, in which order, and what gets cut. Written Friday 13 Nov 2026, 23:00 Helsinki time, with **no code in the repository yet**.
 > Status of each batch is tracked in the owning track's `STATUS.md`, not here.
@@ -58,7 +58,7 @@ Cross-track dependencies (everything else is internal to a track):
 
 | Batch | Needs first | Why |
 |---|---|---|
-| BE-01 | AI-01 | Imports `ghostchef_ai` in fake mode and seeds from the fixture |
+| BE-01 | AI-01 | Imports `echo_ai` in fake mode and seeds from the fixture |
 | IOS-01, WEB-01 | BE-01 running anywhere reachable | A mock API with every endpoint in contract shape. Both can start on bundled fixtures before it is up |
 | BE-03 | AI-04 | Real `check_frame` / `watch_frame` |
 | BE-02 (seed with real stills) | AI-03 footage | Until then it seeds placeholder images |

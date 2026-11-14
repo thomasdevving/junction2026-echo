@@ -1,4 +1,4 @@
-# Ghost Chef — product brief
+# Echo — product brief
 
 > Scope, audience, and what we may claim. The technical concept is [TECH-SPEC.md](TECH-SPEC.md); this file adds the audience, trust, and judging-facing framing the spec does not cover.
 >

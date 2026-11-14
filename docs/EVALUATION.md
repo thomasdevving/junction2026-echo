@@ -1,4 +1,4 @@
-# Ghost Chef — evaluation and judging evidence
+# Echo — evaluation and judging evidence
 
 > What we have to be able to show, how we measure it, and the results once they exist.
 > **Every number in this file is either a proposed target (marked TARGET) or a measured result with its date and conditions. As of 2026-11-13 nothing has been measured.**
@@ -116,9 +116,9 @@ Trigger each one deliberately before G4 and record what happened in `ios/STATUS.
 
 ```
 cd ai
-python -m ghostchef_ai.eval --split heldout --config full      # writes ai/eval/results/<timestamp>-full.json
-python -m ghostchef_ai.eval --split heldout --config no-ref
-python -m ghostchef_ai.eval --split heldout --config generic
+python -m echo_ai.eval --split heldout --config full      # writes ai/eval/results/<timestamp>-full.json
+python -m echo_ai.eval --split heldout --config no-ref
+python -m echo_ai.eval --split heldout --config generic
 ```
 
 These commands are specified in AI-07 and do not exist until that batch is done.

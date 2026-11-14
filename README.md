@@ -51,7 +51,7 @@ Review what it did, commit with your track's prefix (`[ios]`, `[backend]`, `[ai]
 ## How the pieces fit
 
 ```
- Meta glasses ⇄ ios/ (iPhone app) ──HTTPS──► backend/ (FastAPI) ──imports──► ai/ (ghostchef_ai) ──► Gemini API
+ Meta glasses ⇄ ios/ (iPhone app) ──HTTPS──► backend/ (FastAPI) ──imports──► ai/ (echo_ai) ──► Gemini API
                      │                            │        ▲
                      └──WebSocket──► Gemini Live   │        └── web/ (simulator · review page · demo monitor)
                                                    ▼
@@ -73,7 +73,7 @@ Each track folder has a `README.md` (setup, design, rules), a `STATUS.md` (what 
 | Document | Read it for |
 |---|---|
 | [docs/TECH-SPEC.md](docs/TECH-SPEC.md) | **The team's concept**: summary, stack, flows, display spec, scope. The starting point for everything else |
-| [docs/API-CONTRACT.md](docs/API-CONTRACT.md) | **Every interface between tracks**: HTTP API, data model, the `ghostchef_ai` package, client rules. Wins over any other description |
+| [docs/API-CONTRACT.md](docs/API-CONTRACT.md) | **Every interface between tracks**: HTTP API, data model, the `echo_ai` package, client rules. Wins over any other description |
 | [docs/PLAN.md](docs/PLAN.md) | Tracks and owners, batch dependencies, gates G0–G5, cut order, how to work with Claude |
 | [docs/PRODUCT.md](docs/PRODUCT.md) | Problem, audience, why glasses, trust and accessibility, pilot path, what we may claim |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Components, technology roles, device and API assumptions with their status, failure behaviour, security |

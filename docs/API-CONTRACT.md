@@ -1,4 +1,4 @@
-# Ghost Chef — API & data contract (v2)
+# Echo — API & data contract (v2)
 
 > **This file is the single source of truth for every interface between the four tracks.**
 > It refines the "Backend API" and "Data model" sections of [TECH-SPEC.md](TECH-SPEC.md). Where the two differ, this file wins; every difference is listed in [§10 Differences from TECH-SPEC](#10-differences-from-tech-spec).
@@ -10,7 +10,7 @@ Who implements what:
 | Interface | Provider | Consumers |
 |---|---|---|
 | HTTP API (§2–§6) | `backend/` | `ios/`, `web/` |
-| Python package `ghostchef_ai` (§7) | `ai/` | `backend/` |
+| Python package `echo_ai` (§7) | `ai/` | `backend/` |
 | Fixture recipe `ai/fixtures/sushi_recipe.json` (§8) | `ai/` | `backend/` (seed), `ios/` + `web/` (offline fixtures) |
 | Gemini Live session config (§5) | `ai/` writes it, `backend/` serves it | `ios/` |
 
@@ -480,14 +480,14 @@ Row Level Security is enabled on all four tables with no policies for `anon`. On
 
 ## 7. Internal interface: `backend/` ⇄ `ai/`
 
-`ai/` ships an installable Python package named **`ghostchef_ai`** (`pip install -e ../ai`). `backend/` imports it and calls nothing else in `ai/`. All Gemini calls and all prompts live inside this package.
+`ai/` ships an installable Python package named **`echo_ai`** (`pip install -e ../ai`). `backend/` imports it and calls nothing else in `ai/`. All Gemini calls and all prompts live inside this package.
 
 ```python
-# ghostchef_ai/__init__.py — the complete public surface
-from ghostchef_ai.schemas import (
+# echo_ai/__init__.py — the complete public surface
+from echo_ai.schemas import (
     WatchFor, StepSpec, RecipeDraft, CheckResult, WatchResult, LiveConfig, LiveToken,
 )
-from ghostchef_ai.errors import AIError, AITimeout, AIQuotaError, AIUnavailable, AIInvalidOutput
+from echo_ai.errors import AIError, AITimeout, AIQuotaError, AIUnavailable, AIInvalidOutput
 
 async def extract_recipe(video_path: Path, *, title_hint: str | None = None,
                          step_marks_s: list[float] | None = None) -> RecipeDraft: ...
@@ -569,9 +569,9 @@ class LiveToken(BaseModel):
 
 Rules:
 
-- **Fake mode.** With env `GHOSTCHEF_AI_FAKE=1` every function returns deterministic, contract-valid data without any network call (details in [ai/tasks/01](../ai/tasks/01-package-skeleton-and-fixture.md)). Backend development and tests never need a Gemini key.
+- **Fake mode.** With env `ECHO_AI_FAKE=1` every function returns deterministic, contract-valid data without any network call (details in [ai/tasks/01](../ai/tasks/01-package-skeleton-and-fixture.md)). Backend development and tests never need a Gemini key.
 - **Errors.** Functions raise only `AIError` subclasses. Mapping to HTTP: `AITimeout → 504 model_timeout`, `AIQuotaError → 429 quota_exhausted`, `AIUnavailable` and `AIInvalidOutput → 503 model_unavailable`.
-- **Env.** The package reads `GEMINI_API_KEY` and the optional model overrides `GHOSTCHEF_MODEL_VIDEO`, `GHOSTCHEF_MODEL_CHECK`, `GHOSTCHEF_MODEL_WATCH`, `GHOSTCHEF_MODEL_LIVE`. It reads no other configuration.
+- **Env.** The package reads `GEMINI_API_KEY` and the optional model overrides `ECHO_MODEL_VIDEO`, `ECHO_MODEL_CHECK`, `ECHO_MODEL_WATCH`, `ECHO_MODEL_LIVE`. It reads no other configuration.
 - **No I/O beyond Gemini.** The package never touches Supabase or ffmpeg, and reads nothing from disk except `video_path`. `backend/` owns storage, ffmpeg, HTTP, and latency measurement.
 - **ffmpeg** frame and clip extraction is done by `backend/`, using the `timestamp_s`, `clip_start_s`, `clip_end_s` values in the `RecipeDraft`.
 - **Step marks** are hints. `extract_recipe` tells the model where the chef pinched, but it may merge, split, or ignore marks to satisfy the step rules. An empty or missing list means "no hints".
@@ -620,5 +620,5 @@ These are additions made while turning the spec into a buildable contract. None 
 | 7 | Extra event kinds: `step_change`, `check_unsure`, `warning_shown`, `warning_dismissed`, `show_me`, `client_error`, `session_end` | The monitor and the Done summary need them. The spec's four kinds are unchanged. |
 | 8 | `/live-token` takes `recipe_id` and returns the config, tool declarations, and lock state | Makes the voice commands ("check", "next", "show me") implementable as Live function calls. |
 | 9 | Columns `recipes.error`, `recipes.consent_at`, `sessions.client`, `sessions.device_label`, `session_events.request_id` | Support the items above. |
-| 10 | The `ghostchef_ai` package boundary (§7) and fake mode | Lets `backend/` and `ai/` be built on different laptops without touching each other's files. |
+| 10 | The `echo_ai` package boundary (§7) and fake mode | Lets `backend/` and `ai/` be built on different laptops without touching each other's files. |
 | 11 | `POST /recipes` also returns `upload_token`, `bucket`, `object_path`, `resumable_endpoint`, `upload_expires_at`; the `409 upload_missing` error; the 2-hour `uploading` timeout | The spec names only `upload_url`. The extra fields make the resumable (TUS) upload the spec asks for possible, and memory mode works without Supabase. |
