@@ -21,6 +21,7 @@ import asyncio
 import base64
 import json
 import os
+import re
 import sys
 import time
 import wave
@@ -40,12 +41,14 @@ from ghostchef_ai.config import load_env  # noqa: E402
 from ghostchef_ai.live import LIVE_API_VERSION, SILENT_FUNCTIONS  # noqa: E402
 from ghostchef_ai.schemas import RecipeDraft  # noqa: E402
 
-load_env()
-
-# Demo beat 6 and the words a grounded answer uses (the placeholder narration says the spread
-# goes to the edges "so every bite has flavour and the filling has something to stick to").
+# Demo beat 6 and the words a grounded answer uses. The placeholder narration gives two reasons
+# for "to the edges": for the spread, "so every bite has flavour and the filling has something to
+# stick to"; for the filling, piling it up "makes the sandwich fat in the centre and empty at the
+# corners, so it falls apart when you cut it". Either is the chef's content.
 DEMO_QUESTION = "Why spread it to the edges?"
-GROUNDED_WORDS = ("flavour", "flavor", "bite", "stick")
+DEMO_STEP = 4  # beat 1: the wearer is on "Add fillings" when beat 6 asks the question
+GROUNDED_WORDS = ("flavour", "flavor", "bite", "stick", "falls apart", "fall apart",
+                  "centre", "center", "corners")
 
 HOST = "wss://generativelanguage.googleapis.com"
 PATH = (f"/ws/google.ai.generativelanguage.{LIVE_API_VERSION}"
@@ -256,6 +259,23 @@ class Report:
         return f"{sum(hits)}/{len(hits)}"
 
 
+NUMBER_WORDS = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+                "ten")
+
+
+def names_step(said: str, step) -> bool:
+    """The answer names this step: its title, or its number as a digit or a word.
+
+    Only this step's own title counts: a keyword of another step (the old check accepted
+    "spread", which is now step 2) would let a wrong answer pass.
+    """
+    said = said.lower().replace("’", "'")
+    if step.title.lower() in said:
+        return True
+    names = [str(step.idx)] + ([NUMBER_WORDS[step.idx]] if step.idx < len(NUMBER_WORDS) else [])
+    return any(re.search(rf"\b{n}\b", said) for n in names)
+
+
 def context_line(idx: int, total: int, title: str) -> str:
     return (f'[CONTEXT] Cook is now on step {idx} of {total}: "{title}". '
             "Do not reply to this message.")
@@ -280,7 +300,7 @@ async def run_attempt(n: int, recipe: RecipeDraft, out: Path, rep: Report, wav: 
     if live is None:
         return
     total = len(recipe.steps)
-    s2, s3 = recipe.step(2), recipe.step(3)
+    s2, cur, nxt = recipe.step(2), recipe.step(DEMO_STEP), recipe.step(DEMO_STEP + 1)
 
     await live.text(context_line(2, total, s2.title), turn_complete=False)
     t = await live.collect(SILENCE_WAIT_S)
@@ -288,7 +308,13 @@ async def run_attempt(n: int, recipe: RecipeDraft, out: Path, rep: Report, wav: 
     rep.add(n, "[CONTEXT] turnComplete=false -> silence", silent(t) and not t.tool_calls,
             show(t))
 
-    # The demo question (DEMO-AND-SUBMISSION §2 beat 6): answered from the chef's narration.
+    # The demo is on step 4 (beat 1: "Add fillings"), so the app has moved there before the
+    # question is asked. A second context line, same silence rule.
+    await live.text(context_line(cur.idx, total, cur.title), turn_complete=False)
+    t = await live.collect(SILENCE_WAIT_S)
+    rep.add(n, "[CONTEXT] to the demo step -> silence", silent(t) and not t.tool_calls, show(t))
+
+    # The demo question (DEMO-AND-SUBMISSION §2 beat 6), asked where the demo asks it.
     await live.text(DEMO_QUESTION)
     t = await live.collect(ANSWER_WAIT_S)
     save_wav(d / "2-demo-question.wav", bytes(t.audio))
@@ -313,34 +339,33 @@ async def run_attempt(n: int, recipe: RecipeDraft, out: Path, rep: Report, wav: 
     rep.add(n, "what's next -> next_step", called and t.audio_before_call == 0, show(t))
     if t.tool_calls:
         after = await live.answer_tool(t.tool_calls[0], {
-            "status": "done", "now_on": f"3 of {total}: {s3.title}"}, SILENCE_WAIT_S)
+            "status": "done", "now_on": f"{nxt.idx} of {total}: {nxt.title}"}, SILENCE_WAIT_S)
         save_wav(d / "4-after-next.wav", bytes(after.audio))
         rep.add(n, "silent after next_step", silent(after), show(after))
         # The app sends a context line on every step change (API-CONTRACT §5.1). This one goes
         # with turnComplete=true, which asks the model for a turn it must leave silent.
-        await live.text(context_line(3, total, s3.title))
+        await live.text(context_line(nxt.idx, total, nxt.title))
         t = await live.collect(SILENCE_WAIT_S)
         save_wav(d / "4b-context-turn.wav", bytes(t.audio))
         rep.add(n, "[CONTEXT] turnComplete=true -> silence", silent(t) and not t.tool_calls,
                 show(t))
         await live.text("Which step am I on? Just the number and name.")
         t = await live.collect(ANSWER_WAIT_S)
-        said = t.transcript.lower()
-        rep.add(n, "knows the step from [CONTEXT]", bool(t.audio) and not t.tool_calls and (
-            "3" in said or "three" in said or "spread" in said), show(t))
+        rep.add(n, "knows the step from [CONTEXT]", bool(t.audio) and not t.tool_calls
+                and names_step(t.transcript, nxt), show(t))
 
     await live.text("Say that again")
     t = await live.collect(ANSWER_WAIT_S)
     called = [c["name"] for c in t.tool_calls] == ["repeat_instruction"]
     rep.add(n, "say that again -> repeat_instruction", called, show(t))
     if t.tool_calls:
-        after = await live.answer_tool(t.tool_calls[0], {"instruction": s3.instruction},
+        after = await live.answer_tool(t.tool_calls[0], {"instruction": nxt.instruction},
                                        ANSWER_WAIT_S)
         save_wav(d / "5-repeat.wav", bytes(after.audio))
         said = after.transcript.lower()
         # Read aloud = most of the instruction's longer words are in the transcript (works for
         # any recipe; the old fixed keywords were sushi-specific).
-        words = {w.strip(".,;:!?'\"").lower() for w in s3.instruction.split() if len(w) > 4}
+        words = {w.strip(".,;:!?'\"").lower() for w in nxt.instruction.split() if len(w) > 4}
         hits = sum(1 for w in words if w in said)
         read = bool(after.audio) and bool(words) and hits >= max(1, len(words) // 2)
         rep.add(n, "instruction read aloud", read, show(after))
@@ -362,7 +387,7 @@ async def run_attempt(n: int, recipe: RecipeDraft, out: Path, rep: Report, wav: 
     await live.close()
 
     if extras:
-        await protocol_extras(n, tok.token, cfg.model, handle, recipe, out, rep)
+        await protocol_extras(n, tok.token, cfg.model, handle, recipe, nxt, out, rep)
 
 
 async def spoken_question(n: int, live: Live, wav: Path, d: Path, rep: Report):
@@ -388,7 +413,7 @@ async def spoken_question(n: int, live: Live, wav: Path, d: Path, rep: Report):
 
 
 async def protocol_extras(n: int, token: str, model: str, handle: str | None, recipe: RecipeDraft,
-                          out: Path, rep: Report):
+                          step, out: Path, rep: Report):
     print("  --- protocol extras ---")
     cfg = gc.build_live_config(recipe.title, None, recipe.transcript, recipe.steps)
     if handle:
@@ -406,8 +431,7 @@ async def protocol_extras(n: int, token: str, model: str, handle: str | None, re
             t = await live.collect(ANSWER_WAIT_S)
             save_wav(out / f"attempt-{n}" / "8-resumed.wav", bytes(t.audio))
             detail += f"; {show(t)}"
-            said = t.transcript.lower()
-            ok = ok and bool(t.audio) and ("3" in said or "three" in said or "spread" in said)
+            ok = ok and bool(t.audio) and names_step(t.transcript, step)
             await live.close()
         rep.add(n, "resume with a NEW token + handle keeps the history", ok, detail)
     else:
@@ -458,6 +482,7 @@ async def main_async(args) -> int:
 
 
 def main() -> int:
+    load_env()  # ai/.env, only when run as a script
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])

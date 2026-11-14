@@ -271,3 +271,18 @@ def test_bad_max_calls_is_an_ai_error(monkeypatch):
     monkeypatch.setenv("GHOSTCHEF_MAX_CALLS", "lots")
     with pytest.raises(AIUnavailable, match="whole number"):
         config.max_calls()
+
+
+async def test_unspent_call_is_closed_on_bad_settings(monkeypatch):
+    """A bad GHOSTCHEF_MAX_CALLS raises AIUnavailable and the coroutine is closed, not leaked."""
+    import inspect
+
+    monkeypatch.setenv("GHOSTCHEF_MAX_CALLS", "lots")
+
+    async def call():
+        return 1
+
+    coro = call()
+    with pytest.raises(AIUnavailable):
+        await client.call_with_budget(coro, 1)
+    assert inspect.getcoroutinestate(coro) == inspect.CORO_CLOSED

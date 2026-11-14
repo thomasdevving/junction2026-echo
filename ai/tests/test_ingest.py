@@ -317,3 +317,15 @@ async def test_upload_sends_explicit_mime_type(monkeypatch, tmp_path):
     noext.write_bytes(b"\x00" * 64)
     await ingest.run_extract(noext)
     assert files.configs == [{"mime_type": "video/mp4"}]
+
+
+class StalledDeleteFiles(StubFiles):
+    async def delete(self, *, name):
+        await asyncio.sleep(10)
+
+
+async def test_stalled_delete_does_not_hang_a_finished_job(monkeypatch, video):
+    _stub(monkeypatch, StalledDeleteFiles(), StubModels([_resp(raw())]))
+    monkeypatch.setattr(ingest, "DELETE_TIMEOUT_S", 0.05)
+    out = await asyncio.wait_for(ingest.run_extract(video), timeout=5)
+    assert out.attempts == 1

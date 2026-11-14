@@ -35,6 +35,7 @@ PROCESSING_TIMEOUT_S = 300.0  # Files API: uploaded -> ACTIVE, including every s
 POLL_INTERVAL_S = 2.0
 # Extra margin for the last status poll before the overall processing limit cuts it off.
 POLL_GRACE_S = 10.0
+DELETE_TIMEOUT_S = 30.0       # cleanup must not hang a finished job on a stalled connection
 # Thinking tokens count against this limit; a 10-step recipe plus a transcript is a few
 # thousand tokens of JSON.
 MAX_OUTPUT_TOKENS = 16384
@@ -347,7 +348,11 @@ async def run_extract(video_path: Path, *, title_hint: str | None = None,
         return ExtractOutcome(draft, model, t1 - t0, time.perf_counter() - t1, attempts)
     finally:
         try:
-            await aio.files.delete(name=uploaded.name)
+            await asyncio.wait_for(aio.files.delete(name=uploaded.name),
+                                   timeout=DELETE_TIMEOUT_S)
+        except TimeoutError:
+            log.warning("extract: deleting the uploaded file took longer than %g s; it expires "
+                        "on its own (Files API retention)", DELETE_TIMEOUT_S)
         except Exception as exc:  # noqa: BLE001 — cleanup must never mask the real result
             log.warning("extract: could not delete uploaded file: %s", exc)
 

@@ -21,6 +21,7 @@ def _load(name):
 
 ef = _load("extract_frames")
 cc = _load("check_cases")
+cc = _load("check_cases")
 sbs = _load("side_by_side")
 WATCH = cc.load_watch_fors(AI_DIR / "fixtures" / "sushi_recipe.json")
 HAS_FFMPEG = bool(shutil.which("ffmpeg") and shutil.which("ffprobe"))
@@ -166,3 +167,28 @@ def test_side_by_side(tmp_path):
     assert sbs.main([*map(str, imgs), "--labels", "ref", "mine", "-o", str(out)]) == 0
     with Image.open(out) as im:
         assert im.height == sbs.HEIGHT + sbs.LABEL_H + 2 * sbs.GAP
+
+
+# ------------------------------------------------------------------ spreadsheet-saved CSVs
+
+
+def test_check_cases_reads_a_bom_header(tmp_path):
+    csv_path = tmp_path / "cases.csv"
+    csv_path.write_bytes(b"\xef\xbb\xbf" + ",".join(cc.COLUMNS).encode() + b"\r\n")
+    header, rows = cc.read_rows(csv_path)
+    assert header == cc.COLUMNS and rows == []
+
+
+def test_append_after_a_file_without_final_newline(tmp_path):
+    eval_dir = tmp_path
+    (eval_dir / "frames" / "dev").mkdir(parents=True)
+    (eval_dir / "frames" / "heldout").mkdir(parents=True)
+    (eval_dir / "frames" / "dev" / "b.jpg").write_bytes(b"x")
+    csv_path = eval_dir / "cases.csv"
+    # Saved by a spreadsheet without a newline after the last row.
+    csv_path.write_bytes((",".join(cc.COLUMNS) + "\r\n"
+                          + "c0001,frames/dev/a.jpg,4,dev,pass,,AK,glasses,last").encode())
+    assert cc.scaffold(csv_path, eval_dir, 4, "AK", "glasses") == 1
+    _, rows = cc.read_rows(csv_path)
+    assert [r["case_id"] for r in rows] == ["c0001", "c0002"]
+    assert rows[0]["notes"] == "last" and rows[1]["file"] == "frames/dev/b.jpg"

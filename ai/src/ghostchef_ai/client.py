@@ -69,9 +69,9 @@ async def call_with_budget(coro: Awaitable[T], timeout_s: float) -> T:
     """Count one paid call against the cap, await it within timeout_s, map errors."""
     try:
         _spend_one_call()
-    except AIQuotaError:
+    except AIError:  # budget exhausted, or a bad GHOSTCHEF_MAX_CALLS / GHOSTCHEF_PROVIDER
         if asyncio.iscoroutine(coro):
-            coro.close()
+            coro.close()  # never awaited: close it so no "never awaited" warning is logged
         raise
     try:
         return await asyncio.wait_for(coro, timeout=timeout_s)

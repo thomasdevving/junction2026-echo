@@ -10,6 +10,7 @@ check_frame does not treat it as unjudgeable. Replaced by real chef stills in AI
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import random
 from pathlib import Path
@@ -63,6 +64,17 @@ def main() -> None:
         out = images / f"step-{step['idx']}.jpg"
         make(step["idx"], step["title"], out)
         print(f"{out}  {out.stat().st_size} bytes")
+    write_manifest(images, [images / f"step-{s['idx']}.jpg" for s in recipe["steps"]])
+
+
+def write_manifest(images: Path, files: list[Path]) -> None:
+    """Record the sha256 of each placeholder, so the eval runner can tell a placeholder card
+    from a real chef still (python -m ghostchef_ai.eval warns on placeholder references).
+    A still extracted from the chef take (AI-03.5) has a different hash and is not listed."""
+    manifest = {f.name: hashlib.sha256(f.read_bytes()).hexdigest() for f in files}
+    path = images / "placeholders.json"
+    path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    print(f"{path}  {len(manifest)} placeholder hashes")
 
 
 if __name__ == "__main__":

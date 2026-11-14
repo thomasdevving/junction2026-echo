@@ -39,6 +39,15 @@ from ghostchef_ai.errors import AIError  # noqa: E402
 
 IMAGES = AI_DIR / "fixtures" / "images"
 
+
+def _step3_heading_word() -> str:
+    """The longest word of fixture step 3's title, which make_placeholders prints on the image."""
+    import json
+
+    recipe = json.loads((AI_DIR / "fixtures" / "sushi_recipe.json").read_text(encoding="utf-8"))
+    title = next(s["title"] for s in recipe["steps"] if s["idx"] == 3)
+    return max(title.split(), key=len).lower()
+
 TEXT_SCHEMA = {
     "type": "object",
     "properties": {"has_text": {"type": "boolean"}, "text": {"type": "string"}},
@@ -98,8 +107,9 @@ async def test_model(model: str, repeats: int) -> dict:
     step4 = (IMAGES / "step-4.jpg").read_bytes()
     out: dict = {"model": model, "image_ok": 0, "image_n": 0, "lat": [], "errors": []}
 
-    # 1. image + structured output, repeated (latency sample). The placeholder says
-    #    "3. Spread rice", so a correct answer reads the text.
+    # 1. image + structured output, repeated (latency sample). The placeholder shows
+    #    "3. <step 3 title>", so a correct answer reads that title.
+    expect = _step3_heading_word()
     for _ in range(repeats):
         res, ms, err = await _timed(client.image_json(
             model=model, schema=TEXT_SCHEMA, schema_name="text_check", timeout_s=20,
@@ -112,7 +122,7 @@ async def test_model(model: str, repeats: int) -> dict:
                 return out
             continue
         out["lat"].append(ms)
-        if res.data.get("has_text") and "spread" in res.data.get("text", "").lower():
+        if res.data.get("has_text") and expect in res.data.get("text", "").lower():
             out["image_ok"] += 1
         out["resolved_model"] = res.model
 

@@ -97,8 +97,8 @@ Run them in order. One Claude session per batch. The kickoff prompt is in [../do
 
 ```bash
 python -m ghostchef_ai models
-python -m ghostchef_ai check --step 3 --frame path/to/frame.jpg --ref fixtures/images/step-3.jpg
-python -m ghostchef_ai watch --step 3 --frame path/to/frame.jpg
+python -m ghostchef_ai check --step 4 --frame path/to/frame.jpg --ref fixtures/images/step-4.jpg
+python -m ghostchef_ai watch --step 4 --frame path/to/frame.jpg
 python -m ghostchef_ai extract path/to/chef.mp4 -o out.json
 python -m ghostchef_ai live-config
 python -m ghostchef_ai.eval --split dev --config full

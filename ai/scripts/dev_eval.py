@@ -35,8 +35,6 @@ from ghostchef_ai.config import fixture_dir, is_fake, load_env  # noqa: E402
 from ghostchef_ai.errors import AIError  # noqa: E402
 from ghostchef_ai.schemas import RecipeDraft  # noqa: E402
 
-load_env()
-
 
 @dataclass
 class Case:
@@ -69,7 +67,7 @@ def resized_jpeg(src: Path, long_edge: int, rotate: int, work: Path) -> bytes:
 
 
 def load_dev_cases(csv_path: Path) -> list[Case]:
-    with csv_path.open(newline="", encoding="utf-8") as f:
+    with csv_path.open(newline="", encoding="utf-8-sig") as f:  # tolerate a spreadsheet BOM
         rows = list(csv.DictReader(f))
     cases = []
     for r in rows:
@@ -176,6 +174,7 @@ def _agrees(r: dict) -> bool:
 
 
 def main(argv: list[str] | None = None) -> int:
+    load_env()  # ai/.env, only when run as a script
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])

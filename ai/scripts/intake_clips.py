@@ -62,7 +62,8 @@ class Clip:
 
 def read_manifest(path: Path) -> tuple[list[Clip], list[str]]:
     clips, errors = [], []
-    with path.open(newline="", encoding="utf-8") as f:
+    # utf-8-sig: a spreadsheet's "CSV UTF-8" export puts a BOM before "clip_id".
+    with path.open(newline="", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
         if reader.fieldnames != MANIFEST_COLUMNS:
             return [], [f"header must be exactly: {','.join(MANIFEST_COLUMNS)}"]
@@ -103,12 +104,13 @@ def destination(clip: Clip, src_file: Path, footage: Path) -> Path:
 
 
 def append_rows(cases_csv: Path, eval_dir: Path, frames: list[Path], clip: Clip,
-                labeller: str, device: str, columns: list[str]) -> int:
+                labeller: str, device: str, cc) -> int:
+    """Append one unlabelled row per new frame. cc = the check_cases module (columns, helper)."""
     rows = []
     existing: set[str] = set()
     next_id = 1
     if cases_csv.exists() and cases_csv.stat().st_size:
-        with cases_csv.open(newline="", encoding="utf-8") as f:
+        with cases_csv.open(newline="", encoding="utf-8-sig") as f:
             for r in csv.DictReader(f):
                 existing.add(r["file"].replace("\\", "/"))
                 if r["case_id"][:1] == "c" and r["case_id"][1:].isdigit():
@@ -124,8 +126,9 @@ def append_rows(cases_csv: Path, eval_dir: Path, frames: list[Path], clip: Clip,
                      "source_device": device, "notes": note})
         next_id += 1
     new_file = not cases_csv.exists() or cases_csv.stat().st_size == 0
+    cc.ensure_trailing_newline(cases_csv)
     with cases_csv.open("a", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=columns)
+        w = csv.DictWriter(f, fieldnames=cc.COLUMNS)
         if new_file:
             w.writeheader()
         w.writerows(rows)
@@ -158,7 +161,7 @@ def main(argv: list[str] | None = None) -> int:
     ef = None if args.dry_run else _load("extract_frames")
     cc = _load("check_cases")
     matched: set[Path] = set()
-    missing, ambiguous, total_rows = [], [], 0
+    missing, ambiguous, failed, conflicts, total_rows = [], [], [], [], 0
     for clip in clips:
         files = find_file(args.src, clip.clip_id)
         if not files:
@@ -178,14 +181,30 @@ def main(argv: list[str] | None = None) -> int:
         dest.parent.mkdir(parents=True, exist_ok=True)
         if not dest.exists():
             shutil.copy2(src_file, dest)
-        print("copied", plan)
+            print("copied", plan)
+        elif dest.stat().st_size != src_file.stat().st_size:
+            # Same ID, different file: probably a re-take. Never overwrite silently.
+            conflicts.append(f"{clip.clip_id}: {shown} exists with a different size "
+                             f"({dest.stat().st_size} vs {src_file.stat().st_size} bytes); "
+                             "kept the old file. Delete it (and its frames) to take the new one")
+            print("KEPT OLD", plan)
+        else:
+            print("already there", plan)
         if clip.split in ("dev", "heldout"):
             out_dir = args.eval_dir / "frames" / clip.split
-            ef.main([str(dest), str(out_dir), "--every", str(args.every),
-                     "--long-edge", str(args.long_edge), "--prefix", clip.clip_id])
+            try:
+                rc = ef.main([str(dest), str(out_dir), "--every", str(args.every),
+                              "--long-edge", str(args.long_edge), "--prefix", clip.clip_id])
+            except SystemExit as exc:  # extract_frames exits on ffprobe / ffmpeg problems
+                rc = exc.code if isinstance(exc.code, int) else 1
+                print(f"        frame extraction stopped: {exc.code}", file=sys.stderr)
             frames = sorted(out_dir.glob(f"{clip.clip_id}-*.jpg"))
+            if rc != 0 or not frames:
+                failed.append(f"{clip.clip_id}: frame extraction failed (exit {rc}, "
+                              f"{len(frames)} frames on disk)")
+                continue
             n = append_rows(args.eval_dir / "cases.csv", args.eval_dir, frames, clip,
-                            args.labeller, args.device, cc.COLUMNS)
+                            args.labeller, args.device, cc)
             total_rows += n
             print(f"        {len(frames)} frames, {n} new unlabelled rows")
     unlisted = sorted(p.name for p in args.src.rglob("*")
@@ -197,12 +216,16 @@ def main(argv: list[str] | None = None) -> int:
         print(f"MISSING file for {m}")
     for a in ambiguous:
         print(f"AMBIGUOUS {a} (rename so only one file starts with the ID)")
+    for fl in failed:
+        print(f"FAILED {fl}")
+    for c in conflicts:
+        print(f"CONFLICT {c}")
     for u in unlisted:
         print(f"not in manifest (ignored): {u}")
     if not args.dry_run and total_rows:
         print("\nnext: label the new rows in eval/cases.csv by eye, then "
               "`python scripts/check_cases.py --require-minimum`")
-    return 1 if (missing or ambiguous) else 0
+    return 1 if (missing or ambiguous or failed or conflicts) else 0
 
 
 if __name__ == "__main__":

@@ -206,3 +206,23 @@ def test_voice_goes_into_speech_config(recipe):
     cfg = _cfg(recipe).model_copy(update={"voice": "Kore"})
     sc = live.locked_setup(cfg)["config"]["speech_config"]
     assert sc["voice_config"]["prebuilt_voice_config"]["voice_name"] == "Kore"
+
+
+def test_live_smoke_step_check_accepts_only_the_right_step(recipe):
+    """The old check accepted "spread" for step 3, which is now step 2's title."""
+    import importlib.util
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[1] / "scripts" / "live_smoke.py"
+    import sys
+
+    spec = importlib.util.spec_from_file_location("live_smoke", path)
+    ls = importlib.util.module_from_spec(spec)
+    sys.modules["live_smoke"] = ls  # its dataclasses need the module registered
+    spec.loader.exec_module(ls)
+    s3, s5 = recipe.step(3), recipe.step(5)
+    assert ls.names_step("You are on step three, Add lettuce.", s3)
+    assert ls.names_step("Step 3.", s3)
+    assert not ls.names_step("You're on the spread step.", s3)
+    assert ls.names_step("Close the sandwich: step five.", s5)
+    assert not ls.names_step("Step 15 of the lesson.", s5)

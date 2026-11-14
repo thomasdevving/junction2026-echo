@@ -41,9 +41,23 @@ def load_watch_fors(recipe_path: Path) -> dict[int, set[str]]:
 
 
 def read_rows(csv_path: Path) -> tuple[list[str], list[dict[str, str]]]:
-    with csv_path.open(newline="", encoding="utf-8") as f:
+    # utf-8-sig: spreadsheets save "CSV UTF-8" with a BOM before the first column name.
+    with csv_path.open(newline="", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
         return list(reader.fieldnames or []), list(reader)
+
+
+def ensure_trailing_newline(csv_path: Path) -> None:
+    """Before appending: a file saved without a final newline would merge the next row into
+    its last one."""
+    if not csv_path.exists() or csv_path.stat().st_size == 0:
+        return
+    with csv_path.open("rb") as f:
+        f.seek(-1, 2)
+        last = f.read(1)
+    if last not in (b"\n", b"\r"):
+        with csv_path.open("ab") as f:
+            f.write(b"\r\n")
 
 
 def validate(csv_path: Path, eval_dir: Path, watch_fors: dict[int, set[str]]):
@@ -157,6 +171,7 @@ def scaffold(csv_path: Path, eval_dir: Path, step: int, labeller: str, device: s
                         "source_device": device, "notes": ""})
             next_id += 1
     write_header = not csv_path.exists() or csv_path.stat().st_size == 0
+    ensure_trailing_newline(csv_path)
     with csv_path.open("a", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=COLUMNS)
         if write_header:

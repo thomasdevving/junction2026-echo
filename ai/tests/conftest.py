@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from ghostchef_ai import fake
+from ghostchef_ai import config, fake
 from ghostchef_ai.schemas import RecipeDraft
 
 AI_DIR = Path(__file__).resolve().parents[1]
@@ -19,6 +19,9 @@ def _fake_env(monkeypatch):
               # ai/.env may hold a real key: unit tests must never reach a paid API.
               "GEMINI_API_KEY", "OPENAI_API_KEY"):
         monkeypatch.delenv(k, raising=False)
+    # Entry points (CLI main, eval.main, the scripts' main) call config.load_env(), which would
+    # load the real key from ai/.env into this process. Tests never read ai/.env.
+    monkeypatch.setattr(config, "load_dotenv", lambda *a, **k: False)
     fake.reset()
     yield
     fake.reset()
