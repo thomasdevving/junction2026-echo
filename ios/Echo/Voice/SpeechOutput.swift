@@ -75,7 +75,7 @@ final class SystemSpeechOutput: NSObject, SpeechOutput {
     /// `.playback` so results are heard with the ring switch on silent. IOS-05 switches to
     /// `.playAndRecord` for Gemini Live; that session also plays TTS, so it is left alone (switching
     /// it back would cut the mic).
-    private func configureAudioSessionIfNeeded() {
+    func configureAudioSessionIfNeeded() {
         guard !audioSessionConfigured else { return }
         audioSessionConfigured = true
         let session = AVAudioSession.sharedInstance()

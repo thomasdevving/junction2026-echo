@@ -34,9 +34,15 @@ targets:
       - path: Echo
         excludes:
           - "Resources/Fixtures"
+          - "Resources/Voice"
           - "Info.plist"
       # Folder reference so the bundle keeps the Fixtures/ (and Fixtures/images/) layout.
       - path: Echo/Resources/Fixtures
+        type: folder
+        buildPhase: resources
+      # Pre-rendered ElevenLabs lines (scripts/render-voice.sh). Git-ignored except .gitkeep; an
+      # empty folder means the app uses iOS speech.
+      - path: Echo/Resources/Voice
         type: folder
         buildPhase: resources
     dependencies:

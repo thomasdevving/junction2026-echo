@@ -49,6 +49,7 @@ The first two commands are from the SDK README (checked 2026-11-13). The third r
 cd ios
 cp Config/Secrets.example.xcconfig Config/Secrets.xcconfig     # then edit: backend URL + demo key
 swift scripts/make-mock-feed.swift      # MockDeviceKit camera feed for the simulator (mp4s are git-ignored)
+scripts/render-voice.sh                 # optional: ElevenLabs voice lines (needs Config/ElevenLabs.xcconfig; git-ignored)
 xcodegen generate
 open Echo.xcodeproj
 ```

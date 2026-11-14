@@ -5,6 +5,17 @@ struct SettingsView: View {
     @Environment(AppEnvironment.self) private var env
     @Environment(\.dismiss) private var dismiss
 
+    /// Says which voice will actually be heard, so nobody demos the fallback by accident.
+    private var voiceFooter: String {
+        let base = "Check results, step changes and the pass chime are spoken on the phone. Plays even with the ring switch on silent."
+        guard env.settings.voiceProvider == .elevenLabs else { return base + " Voice: iOS speech." }
+        let library = env.speech.library
+        if library.isEmpty {
+            return base + " No ElevenLabs lines are in this build (run scripts/render-voice.sh), so iOS speech is used."
+        }
+        return base + " ElevenLabs: \(library.count) recorded lines; anything else (sentences Gemini writes itself) uses iOS speech."
+    }
+
     var body: some View {
         @Bindable var settings = env.settings
 
@@ -76,6 +87,12 @@ struct SettingsView: View {
                     Toggle(isOn: Binding(get: { !settings.speechMuted }, set: { settings.speechMuted = !$0 })) {
                         Label("Speak Results", systemImage: "speaker.wave.2")
                     }
+                    Picker(selection: $settings.voiceProvider) {
+                        ForEach(VoiceProvider.allCases) { Text($0.label).tag($0) }
+                    } label: {
+                        Label("Voice", systemImage: "person.wave.2")
+                    }
+                    .disabled(settings.speechMuted)
                     Button {
                         env.speech.playChime()
                         env.speech.speak("Filling piled up. Spread it to the edges.", priority: .result)
@@ -86,7 +103,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Voice")
                 } footer: {
-                    Text("Check results, step changes and the pass chime are spoken on the phone. Plays even with the ring switch on silent.")
+                    Text(voiceFooter)
                 }
 
                 Section {

@@ -30,6 +30,7 @@ final class Settings {
         static let speechMuted = "settings.speechMuted"
         static let voiceEnabled = "settings.voiceEnabled"
         static let voiceMicMode = "settings.voiceMicMode"
+        static let voiceProvider = "settings.voiceProvider"
         static let appMode = "settings.appMode"
         static let audioOnlyForced = "settings.audioOnlyForced"
         static let demoStartStep = "settings.demoStartStep"
@@ -77,6 +78,8 @@ final class Settings {
     var voiceEnabled: Bool { didSet { defaults.set(voiceEnabled, forKey: Key.voiceEnabled) } }
     /// Open mic (default) or push-to-talk for a loud stage (IOS-05.3).
     var voiceMicMode: VoiceMicMode { didSet { defaults.set(voiceMicMode.rawValue, forKey: Key.voiceMicMode) } }
+    /// Who speaks results and step read-outs: pre-rendered ElevenLabs lines (iOS speech for the rest), or iOS speech only.
+    var voiceProvider: VoiceProvider { didSet { defaults.set(voiceProvider.rawValue, forKey: Key.voiceProvider) } }
     /// The last mode picked on the first screen (IOS-08.1); nil before the first pick.
     var lastAppMode: AppMode? { didSet { defaults.set(lastAppMode?.rawValue, forKey: Key.appMode) } }
     /// IOS-07.1: speak every screen even when a display is available (rehearsing for Gen 2 glasses).
@@ -107,6 +110,7 @@ final class Settings {
         watchInterval = defaults.object(forKey: Key.watchInterval) as? Double ?? Self.defaultWatchInterval
         voiceEnabled = defaults.object(forKey: Key.voiceEnabled) as? Bool ?? true
         voiceMicMode = defaults.string(forKey: Key.voiceMicMode).flatMap(VoiceMicMode.init) ?? .openMic
+        voiceProvider = defaults.string(forKey: Key.voiceProvider).flatMap(VoiceProvider.init) ?? .elevenLabs
         lastAppMode = defaults.string(forKey: Key.appMode).flatMap(AppMode.init)
         audioOnlyForced = defaults.bool(forKey: Key.audioOnlyForced)
         demoStartStep = max(1, defaults.object(forKey: Key.demoStartStep) as? Int ?? 1)

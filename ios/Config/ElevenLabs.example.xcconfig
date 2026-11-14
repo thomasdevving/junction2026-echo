@@ -1,0 +1,10 @@
+// ElevenLabs settings for the voice scripts (ios/scripts/render-voice.swift, voice-latency.swift).
+// Copy to Config/ElevenLabs.xcconfig (git-ignored) and fill in. NEVER #include this file from
+// Config.xcconfig: the key must not be compiled into the app (it would be readable in the app file).
+//
+// API key: elevenlabs.io → Profile → API Keys (needs text-to-speech access).
+ELEVENLABS_API_KEY =
+// Voice: elevenlabs.io → Voices → pick one → "Copy voice ID".
+ELEVENLABS_VOICE_ID =
+// Fast model for short lines (docs: ~100 ms model latency).
+ELEVENLABS_MODEL = eleven_flash_v2_5

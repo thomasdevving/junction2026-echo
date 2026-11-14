@@ -10,7 +10,7 @@ final class AppEnvironment {
     /// Meta Wearables SDK: registration, devices, session, Glasses Lab proofs (IOS-02).
     let glasses = GlassesManager()
     /// On-device speech + chime for results (IOS-03.4); follows the mute toggle in Settings.
-    let speech: SystemSpeechOutput
+    let speech: VoicedSpeechOutput
     /// Step media on disk (IOS-03.5).
     let imageCache = ImageCache()
     /// The last ten watcher results, shown in Settings for tuning (IOS-04.4).
@@ -22,7 +22,12 @@ final class AppEnvironment {
     init(settings: Settings = Settings(), session: URLSession = .shared, mock: MockAPI = .fixture(delay: 0.8, mimicFakeAI: true)) {
         self.settings = settings
         self.mock = mock
-        self.speech = SystemSpeechOutput(isMuted: { [settings] in settings.speechMuted })
+        let system = SystemSpeechOutput(isMuted: { [settings] in settings.speechMuted })
+        self.speech = VoicedSpeechOutput(
+            fallback: system, library: VoiceLibrary.load(), player: AVLinePlayer(),
+            provider: { [settings] in settings.voiceProvider },
+            isMuted: { [settings] in settings.speechMuted },
+            prepareAudio: { system.configureAudioSessionIfNeeded() })
         self.client = APIClient(session: session) {
             Settings.apiConfig(defaults: .standard, bundle: .main)
         }
