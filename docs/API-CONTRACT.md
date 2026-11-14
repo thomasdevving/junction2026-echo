@@ -3,7 +3,7 @@
 > **This file is the single source of truth for every interface between the four tracks.**
 > It refines the "Backend API" and "Data model" sections of [TECH-SPEC.md](TECH-SPEC.md). Where the two differ, this file wins; every difference is listed in [§10 Differences from TECH-SPEC](#10-differences-from-tech-spec).
 >
-> `contract_version: 2.0` · frozen 2026-11-14 (v1.0 frozen 2026-11-13) · change it only through [§9 Change protocol](#9-change-protocol).
+> `contract_version: 2.1` · frozen 2026-11-14 (v1.0 frozen 2026-11-13) · change it only through [§9 Change protocol](#9-change-protocol).
 
 Who implements what:
 
@@ -63,7 +63,7 @@ Every non-2xx response has this body:
 ### `GET /health` (no auth)
 
 ```json
-{ "status": "ok", "contract_version": "2.0", "ai_mode": "fake", "storage": "memory" }
+{ "status": "ok", "contract_version": "2.1", "ai_mode": "fake", "storage": "memory" }
 ```
 
 `ai_mode` is `fake` or `gemini`. `storage` is `memory` or `supabase`. Clients show these in their debug/settings view so nobody demos against a fake by accident.
@@ -412,9 +412,30 @@ The Live config declares these functions. The client executes them through the s
 
 ### 5.3 Who speaks what
 
-- **`spoken` strings from `/check` and `/watch` are always spoken by on-device text-to-speech.** That path is deterministic and works when Live is down.
-- **Gemini Live speaks only answers to questions** and `repeat_instruction`.
-- While on-device TTS is speaking, Live audio output is ducked or queued. They must never talk over each other.
+One voice for the whole app: ElevenLabs. On-device text-to-speech is the fallback, never the default.
+
+- **Fixed lines** (greetings, step announcements, the app's own prompts) are pre-rendered ElevenLabs audio bundled in the app. No network needed.
+- **Other result sentences** (`spoken` from `/check` and `/watch`) are spoken through ElevenLabs, streamed over the TTS WebSocket opened with a token from `GET /tts-token` (§5.4).
+- **Live answers** (answers to questions and `repeat_instruction`) are spoken through ElevenLabs as well: the client takes the text from Live's output transcription and streams it to ElevenLabs instead of playing Live's own audio.
+- **Fallback:** whenever ElevenLabs is unavailable (`/tts-token` returns an error, the WebSocket fails to open or stalls), the client speaks the same text with on-device text-to-speech. The `/check` and `/watch` path therefore still works when Live and ElevenLabs are both down.
+- Only one voice speaks at a time: utterances are queued, never played over each other.
+
+### 5.4 `GET /tts-token` — ElevenLabs voice
+
+```json
+{
+  "token": "…",
+  "expires_at": "2026-11-14T09:45:00Z",
+  "voice_id": "…",
+  "model_id": "eleven_flash_v2_5",
+  "output_format": "pcm_24000"
+}
+```
+
+- Same auth as every protected endpoint (`X-Demo-Key`). The ElevenLabs API key never leaves the backend; the server mints an ElevenLabs single-use token for the `tts_websocket` scope.
+- The client opens `wss://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream-input?model_id={model_id}&output_format={output_format}&single_use_token={token}` directly. `output_format` `pcm_24000` is 16-bit signed little-endian mono PCM at 24 kHz.
+- The token is **single use** (consumed when the WebSocket opens) and valid for 15 minutes (`expires_at`). Call `/tts-token` again for every new WebSocket.
+- Errors: `503 model_unavailable` (retryable) when ElevenLabs is not configured on the server or the mint fails; `429 quota_exhausted` (retryable) when ElevenLabs rate-limits the mint or the client exceeds 30 tokens per minute per credential. On any error the client falls back to on-device text-to-speech (§5.3).
 
 ---
 
@@ -608,6 +629,7 @@ Rules:
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 2026-11-13 | Initial contract derived from TECH-SPEC.md. |
+| 2.1 | 2026-11-14 | **Additive:** new `GET /tts-token` (§5.4) so the app speaks with an ElevenLabs voice without holding the ElevenLabs key; §5.3 rewritten: fixed lines are pre-rendered ElevenLabs audio, other result sentences and Live answers (from Live's output transcription) go through ElevenLabs, on-device TTS is the fallback. Agreed by `ios/`. |
 | 2.0 (browser extension) | 2026-11-14 | User-requested additive same-origin access-code login, opaque cookie sessions and sign-out. Railway API credentials stay server-side; existing header clients remain compatible. |
 | 2.0 (no change) | 2026-11-14 | **Examples only, no interface change:** the JSON examples now use the sandwich lesson (D-19) instead of the maki roll; the fixture path is unchanged. |
 | 2.0 | 2026-11-14 | **Breaking**, following the TECH-SPEC update (iOS Chef mode + review-only web page). `POST /recipes` becomes JSON and returns a signed Storage upload URL instead of taking a multipart video; new `POST /recipes/{id}/process`; new status `uploading`; new `step_marks_s` (request, recipe response, `recipes` column, `extract_recipe` argument); new error `409 upload_missing`; Cook mode prefetches clips as well as images. Requested by the team. |
