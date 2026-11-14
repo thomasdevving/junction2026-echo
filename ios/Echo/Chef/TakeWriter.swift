@@ -84,11 +84,16 @@ final class TakeWriter: @unchecked Sendable {
                 let result = TakeCaptureResult(
                     durationS: CMTimeSubtract(end, start).seconds, width: self.size.width, height: self.size.height,
                     videoFrames: self.frames, hasAudio: self.audioBuffers > 0)
+                // The completion handler runs after writing has finished; nothing else touches the
+                // writer then, so reading its status from that thread is safe.
+                nonisolated(unsafe) let finishedWriter = writer
                 writer.finishWriting {
-                    if writer.status == .completed {
+                    if finishedWriter.status == .completed {
                         cont.resume(returning: result)
                     } else {
-                        cont.resume(throwing: WriterError.failed(writer.error?.localizedDescription ?? "status \(writer.status.rawValue)"))
+                        cont.resume(
+                            throwing: WriterError.failed(
+                                finishedWriter.error?.localizedDescription ?? "status \(finishedWriter.status.rawValue)"))
                     }
                 }
             }

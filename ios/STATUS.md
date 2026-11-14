@@ -109,10 +109,13 @@ Looking down at a board: is the work in frame? —
 
 `scripts/sync-fixture.sh` re-run after `b9b01bb` (ai/fixtures switched to the ham and cheese sandwich; the file keeps the name `sushi_recipe.json` until after the demo). Tests and previews that hard-coded the maki strings now use the sandwich: the demo mistake test pins step 4 `filling_piled_center` ("Filling piled up" / "Spread it to the edges"); the watcher tests use step 1 `slices_overlapping`, and the "step without watch-fors" test moved to step 3 (lettuce), since step 2 (spread) now has `spread_misses_edges`; contract tests follow the API-CONTRACT examples (step 4 "Add fillings"). `StillImageFrameSource` still draws the old generic test card (the fake AI only looks at file size). Covered by the 149-test run above, except `LensAndCacheTests` and the previews (not compiled here).
 
-## Rename to Echo (2026-11-14, not built)
+## Rename to Echo (2026-11-14, built and tested on the Mac 19:28)
 
 - Target/folders `GhostChef` → `Echo`, `GhostChefTests` → `EchoTests`, `GhostChefAPI` → `EchoAPI`, `GhostChefApp` → `EchoApp`, URL scheme `ghostchef://` → `echoapp://`, `GHOSTCHEF_BUNDLE_ID` → `ECHO_BUNDLE_ID` (default `com.echo.app`).
 - Done by text replacement on Linux. **Not built or tested in Xcode.** iOS owner: rename the key in your untracked `Secrets.xcconfig` to `ECHO_BUNDLE_ID`, `xcodegen generate`, build, run the tests, and register with Meta AI again (the callback scheme changed).
+- **Checked on Thomas's Mac at `e79d8ac` (Xcode 27.3 beta):** `Secrets.xcconfig` key renamed to `ECHO_BUNDLE_ID` (value kept `com.thomasnguyen.ghostchef`, so the phone treats Echo as an update of the installed app); git-ignored `mock-feed.mp4` moved to `Echo/Resources/MockFeed/`; old generated `GhostChef.xcodeproj` removed; build label `e79d8ac · 2026-11-14 19:28`. `xcodegen generate` → `Echo.xcodeproj` (targets `Echo`, `EchoTests`, scheme `Echo`). Simulator build: **succeeds, no rename leftovers**. Tests: **220/220 in 37 suites pass** (same as `60dafdc`). Signed device build (`generic/platform=iOS`, `-allowProvisioningUpdates`): **succeeds** with the existing "iOS Team Provisioning Profile: com.thomasnguyen.ghostchef"; built app: display name Echo, URL scheme `echoapp`, `MWDAT.AppLinkURLScheme` `echoapp://`.
+- Fixed while there: `Chef/TakeWriter.swift` Swift 6 warning (`AVAssetWriter` captured in the `finishWriting` handler). One warning left on purpose: `Frames/FrameSource.swift:67` says `nonisolated(unsafe)` on the `CIContext` is unnecessary with the iOS 27 SDK, but it is needed for the Swift 6.1 / older-SDK compile noted under IOS-05.
+- **Not done:** install on the iPhone (it showed as unavailable: unplugged or locked); register with Meta AI again under `echoapp://` (needs the glasses).
 
 ## Needs from other tracks
 
