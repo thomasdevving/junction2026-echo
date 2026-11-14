@@ -15,7 +15,7 @@
 | 5 | **Evidence** | E1: "⟨X⟩ of ⟨Y⟩ mistakes caught · ⟨FA⟩ wrong approvals · ~⟨CHECK_P50⟩ s per check" + small print "One recipe · ⟨N⟩ steps · held-out set · our own footage · ⟨date⟩". E2 (no numbers yet): "How we measure: wrong approvals first, then response time" + a "Limits" list | C17–C20 placeholders. Limits list always shown: one recipe, small set, our own footage, borrowed device, ⟨anything that failed⟩. If no user sessions: "Not yet tested with users" (C22) |
 | 6 | **Trust** | Cards: "● watching while frames are sent" · "Consent before recording; delete removes everything" · "Can't tell, instead of guessing" · "Warns only after two confident hits" | C12–C15, C8. Audio-only only as "designed for" until IOS-07 runs (C16) |
 | 7 | **Who and next** | "For anyone learning **a chef's dish.**" Card: "PROPOSED PILOT · one cooking class · one instructor · shared glasses · success = fewer instructor interventions per student, more steps completed unaided". Chip **NEXT**: "Other hands-on skills" | C21. Say "proposed". Name a contact only if a conversation really happened (WEB-04.3) |
-| 8 | **Close** | **echo.** · "Built this weekend at Junction 2026" · `github.com/thomasdevving/statai` · team first names | C23. Leave it up during Q&A |
+| 8 | **Close** | **echo.** · "Built this weekend at Junction 2026" · `github.com/thomasdevving/junction2026-echo` · team first names | C23. Leave it up during Q&A |
 
 Every slide: eyebrow + one headline + at most three supporting elements. Text readable from 3 m (body ≥ 36 px at 1920 wide; checked by rendering at 25 % size in Phase 5). Nothing carried by colour alone (pass / fix / unsure always have an icon and a word).
 

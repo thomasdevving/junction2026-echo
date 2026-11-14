@@ -125,7 +125,7 @@ web/pitch/
 | Q5 | You own `ai/`: will AI-07 put numbers (check latency, held-out counts) into `docs/EVALUATION.md` §4 before Sun ~07:00? | `EVALUATION.md:86`: no number in the deck before it is in §4 | Ship the no-numbers evidence line (script.md, part E) |
 | Q6 | On stage: will we have the glasses, a board and bread for a live demo, or is the live part the monitor on our laptop? | The 3-minute talk's demo minute | Script uses a live check with the monitor; fallback plays the 40 s real block |
 | Q7 | "Echo" final? (Q-12 still open in `web/STATUS.md:85`) | Name is one constant either way | Echo |
-| Q8 | End card shows `github.com/thomasdevving/statai`: OK? | Public link in a public video | Yes |
+| Q8 | End card shows `github.com/thomasdevving/junction2026-echo`: OK? | Public link in a public video | Yes |
 | Q9 | OK to add one line to `web/STATUS.md` recording that you took over the deck/video part of WEB-04/05 from Türker? | CLAUDE.md hand-over rule | Add it in the first commit you approve |
 | Q10 | If no chef take exists in time, drop beat 1 (chef records) and give its 7 s to beat 2? | Real block must stay true | Yes, with the caption changed |
 

@@ -112,7 +112,7 @@ Caption rule (C10): beat 4 says "the recipe's narration" while the narration is 
 | Version | On screen | Labels |
 |---|---|---|
 | E1 (numbers) | Eyebrow "MEASURED". Three large counts in Manrope 800: "⟨X⟩ of ⟨Y⟩ mistakes caught", "⟨FA⟩ wrong approvals", "~⟨CHECK_P50⟩ s per check". Small print under them: "One recipe · ⟨N⟩ steps · held-out set · our own footage · measured ⟨date⟩" | Counts written exactly as in EVALUATION §4; no percentages |
-| E2 (no numbers) | Eyebrow "HOW WE MEASURE". Two cards: "Wrong approvals: the error that matters most" and "Response time from the deployed backend". Small print: "Method and limits: github.com/thomasdevving/statai" | — |
+| E2 (no numbers) | Eyebrow "HOW WE MEASURE". Two cards: "Wrong approvals: the error that matters most" and "Response time from the deployed backend". Small print: "Method and limits: github.com/thomasdevving/junction2026-echo" | — |
 
 Counts reveal with a short number roll (pure function of `t`, ends exactly on the value).
 
@@ -122,7 +122,7 @@ Counts reveal with a short number roll (pure function of `t`, ends exactly on th
 |---|---|---|---|
 | 1:42–1:47 | Headline: "For anyone learning **a chef's dish.**" Under it a glass card: "PROPOSED PILOT · one cooking class · one instructor · shared glasses · measured by instructor interventions per student" | Headline rises; card rises | `Proposed`, not a partnership |
 | 1:47–1:49 | Chip **NEXT**: "Other hands-on skills" | Fades in beside the card | `Next` |
-| 1:49–1:52 | End card: **echo.** logo, "Cook from the chef's point of view.", "Built at Junction 2026", `github.com/thomasdevving/statai`, and "Voice: ElevenLabs" if the free plan is used (gate1 Q1) | Everything else fades out; the logo settles last | — |
+| 1:49–1:52 | End card: **echo.** logo, "Cook from the chef's point of view.", "Built at Junction 2026", `github.com/thomasdevving/junction2026-echo`, and "Voice: ElevenLabs" if the free plan is used (gate1 Q1) | Everything else fades out; the logo settles last | — |
 
 ## 4. Transitions
 

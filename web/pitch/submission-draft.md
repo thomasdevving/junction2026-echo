@@ -13,7 +13,7 @@
 | Challenges | **Meta — AI Glasses for Everyone, Everyday** (main); **Google DeepMind — Best Use of Gemini API** (technology). Not Arduino. |
 | Team | Thomas, Stylianos, Aleksandr, Türker |
 | Short description | A chef records a recipe once through smart glasses; anyone wearing the glasses can then cook it hands-free while Gemini compares what they are doing with the chef's own point-of-view footage, corrects mistakes as they happen, and answers questions in the chef's method. |
-| Repository | https://github.com/thomasdevving/statai |
+| Repository | https://github.com/thomasdevving/junction2026-echo |
 | Video / demo link | None yet. If the form requires one, say so; do not invent a link. |
 
 ## Final description skeleton (WEB-05.7)
