@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -8,6 +9,22 @@ from echo_ai.schemas import RecipeDraft
 
 AI_DIR = Path(__file__).resolve().parents[1]
 FIXTURE = AI_DIR / "fixtures" / "sushi_recipe.json"
+
+# The team's real chef take (sandwich lesson through the glasses, 2:14, 720x1280, with audio).
+# Not in git: the repository is public (README: no raw footage). Each laptop keeps a private copy
+# at ai/footage/chef-take-sandwich.mp4 (git-ignored), or points ECHO_REAL_TAKE at it.
+REAL_TAKE = Path(os.environ.get("ECHO_REAL_TAKE") or AI_DIR / "footage" / "chef-take-sandwich.mp4")
+
+
+@pytest.fixture(scope="session")
+def real_take() -> Path:
+    if not REAL_TAKE.is_file():
+        pytest.fail(
+            f"Real chef take missing: {REAL_TAKE}. Get the file privately from the team (it is "
+            "not in git) and save it there, or set ECHO_REAL_TAKE to its path.",
+            pytrace=False,
+        )
+    return REAL_TAKE
 
 
 @pytest.fixture(autouse=True)

@@ -54,18 +54,15 @@ def test_missing_ffmpeg_gives_install_hint(monkeypatch):
 
 
 @pytest.mark.skipif(not HAS_FFMPEG, reason="ffmpeg not installed")
-def test_extract_real_video(tmp_path):
-    video = tmp_path / "clip.mp4"
-    subprocess.run(["ffmpeg", "-loglevel", "error", "-f", "lavfi", "-i",
-                    "testsrc=size=1080x1920:rate=10:duration=6", "-pix_fmt", "yuv420p",
-                    str(video)], check=True)
+def test_extract_real_video(tmp_path, real_take):
+    # The real chef take (2:14): one frame every 50 s gives 0, 50 and 100 s; 150 s is past the end.
     out = tmp_path / "frames"
-    assert ef.main([str(video), str(out), "--every", "2.5", "--prefix", "t"]) == 0
+    assert ef.main([str(real_take), str(out), "--every", "50", "--prefix", "t"]) == 0
     frames = sorted(out.glob("*.jpg"))
-    assert [f.name for f in frames] == ["t-0000.00.jpg", "t-0002.50.jpg", "t-0005.00.jpg"]
+    assert [f.name for f in frames] == ["t-0000.00.jpg", "t-0050.00.jpg", "t-0100.00.jpg"]
     with Image.open(frames[0]) as im:
-        assert im.size == (720, 1280)
-    assert ef.main([str(video), str(out), "--at", "3.0", "--name", "step-3"]) == 0
+        assert im.size == (720, 1280)  # the take is already 720x1280: never upscaled
+    assert ef.main([str(real_take), str(out), "--at", "74.5", "--name", "step-3"]) == 0
     assert (out / "step-3.jpg").is_file()
 
 

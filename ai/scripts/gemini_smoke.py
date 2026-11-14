@@ -52,16 +52,25 @@ def _short(exc: BaseException) -> str:
 
 # ------------------------------------------------------------------ video
 
+# The team's real chef take (sandwich lesson through the glasses). Not in git (public repository):
+# ECHO_REAL_TAKE, else ai/footage/chef-take-sandwich.mp4 (git-ignored; get it privately).
+REAL_TAKE = Path(os.environ.get("ECHO_REAL_TAKE")
+                 or Path(__file__).resolve().parents[1] / "footage" / "chef-take-sandwich.mp4")
+CLIP_START_S = 60  # lettuce, ham and cheese: hands and food changing every few seconds
+
+
 def _make_clip(path: Path, seconds: int = 12) -> None:
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
-        sys.exit("ffmpeg not on PATH (needed to generate the test clip); open a new terminal "
+        sys.exit("ffmpeg not on PATH (needed to cut the test clip); open a new terminal "
                  "after installing it")
-    # ffmpeg's `testsrc` pattern shows a running counter: something time-dependent to describe.
-    # (drawtext is avoided: without an explicit font file it crashes on Windows.)
-    subprocess.run([ffmpeg, "-loglevel", "error", "-y", "-f", "lavfi", "-i",
-                    f"testsrc=size=720x1280:rate=10:duration={seconds}",
-                    "-pix_fmt", "yuv420p", str(path)], check=True)
+    if not REAL_TAKE.is_file():
+        sys.exit(f"Real chef take missing: {REAL_TAKE} (not in git; set ECHO_REAL_TAKE or copy "
+                 "it there)")
+    # A slice of the real lesson: something time-dependent and food-related to describe.
+    subprocess.run([ffmpeg, "-loglevel", "error", "-y", "-ss", str(CLIP_START_S),
+                    "-i", str(REAL_TAKE), "-t", str(seconds), "-c:v", "libx264",
+                    "-pix_fmt", "yuv420p", "-c:a", "aac", str(path)], check=True)
 
 
 async def test_video(model: str) -> None:
