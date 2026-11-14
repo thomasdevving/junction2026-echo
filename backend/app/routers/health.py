@@ -8,7 +8,7 @@ from app import ai
 from app.config import Settings, get_settings
 from app.media.ffmpeg import ffmpeg_available
 
-CONTRACT_VERSION = "2.0"
+CONTRACT_VERSION = "2.1"
 
 router = APIRouter(tags=["health"])
 

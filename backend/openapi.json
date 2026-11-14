@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Echo API",
-  "version": "2.0"
+  "version": "2.1"
  },
  "paths": {
   "/health": {
@@ -30,6 +30,95 @@
          },
          "type": "object",
          "title": "Response Health Health Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/app/auth/session": {
+   "get": {
+    "tags": [
+     "browser auth"
+    ],
+    "summary": "Session",
+    "operationId": "session_app_auth_session_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "type": "object",
+         "title": "Response Session App Auth Session Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/app/auth/login": {
+   "post": {
+    "tags": [
+     "browser auth"
+    ],
+    "summary": "Login",
+    "operationId": "login_app_auth_login_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Login"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "type": "object",
+         "title": "Response Login App Auth Login Post"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/app/auth/logout": {
+   "post": {
+    "tags": [
+     "browser auth"
+    ],
+    "summary": "Logout",
+    "operationId": "logout_app_auth_logout_post",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "type": "object",
+         "title": "Response Logout App Auth Logout Post"
         }
        }
       }
@@ -1083,6 +1172,55 @@
      }
     }
    }
+  },
+  "/tts-token": {
+   "get": {
+    "tags": [
+     "tts"
+    ],
+    "summary": "Tts Token",
+    "operationId": "tts_token_tts_token_get",
+    "parameters": [
+     {
+      "name": "x-demo-key",
+      "in": "header",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "X-Demo-Key"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TtsTokenOut"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
   }
  },
  "components": {
@@ -1586,6 +1724,21 @@
      "config"
     ],
     "title": "LiveTokenOut"
+   },
+   "Login": {
+    "properties": {
+     "code": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Code"
+     }
+    },
+    "type": "object",
+    "required": [
+     "code"
+    ],
+    "title": "Login"
    },
    "Monitor": {
     "properties": {
@@ -2479,6 +2632,40 @@
     "type": "object",
     "title": "StepPatch",
     "description": "PATCH /steps/{id}: any of these. Explicit null only where the field is nullable."
+   },
+   "TtsTokenOut": {
+    "properties": {
+     "token": {
+      "type": "string",
+      "title": "Token"
+     },
+     "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Expires At"
+     },
+     "voice_id": {
+      "type": "string",
+      "title": "Voice Id"
+     },
+     "model_id": {
+      "type": "string",
+      "title": "Model Id"
+     },
+     "output_format": {
+      "type": "string",
+      "title": "Output Format"
+     }
+    },
+    "type": "object",
+    "required": [
+     "token",
+     "expires_at",
+     "voice_id",
+     "model_id",
+     "output_format"
+    ],
+    "title": "TtsTokenOut"
    },
    "ValidationError": {
     "properties": {

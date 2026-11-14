@@ -372,6 +372,14 @@ class LiveConfigOut(BaseModel):
     session_resumption: bool
 
 
+class TtsTokenOut(BaseModel):
+    token: str
+    expires_at: datetime
+    voice_id: str
+    model_id: str
+    output_format: str
+
+
 class LiveTokenOut(BaseModel):
     token: str
     expires_at: datetime

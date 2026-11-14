@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     echo_ai_fake: str = "1"
     gemini_api_key: SecretStr | None = None
 
+    # ElevenLabs voice (GET /tts-token, contract §5.4). Backend only: echo_ai never reads these.
+    elevenlabs_api_key: SecretStr | None = None
+    elevenlabs_voice_id: str | None = None
+    elevenlabs_model: str = "eleven_flash_v2_5"
+
     check_budget_s: float = Field(default=8.0, gt=0)
     watch_budget_s: float = Field(default=3.5, gt=0)
     signed_url_ttl_s: int = Field(default=7200, gt=0)
@@ -48,12 +53,30 @@ class Settings(BaseSettings):
             return None
         return v
 
+    @field_validator("elevenlabs_voice_id", mode="before")
+    @classmethod
+    def _voice_id(cls, v: object) -> object:
+        return (v.strip() or None) if isinstance(v, str) else v
+
+    @field_validator("elevenlabs_model", mode="before")
+    @classmethod
+    def _model_default(cls, v: object) -> object:
+        if isinstance(v, str):
+            return v.strip() or "eleven_flash_v2_5"
+        return v
+
     @field_validator("fault_inject", mode="before")
     @classmethod
     def _fault_normalised(cls, v: object) -> object:
         return v.strip() if isinstance(v, str) else v
 
-    @field_validator("supabase_service_key", "gemini_api_key", "web_login_code", mode="before")
+    @field_validator(
+        "supabase_service_key",
+        "gemini_api_key",
+        "web_login_code",
+        "elevenlabs_api_key",
+        mode="before",
+    )
     @classmethod
     def _empty_secret_to_none(cls, v: object) -> object:
         if isinstance(v, str) and not v.strip():

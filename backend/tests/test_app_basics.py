@@ -22,7 +22,7 @@ def test_health_body(client):
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "ok"
-    assert body["contract_version"] == "2.0"
+    assert body["contract_version"] == "2.1"
     assert body["storage"] == "memory"
     assert body["ai_mode"] in ("fake", "gemini", "unavailable")
 

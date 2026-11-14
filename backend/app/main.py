@@ -32,6 +32,7 @@ from app.routers import (
     recipes,
     sessions,
     steps,
+    tts,
 )
 from app.seed import seed_fixture
 from app.store.base import Store
@@ -104,7 +105,7 @@ def create_app() -> FastAPI:
     # to backend/openapi.json instead.
     app = FastAPI(
         title="Echo API",
-        version="2.0",
+        version="2.1",
         lifespan=lifespan,
         docs_url=None,
         redoc_url=None,
@@ -135,7 +136,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(browser_auth.router)
     app.include_router(latest_frame.router)  # token-authorised, see the module
-    for module in (recipes, steps, frames, sessions, live):
+    for module in (recipes, steps, frames, sessions, live, tts):
         app.include_router(module.router, dependencies=auth)
     if settings.storage == "memory":
         app.include_router(local.router)
