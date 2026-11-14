@@ -106,3 +106,24 @@ def test_delete_revokes_upload_token(client, auth):
 
 def test_seed_recipe_constant():
     assert uuid.UUID(SEED_RECIPE_ID).version == 4
+
+
+@requires_ai
+@requires_ffmpeg
+async def test_seed_cuts_step_clips_from_the_chef_take(tmp_path, take_mp4):
+    """scripts/seed.py --video: every fixture step with a clip window gets an MP4 clip."""
+    from echo_ai import config as ai_config
+
+    from app.seed import load_draft, write_fixture_recipe
+    from app.store.memory import MemoryStore
+
+    fixture_dir = ai_config.fixture_dir()
+    store = MemoryStore(tmp_path)
+    draft = load_draft(fixture_dir)
+    _, steps = await write_fixture_recipe(store, draft, fixture_dir, "published", take_mp4)
+    assert [s.idx for s in steps if s.clip_path] == [s.idx for s in draft.steps]
+    for s in steps:
+        blob = await store.get_blob("media", s.clip_path)
+        assert blob and blob[4:8] == b"ftyp"
+    _, plain = await write_fixture_recipe(MemoryStore(tmp_path / "b"), draft, fixture_dir, "review")
+    assert not any(s.clip_path for s in plain)
