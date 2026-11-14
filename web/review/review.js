@@ -1,5 +1,5 @@
 import { listRecipes, getRecipe, createRecipe, putVideo, processRecipe, patchRecipe, patchStep, publishRecipe, deleteRecipe } from '../shared/api.js';
-import { CONFIG_EVENT } from '../shared/config.js';
+import { CONFIG_EVENT, getConfig } from '../shared/config.js';
 import { mountChrome } from '../shared/chrome.js';
 import { renderLens } from '../shared/lens.js';
 import { icon } from '../shared/icons.js';
@@ -37,6 +37,10 @@ function selectListItem() {
 
 async function refreshList() {
   if (listBusy || document.hidden) return;
+  if (!getConfig().demoKey) {
+    message(libraryMessage, 'Connect this browser in Settings to see your recordings.');
+    lastList = Date.now(); return;
+  }
   listBusy = true;
   const connection = connectionVersion;
   try {
@@ -67,6 +71,12 @@ async function openRecipe(id, force = false) {
   selectedId = id; recipe = null; editors = new Map(); metaDirty = false; metaSaving = false;
   selectListItem();
   const url = new URL(location.href); url.searchParams.set('recipe', id); history.replaceState(null, '', url);
+  if (!getConfig().demoKey) {
+    workspace.setAttribute('aria-busy', 'false');
+    workspace.innerHTML = '<div class="welcome panel"><p class="overline">YOUR LESSONS, IN THIS BROWSER</p><h2>Connect to your recordings.</h2><p>Enter the team’s private demo key in Settings. Your selected recipe will open once this browser is connected.</p><button class="btn btn-light" type="button" data-connect-review>Connect this browser</button></div>';
+    workspace.querySelector('[data-connect-review]').addEventListener('click', () => document.querySelector('.tool-header [data-open-settings]').click());
+    return;
+  }
   workspace.setAttribute('aria-busy', 'true');
   workspace.innerHTML = '<div class="pending-panel panel"><p class="overline">OPENING RECORDING</p><h2>Loading your lesson…</h2></div>';
   try {

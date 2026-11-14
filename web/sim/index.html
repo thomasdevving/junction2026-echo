@@ -12,16 +12,19 @@
 <link rel="stylesheet" href="sim.css">
 </head>
 <body>
-<header class="topbar">
+<header class="topbar tool-header">
   <a class="brand" href="../"><img class="brand-symbol" src="../assets/logos/echo-ripple-mark.svg" width="32" height="32" alt=""><span class="brand-word">echo</span> <span class="brand-page">Simulator</span></a>
   <nav class="topnav" aria-label="Main">
-    <a href="../">Home</a>
     <a href="./" aria-current="page">Simulator</a>
     <a href="../review/">Review</a>
-    <button class="btn btn-icon btn-ghost" type="button" data-open-settings aria-label="Settings"></button>
+    <a href="../monitor/">Monitor</a>
   </nav>
+  <div class="tool-header-actions">
+    <button class="btn btn-ghost setup-trigger" type="button" data-open-setup>Glasses setup</button>
+    <button class="btn btn-icon btn-ghost" type="button" data-open-settings aria-label="Settings"></button>
+  </div>
 </header>
-
+<section class="sim-intro" aria-labelledby="sim-title"><div><p class="setup-eyebrow">BROWSER COOK-ALONG</p><h1 id="sim-title">Try Echo, with or without glasses.</h1><p>This demo uses your webcam or a photo. For a glasses session, start on your iPhone and follow it in Monitor.</p></div><div class="sim-intro-actions"><button class="btn btn-light" type="button" data-open-settings>Connect this browser</button><button class="btn btn-ghost" type="button" data-open-setup>How to use glasses</button></div></section>
 <main class="sim" id="sim">
   <!-- what the camera sees -->
   <section class="panel camera" aria-labelledby="cam-title">

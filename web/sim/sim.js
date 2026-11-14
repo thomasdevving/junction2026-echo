@@ -409,6 +409,13 @@ function startSimulator() {
   const pickerMsg = $("#picker-msg");
 
   async function loadRecipes() {
+    if (!getConfig().demoKey) {
+      S.recipes = [];
+      pickerList.innerHTML = '';
+      pickerMsg.textContent = 'Connect this browser above with the team’s demo key, then choose a lesson.';
+      if (S.mode === 'pick') draw();
+      return;
+    }
     pickerMsg.textContent = "Loading recipes…";
     pickerList.innerHTML = "";
     try {
@@ -427,7 +434,7 @@ function startSimulator() {
       S.recipes = [];
       pickerMsg.textContent =
         e instanceof ApiError && e.status === 401
-          ? "The API rejected the demo key. Open Settings and enter the key from the backend owner."
+          ? (getConfig().demoKey ? "The demo key was rejected. Open Settings to check it with the team." : "Connect this browser above with the team’s demo key, then choose a lesson.")
           : `Can't load recipes: ${e.message}. Check the API base URL in Settings.`;
     }
     if (S.mode === "pick") draw();
@@ -538,7 +545,7 @@ function startSimulator() {
         e.code === "network" || e.code === "timeout"
           ? "No connection"
           : e.status === 401
-            ? "Key rejected: open Settings"
+            ? (getConfig().demoKey ? "Key rejected: open Settings" : "Connect this browser in Settings")
             : "Can't check right now";
       setMode("notice", { text }, { afterMs: NOTICE_MS, then: backToStep });
       return;

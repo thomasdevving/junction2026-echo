@@ -46,6 +46,21 @@ function paintTimeline() {
   const signature = JSON.stringify(events);
   if (signature === timelineSignature) return;
   timelineSignature = signature;
+  const meaningful = new Set(['check_fix', 'check_pass', 'check_unsure', 'watch_warn', 'question', 'step_change', 'session_end']);
+  const latest = events.find(event => meaningful.has(event.kind)) || events[0];
+  if (latest) {
+    const { confidence, latency_ms, ...payload } = latest.payload || {};
+    const description = describeEvent({ ...latest, payload });
+    $('latest-text').textContent = `${description.text}${payload.fix ? ` · ${payload.fix}` : ''}`;
+    $('latest-mark').innerHTML = icon(description.tone === 'fix' ? 'warn' : description.tone === 'pass' ? 'check' : description.tone === 'question' || description.tone === 'unsure' ? 'question' : 'arrowRight', { size: 22 });
+    $('latest-mark').dataset.tone = description.tone;
+    $('latest-time').textContent = timeText(latest.created_at);
+    if (Number.isFinite(milliseconds(latest.created_at))) $('latest-time').dateTime = latest.created_at;
+  } else {
+    $('latest-text').textContent = 'The session’s feedback will appear here.';
+    $('latest-mark').innerHTML = icon('info', { size: 22 });
+    $('latest-time').textContent = ''; $('latest-time').removeAttribute('datetime');
+  }
   const list = $('timeline'), oldScroll = list.scrollTop;
   if (!events.length) {
     const li = document.createElement('li'); li.className = 'timeline-empty'; li.textContent = 'No events yet. Waiting for the first step or check.';
@@ -69,18 +84,21 @@ function paint() {
   $('connection').textContent = status.toUpperCase();
   const feed = state.feed, step = feed?.current_step;
   $('recipe-title').textContent = feed?.recipe_title || (poller.sessionId ? 'Connecting to session' : 'Waiting for a session');
-  $('step-title').textContent = step ? `Step ${step.idx} of ${state.total}: ${step.title}${feed.session.finished_at ? ' · Session ended' : ''}` : 'Start a cook-along in the simulator or iOS app.';
-  let note = poller.pinned ? 'Pinned session · automatic switching paused' : 'Auto · following the newest active session';
+  $('step-title').textContent = step ? `Step ${step.idx} of ${state.total}: ${step.title}${feed.session.finished_at ? ' · Session ended' : ''}` : 'Start a cook-along in Simulator or Echo on iPhone.';
+  let note = poller.pinned ? 'Following the selected session' : 'Following the latest active session';
   if (status === 'offline') note = `${state.error || 'Reconnecting'}${state.lastSuccess ? ` · last update ${((Date.now() - state.lastSuccess) / 1000).toFixed(0)} s ago` : ''}`;
   else if (status === 'waiting') note = state.error || 'Looking for an active session…';
   else if (status === 'idle') note += feed?.session.finished_at ? ' · ended' : ' · no recent activity';
+  if (!getConfig().demoKey && !state.replay) note = 'Connect this browser in Settings with the team’s demo key.';
   $('connection-note').textContent = note;
   $('frame-age').textContent = feed?.last_frame_at ? `Frame age ${ageText(feed.last_frame_at)}` : 'No frame yet';
   $('ref-step').textContent = step ? `Step ${step.idx}` : 'Current step';
   $('reference-line').textContent = step?.key_line || 'Follow the chef’s method.';
   const last = feed?.last_result;
   const watchRecent = last?.source === 'watch' && Date.now() - milliseconds(last.at) < 6000;
-  $('watch-ticker').textContent = watchRecent ? `Watching… ${last.body?.status === 'ok' ? 'ok' : 'warning'} (${seconds(last.body?.latency_ms)})` : last ? `Last ${last.source} result ${ageText(last.at)} ago` : 'Waiting for watcher results.';
+  $('watch-ticker').textContent = detailsHidden
+    ? watchRecent ? (last.body?.status === 'ok' ? 'Watching the current step' : 'A possible mistake was spotted') : last ? 'Latest saved camera frame' : 'Waiting for the first camera frame'
+    : watchRecent ? `Watching… ${last.body?.status === 'ok' ? 'ok' : 'warning'} (${seconds(last.body?.latency_ms)})` : last ? `Last ${last.source} result ${ageText(last.at)} ago` : 'Waiting for watcher results.';
   const screen = feed ? deriveLens(feed, state.total) : { kind: 'notice', text: poller.sessionId ? 'Connecting to session' : 'Waiting for a cook-along' };
   const signature = JSON.stringify(screen);
   if (signature !== lensSignature) { renderLens($('monitor-lens'), screen); lensSignature = signature; }
@@ -109,7 +127,7 @@ function loadRecipe(id) {
 }
 
 const poller = new MonitorPoller({
-  listSessions, getMonitor, enabled: () => !document.hidden && !state.replay,
+  listSessions, getMonitor, enabled: () => !document.hidden && !state.replay && Boolean(getConfig().demoKey),
   onSessions(items) { sessions = items; updatePicker(); if (!poller.sessionId) { state.failed = false; state.error = ''; paint(); } },
   onAttach() {
     Object.assign(state, { feed: null, lastSuccess: null, failed: false, total: '?', error: '' });
@@ -128,7 +146,7 @@ const poller = new MonitorPoller({
   onError(error, kind) {
     if (kind === 'discovery' && state.feed) return;
     state.failed = true;
-    state.error = error.status === 401 ? 'Key rejected. Open Settings.' : `${error.message || 'Connection lost'} · reconnecting`;
+    state.error = error.status === 401 ? (getConfig().demoKey ? 'Key rejected. Open Settings.' : 'Connect this browser in Settings with the team’s demo key.') : `${error.message || 'Connection lost'} · reconnecting`;
     paint();
   },
 });
@@ -152,12 +170,16 @@ $('session-picker').addEventListener('change', event => {
   updatePicker(); void poller.tick();
 });
 
-let detailsHidden = params.get('clean') === '1';
+let detailsHidden = params.get('clean') !== '0';
 function toggleDetails() {
   $('details').hidden = detailsHidden;
-  $('lower').dataset.hide = String(detailsHidden);
-  $('details-toggle').setAttribute('aria-pressed', String(detailsHidden));
-  $('details-toggle').innerHTML = `${detailsHidden ? 'Show' : 'Hide'} details <kbd>H</kbd>`;
+  $('lower').hidden = detailsHidden;
+  $('operator-bar').hidden = detailsHidden;
+  document.body.dataset.clean = String(detailsHidden);
+  if (detailsHidden) document.querySelector('.monitor').scrollTop = 0;
+  $('details-toggle').setAttribute('aria-expanded', String(!detailsHidden));
+  $('details-toggle').innerHTML = `${detailsHidden ? 'Details' : 'Hide details'} <kbd>H</kbd>`;
+  const url = new URL(location.href); url.searchParams.set('clean', detailsHidden ? '1' : '0'); history.replaceState(null, '', url);
 }
 toggleDetails();
 $('details-toggle').addEventListener('click', () => { detailsHidden = !detailsHidden; toggleDetails(); });
@@ -224,7 +246,7 @@ addEventListener('keydown', event => {
   if (key === 'escape' && state.replay) { event.preventDefault(); closeBackup(); }
   if (key === 'f') { event.preventDefault(); void fullscreen(); }
   if (key === 'b') { event.preventDefault(); openBackup(); }
-  if (key === 's' && !state.replay) { event.preventDefault(); $('session-picker').focus(); }
+  if (key === 's' && !state.replay) { event.preventDefault(); detailsHidden = false; toggleDetails(); $('session-picker').focus(); }
   if (key === 'h' && !state.replay) { event.preventDefault(); detailsHidden = !detailsHidden; toggleDetails(); }
 });
 document.addEventListener('visibilitychange', () => {

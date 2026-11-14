@@ -95,6 +95,16 @@ The header and hero both have **Open web app** links to the browser cook-along (
 
 Verification: **37/37 web tests pass**, including public health without a private-library request, retained tool-key checks, fake/offline warnings and library-failure reporting. Real production `/health` is public; private tool use still requires the team’s demo key in Settings.
 
+## Tool navigation, setup and monitor follow-up (2026-11-14)
+
+Simulator, Review and Monitor now retain all three tool links, including the active page, with shared header/navigation typography. The Review link no longer disappears on arrival. A shared **Glasses setup** guide explains Meta AI pairing, the Echo iPhone test build’s actual `Settings → Glasses Lab → Register with Meta AI` path, Cook mode, and using the same server/demo key for Monitor. Simulator has an introductory connection step. The guide does not claim browser pairing or verified physical hardware; it states the current test-build and phone-audio limits.
+
+A missing key is now a distinct **Connect this browser** state with a Settings action. The tools do not query private recipe/session data until a key is entered. An entered key refused by the API still reports rejection. No key was embedded or backend rule relaxed. Shared Settings now uses standard named form controls.
+
+Monitor defaults to the three session views and one latest-activity strip. **Details** / H reveals session selection, backup controls, the full timeline and metrics; S also reveals/focuses the picker. `?clean=0` opens details, while `?clean=1` preserves the default. Live/offline/replay state, the fake-AI banner, lens reconstruction label and shared status strip remain visible. Main panel labels and captions are larger, while ordinary camera-status copy omits latency telemetry in clean mode.
+
+Verification: **38/38 web tests pass**. Temporary DOM integration against the isolated fake-AI/memory backend checks identical persistent navigation/current-page state on all three tools, guide → Settings handoff, missing-key state, and Monitor’s clean/details/H/S behaviour with an actual local fake session feed. No production mutation or physical-glasses run was performed. Native Chromium observed the Simulator intro/header and full glasses guide, connected Monitor through shared Settings to the local fake backend, displayed the clean three-view layout and latest correction, verified readable media plus scrollable details, and confirmed that opening Review leaves its selected tab visible.
+
 ## WEB-04 finalization dependencies (2026-11-14)
 
 Scope confirmed by the web owner: finalize WEB-04 using AI-07 numbers and IOS-06 device facts. Pitch slot: **3 minutes** (user-confirmed; not independently checked with organizers). The user confirmed that no external user sessions or instructor conversation have happened. **Not yet tested with users. No instructor conversation happened.** Any pilot remains a proposed pilot.

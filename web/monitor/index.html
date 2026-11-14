@@ -14,21 +14,23 @@
 </head>
 <body class="monitor-page">
 <div class="fake-banner" id="fake-banner" role="status" hidden>FAKE AI — development mode</div>
-<header class="monitor-header">
+<header class="topbar tool-header">
   <a class="brand" href="../"><img class="brand-symbol" src="../assets/logos/echo-ripple-mark.svg" width="32" height="32" alt=""><span class="brand-word">echo</span> <span class="brand-page">Monitor</span></a>
-  <div class="session-heading"><h1 id="recipe-title">Waiting for a session</h1><p id="step-title">Start a cook-along in the simulator or iOS app.</p></div>
+  <nav class="topnav" aria-label="Main"><a href="../sim/">Simulator</a><a href="../review/">Review</a><a href="./" aria-current="page">Monitor</a></nav>
+  <div class="tool-header-actions"><button class="btn btn-ghost setup-trigger" type="button" data-open-setup>Glasses setup</button><button class="btn btn-icon btn-ghost" data-open-settings aria-label="Settings"></button></div>
+</header>
+<section class="monitor-header" aria-label="Current session">
+  <div class="session-heading"><h1 id="recipe-title">Waiting for a session</h1><p id="step-title">Start a cook-along in Simulator or Echo on iPhone.</p><p class="connection-note" id="connection-note" role="status">Looking for an active session…</p></div>
   <div class="monitor-actions">
     <span class="connection-badge" id="connection" data-state="waiting" role="status">WAITING</span>
+    <button class="btn btn-ghost" id="details-toggle" aria-expanded="false" aria-controls="operator-bar lower">Details <kbd>H</kbd></button>
     <button class="btn btn-icon btn-ghost" id="fullscreen" aria-label="Full screen (F)" title="Full screen · F">⛶</button>
-    <button class="btn btn-icon btn-ghost" data-open-settings aria-label="Settings"></button>
   </div>
-</header>
-<div class="operator-bar">
+</section>
+<div class="operator-bar" id="operator-bar" hidden>
   <label for="session-picker">Session <kbd>S</kbd></label>
   <select class="input" id="session-picker"><option value="">Auto · newest active session</option></select>
-  <span class="connection-note" id="connection-note" role="status">Looking for an active session…</span>
   <button class="btn btn-ghost" id="backup-open">Backup <kbd>B</kbd></button>
-  <button class="btn btn-ghost" id="details-toggle" aria-pressed="false">Hide details <kbd>H</kbd></button>
 </div>
 <main class="monitor">
   <section class="views" aria-label="Session views">
@@ -48,7 +50,8 @@
       <p class="reconstruction-note">Reconstructed from session events · not a screen capture</p>
     </article>
   </section>
-  <section class="lower" id="lower" aria-label="Activity and session details">
+  <section class="latest-activity" aria-label="Latest session activity"><span class="latest-mark" id="latest-mark" aria-hidden="true"></span><div><p class="setup-eyebrow">LATEST ACTIVITY</p><p id="latest-text" aria-live="polite">The session’s feedback will appear here.</p></div><time id="latest-time"></time></section>
+  <section class="lower" id="lower" aria-label="Activity and session details" hidden>
     <article class="timeline-panel">
       <header><h2>Timeline</h2><span>Newest first · Helsinki time</span></header>
       <ol id="timeline" class="event-list" tabindex="0" aria-label="Session events"><li class="timeline-empty">Session events will appear here.</li></ol>

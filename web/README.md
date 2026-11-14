@@ -87,9 +87,9 @@ One Claude session per batch. Kickoff prompt: [../docs/PLAN.md §7](../docs/PLAN
 
 ## Running the demo monitor
 
-Open `/monitor/` (standalone server) or `/app/monitor/` (backend server). Enter the API base URL and demo key in Settings. The monitor automatically follows the newest active simulator/iOS session. Choose a session in the picker to pin it, or use `?session=<id>`. `?clean=1` hides the metrics panel.
+Open `/monitor/` (standalone server) or `/app/monitor/` (backend server). Enter the API base URL and demo key in Settings. The monitor automatically follows the newest active simulator/iOS session. Choose a session in the picker to pin it, or use `?session=<id>`. The default view keeps the three session views and latest activity prominent. **Details** reveals session selection, backup playback, the full timeline and metrics; `?clean=0` opens that view directly. `?clean=1` keeps the clean view.
 
-Keyboard: **F** document fullscreen (if allowed), **B** choose a local backup recording, **S** focus session picker, **H** toggle details. Backup files stay on the device and are permanently marked REPLAY; fake-AI mode is always labelled. Start a new simulator session to demonstrate automatic reattachment.
+Keyboard: **F** document fullscreen (if allowed), **B** choose a local backup recording, **S** open details and focus the session picker, **H** toggle details. Backup files stay on the device and are permanently marked REPLAY; fake-AI mode is always labelled. Start a new simulator session to demonstrate automatic reattachment.
 
 Verification: `node --test "web/tests/*.test.mjs"`. Hardware and three-metre checks still pending are recorded in `STATUS.md`.
 
@@ -102,3 +102,11 @@ Review each step’s text, visible success criteria and known mistakes, with the
 The collapsed **Dev fallback: upload an MP4** is for pipeline testing. It requires consent and a non-empty MP4 up to 500 MB; it sends the raw video to the signed upload URL without the demo key. Retry keeps the existing recipe/upload link while valid. Upload state stays in memory: keep the tab open until processing starts. A connection change stops the current upload. Delete requires typing the saved title; the protected demo recipe cannot be force-deleted from this page.
 
 Local fake-AI/memory verification with a generated test video is recorded in `STATUS.md`. A real chef-take review and production upload still need validation; do not use the generated test results as extraction-quality evidence.
+
+## Glasses and browser setup
+
+Simulator, Review and Monitor keep the same three navigation links, with the current page highlighted. **Glasses setup** on each tool opens the shared connection guide. Simulator also has **Connect this browser** and **How to use glasses** actions.
+
+The browser cannot pair with the glasses. Pair them with an iPhone in the Meta AI app, then use the team’s Echo iPhone test build (`Settings → Glasses Lab → Register with Meta AI`). Choose Cook for a lesson or Chef to record one. Monitor follows that app’s session when both use the same backend and demo key. The guide records the prototype limits: physical-device validation and glasses audio routing are still pending, and no public iPhone download link exists yet.
+
+A browser with no key shows **Connect this browser**, rather than **Key rejected**. Enter the private team demo key in Settings; it is never shipped in the website source. An entered key actually refused by the API still shows an error. The public homepage and brand gallery need no key.

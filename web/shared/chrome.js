@@ -3,6 +3,7 @@
 
 import { getConfig, setConfig, CONFIG_EVENT, DEFAULTS } from "./config.js";
 import { probeConnection } from './connection.js';
+import { mountSetup } from './setup.js';
 import { icon } from "./icons.js";
 
 const POLL_MS = 10000;
@@ -25,7 +26,7 @@ function settingsDialog() {
       <div class="field">
         <label for="set-key">Demo key</label>
         <input class="input" id="set-key" name="demoKey" type="password" autocomplete="off" spellcheck="false">
-        <span class="hint">Sent as X-Demo-Key. Stored in this browser only.</span>
+        <span class="hint">Use the same private demo key as Echo on iPhone (Railway variable: DEMO_API_KEY), not your Gemini API key. Stored in this browser only.</span>
       </div>
       <div class="settings-row">
         <div class="field">
@@ -45,13 +46,14 @@ function settingsDialog() {
   document.body.append(dlg);
 
   const f = dlg.querySelector("form");
+  const field = name => f.elements.namedItem(name);
   dlg.addEventListener("close", () => {
     if (dlg.returnValue !== "save") return;
     setConfig({
-      apiBase: f.apiBase.value,
-      demoKey: f.demoKey.value,
-      watchThreshold: f.watchThreshold.value,
-      watchIntervalMs: f.watchIntervalMs.value,
+      apiBase: field("apiBase").value,
+      demoKey: field("demoKey").value,
+      watchThreshold: field("watchThreshold").value,
+      watchIntervalMs: field("watchIntervalMs").value,
     });
   });
 
@@ -62,14 +64,14 @@ function settingsDialog() {
       try {
         storedBase = localStorage.getItem("gc.apiBase") || "";
       } catch {}
-      f.apiBase.value = storedBase;
-      f.apiBase.placeholder = c.apiBase;
-      f.demoKey.value = c.demoKey;
-      f.watchThreshold.value = c.watchThreshold === DEFAULTS.watchThreshold ? "" : c.watchThreshold;
-      f.watchIntervalMs.value = c.watchIntervalMs === DEFAULTS.watchIntervalMs ? "" : c.watchIntervalMs;
+      field("apiBase").value = storedBase;
+      field("apiBase").placeholder = c.apiBase;
+      field("demoKey").value = c.demoKey;
+      field("watchThreshold").value = c.watchThreshold === DEFAULTS.watchThreshold ? "" : c.watchThreshold;
+      field("watchIntervalMs").value = c.watchIntervalMs === DEFAULTS.watchIntervalMs ? "" : c.watchIntervalMs;
       dlg.returnValue = "";
       dlg.showModal();
-      (c.demoKey ? f.apiBase : f.demoKey).focus();
+      (c.demoKey ? field("apiBase") : field("demoKey")).focus();
     },
     get isOpen() {
       return dlg.open;
@@ -89,7 +91,7 @@ function statusStrip(openSettings, shouldPoll, requiresKey) {
   function draw(s) {
     last = s;
     const { apiBase } = getConfig();
-    strip.dataset.state = s.state;
+    strip.dataset.state = s.state === 'key_required' && s.h?.ai_mode === 'fake' ? 'fake' : s.state;
     const base = `<span class="status-item">API <b>${apiBase}</b></span>`;
     let html;
     switch (s.state) {
@@ -102,12 +104,15 @@ function statusStrip(openSettings, shouldPoll, requiresKey) {
       case "unauthorized":
         html = `<span class="status-flag">${icon("warn", { size: 18 })}Key rejected</span>${base}<span class="status-item">ai_mode <b>${s.h.ai_mode}</b></span><span class="status-item">storage <b>${s.h.storage}</b></span>`;
         break;
+      case "key_required":
+        html = `<span class="status-flag">${s.h.ai_mode === 'fake' ? 'Fake AI · ' : ''}Connect this browser</span>${base}<span class="status-item">Enter the team’s demo key in Settings.</span><span class="status-item">ai_mode <b>${s.h.ai_mode}</b></span><span class="status-item">storage <b>${s.h.storage}</b></span>`;
+        break;
       default: {
         const fake = s.h.ai_mode === "fake";
         html = `${fake ? `<span class="status-flag">${icon("warn", { size: 18 })}Fake AI</span>` : `<span class="status-flag">${requiresKey ? 'Live' : 'Service online'}</span>`}${base}<span class="status-item">ai_mode <b>${s.h.ai_mode}</b></span><span class="status-item">storage <b>${s.h.storage}</b></span><span class="status-item">contract <b>${s.h.contract_version}</b></span>`;
       }
     }
-    const needsKey = s.state === "unauthorized" || s.state === "down";
+    const needsKey = ['key_required', 'unauthorized', 'down'].includes(s.state);
     strip.innerHTML = `${html}<button type="button" class="status-action">${needsKey ? "Open settings" : "Settings"}</button>`;
     strip.querySelector(".status-action").addEventListener("click", openSettings);
     document.dispatchEvent(new CustomEvent("echo:status", { detail: s }));
@@ -141,6 +146,7 @@ function statusStrip(openSettings, shouldPoll, requiresKey) {
 /** Wire the gear button (any element with [data-open-settings]) and the footer strip. */
 export function mountChrome({ shouldPoll = () => true, requiresKey = true } = {}) {
   const settings = settingsDialog();
+  mountSetup({ openSettings: () => settings.open() });
   document.querySelectorAll("[data-open-settings]").forEach((b) => b.addEventListener("click", () => settings.open()));
   const status = statusStrip(() => settings.open(), shouldPoll, requiresKey);
   return { settings, status };
