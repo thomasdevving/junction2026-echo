@@ -80,6 +80,9 @@ a.tool:hover { transform: translateY(-5px); border-color: #b4daff77; background:
 
 /* The SVG is one fixed composition: the lens lettering scales with the product. */
 .how-section { padding: 36px 0 74px; }
+.making-intro { max-width: 75ch; margin-top: 28px; font-size: 16px; line-height: 1.9; color: var(--text-dim); }
+.lesson-making { padding-bottom: 12px; }
+.making-link { margin-top: 20px; color: #c4e6ff; }
 .how-section .section-heading h2 { max-width: 24ch; }
 .workflow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; list-style: none; padding: 0; margin: 40px 0 56px; }
 .workflow li { border-top: 1px solid #d5e7ff2b; padding: 24px 4px 0; }

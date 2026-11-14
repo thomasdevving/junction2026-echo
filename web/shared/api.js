@@ -90,6 +90,42 @@ export const health = () => api.get("/health", { auth: false, timeoutMs: 5000 })
 export const listRecipes = (status) =>
   api.get(status ? `/recipes?status=${encodeURIComponent(status)}` : "/recipes");
 export const getRecipe = (id) => api.get(`/recipes/${encodeURIComponent(id)}`);
+export const createRecipe = (body) => api.postJson('/recipes', body);
+export const processRecipe = (id) => api.postJson(`/recipes/${encodeURIComponent(id)}/process`, {});
+export const patchRecipe = (id, body) => api.patchJson(`/recipes/${encodeURIComponent(id)}`, body);
+export const publishRecipe = (id) => api.postJson(`/recipes/${encodeURIComponent(id)}/publish`, {});
+export const deleteRecipe = (id) => api.del(`/recipes/${encodeURIComponent(id)}`);
+export const patchStep = (id, body) => api.patchJson(`/steps/${encodeURIComponent(id)}`, body,
+  { timeoutMs: 'timestamp_s' in body ? 90000 : TIMEOUTS.default });
+
+/** Signed upload: deliberately separate from the authenticated API wrapper. */
+export function putVideo(uploadUrl, file, onProgress = () => {}, { signal } = {}) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(uploadUrl);
+    if (!['http:', 'https:'].includes(url.protocol)) return reject(new ApiError({ message: 'Invalid upload URL' }));
+    const xhr = new XMLHttpRequest();
+    const abort = () => xhr.abort();
+    const finish = (error) => {
+      signal?.removeEventListener('abort', abort);
+      if (error) reject(error); else resolve();
+    };
+    xhr.open('PUT', url.href);
+    xhr.timeout = 30 * 60 * 1000;
+    xhr.setRequestHeader('Content-Type', 'video/mp4');
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(Math.round(event.loaded / event.total * 100));
+    };
+    xhr.onload = () => finish(xhr.status >= 200 && xhr.status < 300 ? null : new ApiError({
+      status: xhr.status, message: `Video upload failed (HTTP ${xhr.status}). Retry while the upload link is valid.`, retryable: true,
+    }));
+    xhr.onerror = () => finish(new ApiError({ code: 'network', message: 'Video upload lost its connection. You can retry.', retryable: true }));
+    xhr.ontimeout = () => finish(new ApiError({ code: 'timeout', message: 'Video upload timed out. You can retry.', retryable: true }));
+    xhr.onabort = () => finish(new ApiError({ code: 'aborted', message: 'Video upload stopped.' }));
+    signal?.addEventListener('abort', abort, { once: true });
+    if (signal?.aborted) return finish(new ApiError({ code: 'aborted', message: 'Video upload stopped.' }));
+    xhr.send(file);
+  });
+}
 export const createSession = (recipeId, deviceLabel) =>
   api.postJson("/sessions", { recipe_id: recipeId, client: "web-sim", device_label: deviceLabel });
 export const postEvent = (sessionId, kind, { stepId = null, requestId = null, payload = {} } = {}) =>

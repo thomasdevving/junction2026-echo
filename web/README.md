@@ -31,7 +31,7 @@ python -m http.server 5173 --directory web
 #   open http://localhost:5173/  and set the API base URL + demo key in Settings (gear icon)
 ```
 
-Optional: Node 18+ only to run the one unit-test file (`node --test "web/tests/*.test.mjs"`; Node 22+ no longer accepts a bare directory, so `node --test web/tests/` fails there).
+Optional: Node 18+ to run the web tests (`node --test "web/tests/*.test.mjs"`; Node 22+ no longer accepts a bare directory, so `node --test web/tests/` fails there).
 
 **Camera note:** browsers allow camera access only on `https://` or `localhost`. The simulator's webcam works on your own laptop at `localhost` and on the deployed HTTPS URL, but not when another device opens `http://<LAN-IP>:…`. Use "Upload a photo" there.
 
@@ -47,9 +47,9 @@ web/
     debounce.js           watcher debounce (same rules as the iOS app) — pure, unit-tested
     ui.css                shared page styling
   sim/       index.html  sim.js
-  review/    index.html  review.js
+  review/    index.html  review.js  review.css  validation.js
   monitor/   index.html  monitor.js  monitor.css  state.js  polling.js
-  tests/     debounce.test.mjs
+  tests/     debounce.test.mjs  monitor.test.mjs  review.test.mjs
   pitch/     one-liners.md  deck-outline.md  evidence.md  qa.md  user-notes.md  run-sheet.md  architecture.svg  deck.pdf
   README.md  STATUS.md  tasks/
 ```
@@ -92,3 +92,13 @@ Open `/monitor/` (standalone server) or `/app/monitor/` (backend server). Enter 
 Keyboard: **F** document fullscreen (if allowed), **B** choose a local backup recording, **S** focus session picker, **H** toggle details. Backup files stay on the device and are permanently marked REPLAY; fake-AI mode is always labelled. Start a new simulator session to demonstrate automatic reattachment.
 
 Verification: `node --test "web/tests/*.test.mjs"`. Hardware and three-metre checks still pending are recorded in `STATUS.md`.
+
+## Reviewing a chef recording
+
+Open `/review/` on the standalone server or `/app/review/` on the backend. Use the shared Settings to enter the API base and demo key. Recipes recorded and uploaded in iOS Chef mode appear automatically; `?recipe=<id>` opens one directly. Uploading/processing recipes update every three seconds while visible; the library refreshes every five seconds.
+
+Review each step’s text, visible success criteria and known mistakes, with the shared lens preview beside the reference. Save each changed card before publishing. With source video available, pause on a clear moment and use **Use current frame**; ±0.1 s / ±1 s controls and numeric timestamps are also available. Published recipes hide the source video per the API contract; numeric re-picking still asks the backend to extract a still if it has the source.
+
+The collapsed **Dev fallback: upload an MP4** is for pipeline testing. It requires consent and a non-empty MP4 up to 500 MB; it sends the raw video to the signed upload URL without the demo key. Retry keeps the existing recipe/upload link while valid. Upload state stays in memory: keep the tab open until processing starts. A connection change stops the current upload. Delete requires typing the saved title; the protected demo recipe cannot be force-deleted from this page.
+
+Local fake-AI/memory verification with a generated test video is recorded in `STATUS.md`. A real chef-take review and production upload still need validation; do not use the generated test results as extraction-quality evidence.

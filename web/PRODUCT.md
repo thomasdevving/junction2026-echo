@@ -36,6 +36,7 @@ The comparison is like with like: the chef's reference and the learner's frame a
 
 - The lens card looks the same everywhere: black background, bright elements, at most two short text lines, amber for fix, green for pass.
 - Every page shows what it is connected to (API base, `ai_mode`, `storage`), turning red when `ai_mode` is `fake`.
+- Review supports the Chef-mode recording → extracted draft → chef edits/reference selection → published lesson flow, with an explicitly labelled MP4 development fallback. The homepage explains that the chef wears the glasses once to demonstrate and narrate the method. Real chef-take and physical-device validation remain pending.
 - Anything not live carries a visible `REPLAY` badge.
 - Claims use only measured values recorded in the tracks' `STATUS.md` files and `docs/EVALUATION.md`.
 - **Open:** final product name (Q-12). Working name for web surfaces is **Echo** (user decision, 2026-11-14; matches the Monitor C mockup).
