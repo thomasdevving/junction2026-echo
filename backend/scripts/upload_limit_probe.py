@@ -3,13 +3,17 @@
     python scripts/upload_limit_probe.py --base https://statai-production.up.railway.app \
         --mb 53 --method tus [--method put] [--mb 45] [--poll 180]
 
-For each size and method: generate a constant-bitrate test MP4 of about that size (ffmpeg,
-temp dir, deleted afterwards), POST /recipes, upload it exactly as the clients do (TUS to
-`resumable_endpoint` with `x-signature` and 6 MB chunks, or one PUT to `upload_url`), call
+For each size and method: re-encode the team's real chef take to a constant-bitrate MP4 of
+about that size (ffmpeg, temp dir, deleted afterwards), POST /recipes, upload it exactly as
+the clients do (TUS to `resumable_endpoint` with `x-signature` and 6 MB chunks, or one PUT to
+`upload_url`), call
 /process, poll the status, then DELETE the recipe (always, even after a failure).
 
 The demo key comes from --key, else $ECHO_DEMO_KEY, else backend/.env (DEMO_API_KEY).
 Never prints the key or the upload token.
+
+The real take is not in git (public repository): it is read from $ECHO_REAL_TAKE, else
+ai/footage/chef-take-sandwich.mp4 (git-ignored; get it privately from the team).
 """
 
 from __future__ import annotations
@@ -26,8 +30,11 @@ from pathlib import Path
 import httpx
 
 CHUNK = 6 * 1024 * 1024  # contract §2: TUS chunk size exactly 6 MB
-DURATION_S = 60
 MARKS = [0, 10, 20, 30, 40, 50]
+REAL_TAKE = Path(
+    os.environ.get("ECHO_REAL_TAKE")
+    or Path(__file__).resolve().parents[2] / "ai" / "footage" / "chef-take-sandwich.mp4"
+)
 
 
 def _key(cli: str | None) -> str:
@@ -41,16 +48,28 @@ def _key(cli: str | None) -> str:
     return get_settings().demo_api_key.get_secret_value()
 
 
+def _duration_s(path: Path) -> float:
+    out = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
+        check=True, capture_output=True, text=True,
+    ).stdout
+    return float(out.strip())
+
+
 def make_mp4(target_mb: float, out: Path) -> int:
-    """~target_mb MB (10^6 bytes) H.264 CBR test pattern, DURATION_S long."""
+    """~target_mb MB (10^6 bytes): the real chef take re-encoded at the constant bitrate that
+    gives that size over its full length (picture and sound are the real lesson)."""
+    if not REAL_TAKE.is_file():
+        sys.exit(
+            f"Real chef take missing: {REAL_TAKE} (not in git; set ECHO_REAL_TAKE or copy it there)"
+        )
+    duration = _duration_s(REAL_TAKE)
     audio_kbps = 64
-    video_kbps = int(target_mb * 8_000 / DURATION_S) - audio_kbps
+    video_kbps = max(100, int(target_mb * 8_000 / duration) - audio_kbps)
     rate = f"{video_kbps}k"
     subprocess.run(
-        ["ffmpeg", "-loglevel", "error", "-y",
-         "-f", "lavfi", "-i", "testsrc2=size=1280x720:rate=30",
-         "-f", "lavfi", "-i", "sine=frequency=440",
-         "-t", str(DURATION_S), "-c:v", "libx264", "-preset", "ultrafast",
+        ["ffmpeg", "-loglevel", "error", "-y", "-i", str(REAL_TAKE),
+         "-c:v", "libx264", "-preset", "ultrafast",
          "-b:v", rate, "-minrate", rate, "-maxrate", rate, "-bufsize", "2000k",
          "-x264-params", "nal-hrd=cbr", "-c:a", "aac", "-b:a", f"{audio_kbps}k",
          "-movflags", "+faststart", str(out)],

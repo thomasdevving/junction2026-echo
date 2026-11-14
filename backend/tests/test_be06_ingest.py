@@ -109,15 +109,16 @@ def _spy_extract(monkeypatch, draft=None) -> list[dict]:
 
 
 # --------------------------------------------------------------------------- BE-06.2
-def test_happy_path_real_stills(client, auth, testsrc_bytes):
-    rid, body = ingest_video(client, auth, testsrc_bytes)
+def test_happy_path_real_stills(client, auth, take_bytes, take_duration_s):
+    rid, body = ingest_video(client, auth, take_bytes)
     assert body["status"] == "review", body
     assert body["error"] is None
     assert len(body["steps"]) == 6
     for step in body["steps"]:
-        assert step["timestamp_s"] <= 4.9
+        # Fixture timestamps past the end of the take (step 6 at 150 s) are pulled back.
+        assert step["timestamp_s"] <= take_duration_s - 0.1 + 0.01
         img = _image(client, step["ref_image_url"])
-        assert img.format == "JPEG" and img.size == (1280, 720)
+        assert img.format == "JPEG" and img.size == (720, 1280)
     assert body["video_url"]
     assert client.post(f"/recipes/{rid}/publish", headers=auth).status_code == 200
 
@@ -128,11 +129,11 @@ def test_process_before_upload_409(client, auth):
     assert r.status_code == 409 and r.json()["error"]["code"] == "upload_missing"
 
 
-def test_size_limit(client, auth, testsrc_bytes, monkeypatch):
+def test_size_limit(client, auth, take_bytes, monkeypatch):
     calls = _spy_extract(monkeypatch)
     created = _create(client, auth)
     rid = created["recipe_id"]
-    _upload(client, created, testsrc_bytes + b"\0" * (1_300_000))
+    _upload(client, created, take_bytes + b"\0" * (1_300_000))
     monkeypatch.setenv("MAX_VIDEO_MB", "1")
     get_settings.cache_clear()
     assert client.post(f"/recipes/{rid}/process", headers=auth).status_code == 202
@@ -200,7 +201,7 @@ def test_startup_sweep(client, auth):
     ],
 )
 def test_failing_extract_recipe_is_readable_and_leaks_nothing(
-    client, auth, testsrc_bytes, monkeypatch, exc_name, message
+    client, auth, take_bytes, monkeypatch, exc_name, message
 ):
     import echo_ai
 
@@ -208,51 +209,55 @@ def test_failing_extract_recipe_is_readable_and_leaks_nothing(
         raise getattr(echo_ai, exc_name)("SECRET api key in /tmp/x")
 
     _patch_extract(monkeypatch, boom)
-    rid, body = ingest_video(client, auth, testsrc_bytes)
+    rid, body = ingest_video(client, auth, take_bytes)
     assert (body["status"], body["error"]) == ("failed", message)
     assert "SECRET" not in client.get(f"/recipes/{rid}", headers=auth).text
 
 
-def test_unexpected_exception_is_generic(client, auth, testsrc_bytes, monkeypatch):
+def test_unexpected_exception_is_generic(client, auth, take_bytes, monkeypatch):
     async def boom(*a, **kw):
         raise RuntimeError("SECRET /home/x/.env")
 
     _patch_extract(monkeypatch, boom)
-    _, body = ingest_video(client, auth, testsrc_bytes)
+    _, body = ingest_video(client, auth, take_bytes)
     assert (body["status"], body["error"]) == ("failed", "processing failed")
 
 
-def test_no_steps_fails(client, auth, testsrc_bytes, monkeypatch):
+def test_no_steps_fails(client, auth, take_bytes, monkeypatch):
     _spy_extract(monkeypatch, _draft([]))
-    _, body = ingest_video(client, auth, testsrc_bytes)
+    _, body = ingest_video(client, auth, take_bytes)
     assert (body["status"], body["error"]) == ("failed", "no steps found in the video")
 
 
-def test_clamping_and_marks(client, auth, testsrc_bytes, monkeypatch):
-    draft = _draft([(0.0, (0.5, 2.5)), (99.0, (3.0, 3.5)), (4.0, (4.0, 9.0))])
+def test_clamping_and_marks(client, auth, take_bytes, take_duration_s, monkeypatch):
+    end = take_duration_s
+    # Same cases as before, placed at the end of the real take: a timestamp past the end, a
+    # too-short clip, and a clip running past the end.
+    draft = _draft([(0.0, (0.5, 2.5)), (999.0, (130.0, 130.5)), (130.0, (130.0, 139.0))])
     calls = _spy_extract(monkeypatch, draft)
-    rid, body = ingest_video(client, auth, testsrc_bytes, marks=[1, 99])
+    rid, body = ingest_video(client, auth, take_bytes, marks=[1, 999])
     assert body["status"] == "review", body
     assert calls[0]["step_marks_s"] == [1.0]
     assert calls[0]["title_hint"] == "Sandwich"
     s1, s2, s3 = body["steps"]
     assert (s1["clip_start_s"], s1["clip_end_s"]) == (0.5, 2.5) and s1["clip_url"]
     assert (s2["clip_start_s"], s2["clip_end_s"]) == (None, None) and s2["clip_url"] is None
-    assert s3["clip_start_s"] == 4.0 and 4.9 <= s3["clip_end_s"] <= 5.1 and s3["clip_url"]
-    assert s2["timestamp_s"] <= 4.9
+    assert s3["clip_start_s"] == 130.0 and s3["clip_url"]
+    assert end - 0.1 <= s3["clip_end_s"] <= end + 0.1
+    assert s2["timestamp_s"] <= end - 0.1 + 0.01
     clip = client.get(s1["clip_url"])
     assert clip.status_code == 200 and clip.headers["content-type"] == "video/mp4"
     assert b"ftyp" in clip.content[:64]
 
 
-def test_clip_window_capped_at_six_seconds(client, auth, testsrc_long_mp4, monkeypatch):
+def test_clip_window_capped_at_six_seconds(client, auth, take_small_mp4, monkeypatch):
     _spy_extract(monkeypatch, _draft([(1.0, (0.0, 8.0))]))
-    _, body = ingest_video(client, auth, testsrc_long_mp4.read_bytes())
+    _, body = ingest_video(client, auth, take_small_mp4.read_bytes())
     step = body["steps"][0]
     assert (step["clip_start_s"], step["clip_end_s"]) == (0.0, 6.0)
 
 
-def test_failing_still_leaves_step_without_reference(client, auth, testsrc_bytes, monkeypatch):
+def test_failing_still_leaves_step_without_reference(client, auth, take_bytes, monkeypatch):
     real = ingest.extract_still
     calls = 0
 
@@ -264,7 +269,7 @@ def test_failing_still_leaves_step_without_reference(client, auth, testsrc_bytes
         await real(path, at_s, out_path, **kw)
 
     monkeypatch.setattr(ingest, "extract_still", flaky)
-    rid, body = ingest_video(client, auth, testsrc_bytes)
+    rid, body = ingest_video(client, auth, take_bytes)
     assert body["status"] == "review"
     assert [s["ref_image_url"] is None for s in body["steps"]] == [
         False, True, False, False, False, False,
@@ -273,19 +278,19 @@ def test_failing_still_leaves_step_without_reference(client, auth, testsrc_bytes
     assert r.status_code == 409 and "[2]" in r.json()["error"]["message"]
 
 
-def test_failing_clip_keeps_the_still(client, auth, testsrc_bytes, monkeypatch):
+def test_failing_clip_keeps_the_still(client, auth, take_bytes, monkeypatch):
     async def boom(*a, **kw):
         raise FfmpegError("boom")
 
     monkeypatch.setattr(ingest, "extract_clip", boom)
     _spy_extract(monkeypatch, _draft([(1.0, (0.0, 3.0)), (2.0, None)]))
-    _, body = ingest_video(client, auth, testsrc_bytes)
+    _, body = ingest_video(client, auth, take_bytes)
     assert body["status"] == "review"
     assert all(s["ref_image_url"] and s["clip_url"] is None for s in body["steps"])
 
 
 @pytest.mark.parametrize("fail", [False, True])
-def test_temp_dir_is_cleaned(client, auth, testsrc_bytes, monkeypatch, tmp_path, fail):
+def test_temp_dir_is_cleaned(client, auth, take_bytes, monkeypatch, tmp_path, fail):
     tmp = tmp_path / "tmp"
     tmp.mkdir()
     monkeypatch.setattr(tempfile, "tempdir", str(tmp))
@@ -295,12 +300,12 @@ def test_temp_dir_is_cleaned(client, auth, testsrc_bytes, monkeypatch, tmp_path,
             raise RuntimeError("x")
 
         _patch_extract(monkeypatch, boom)
-    _, body = ingest_video(client, auth, testsrc_bytes)
+    _, body = ingest_video(client, auth, take_bytes)
     assert body["status"] == ("failed" if fail else "review")
     assert [p for p in tmp.iterdir() if p.name.startswith("echo-ingest-")] == []
 
 
-async def test_only_one_ingestion_at_a_time(app, testsrc_bytes, monkeypatch):
+async def test_only_one_ingestion_at_a_time(app, take_bytes, monkeypatch):
     from echo_ai import fake
 
     active = peak = 0
@@ -326,7 +331,7 @@ async def test_only_one_ingestion_at_a_time(app, testsrc_bytes, monkeypatch):
                     await c.post("/recipes", headers=h, json={"title": "S", "consent": True})
                 ).json()
                 up = await c.put(
-                    created["upload_url"].replace("http://t", ""), content=testsrc_bytes
+                    created["upload_url"].replace("http://t", ""), content=take_bytes
                 )
                 assert up.status_code == 200
                 assert (
@@ -344,7 +349,7 @@ async def test_only_one_ingestion_at_a_time(app, testsrc_bytes, monkeypatch):
             assert peak == 1
 
 
-async def test_delete_mid_job_leaves_no_media(app, testsrc_bytes, monkeypatch):
+async def test_delete_mid_job_leaves_no_media(app, take_bytes, monkeypatch):
     real = ingest.extract_still
     reached = asyncio.Event()
     release = asyncio.Event()
@@ -364,7 +369,7 @@ async def test_delete_mid_job_leaves_no_media(app, testsrc_bytes, monkeypatch):
                 await c.post("/recipes", headers=h, json={"title": "S", "consent": True})
             ).json()
             rid = created["recipe_id"]
-            await c.put(created["upload_url"].replace("http://t", ""), content=testsrc_bytes)
+            await c.put(created["upload_url"].replace("http://t", ""), content=take_bytes)
             await c.post(f"/recipes/{rid}/process", headers=h)
             await asyncio.wait_for(reached.wait(), 20)
             assert (await c.delete(f"/recipes/{rid}", headers=h)).status_code == 204
@@ -446,8 +451,8 @@ def _ref_bytes(rid_step) -> bytes:
     return data
 
 
-def test_patch_timestamp_reextracts_the_still(client, auth, testsrc_bytes):
-    rid, body = ingest_video(client, auth, testsrc_bytes)
+def test_patch_timestamp_reextracts_the_still(client, auth, take_bytes):
+    rid, body = ingest_video(client, auth, take_bytes)
     store = get_store()
     step = body["steps"][0]
     before = _ref_bytes(asyncio.run(store.get_step(step["id"])))
@@ -462,15 +467,15 @@ def test_patch_timestamp_reextracts_the_still(client, auth, testsrc_bytes):
     assert out["timestamp_s"] == 1.0
     fresh = client.get(out["ref_image_url"]).content
     assert fresh != before
-    assert Image.open(io.BytesIO(fresh)).size == (1280, 720)
+    assert Image.open(io.BytesIO(fresh)).size == (720, 1280)
     cached_after = asyncio.run(
         refcache.get_ref_image(store, asyncio.run(store.get_step(step["id"])))
     )
     assert cached_after == fresh
 
 
-def test_patch_timestamp_reuses_the_cached_download(client, auth, testsrc_bytes, monkeypatch):
-    rid, body = ingest_video(client, auth, testsrc_bytes)
+def test_patch_timestamp_reuses_the_cached_download(client, auth, take_bytes, monkeypatch):
+    rid, body = ingest_video(client, auth, take_bytes)
     videocache.clear()
     store = get_store()
     downloads = 0
@@ -488,10 +493,10 @@ def test_patch_timestamp_reuses_the_cached_download(client, auth, testsrc_bytes,
     assert downloads == 1
 
 
-def test_patch_timestamp_past_the_end_422(client, auth, testsrc_bytes):
-    _, body = ingest_video(client, auth, testsrc_bytes)
+def test_patch_timestamp_past_the_end_422(client, auth, take_bytes):
+    _, body = ingest_video(client, auth, take_bytes)
     step = body["steps"][0]
-    r = client.patch(f"/steps/{step['id']}", headers=auth, json={"timestamp_s": 99})
+    r = client.patch(f"/steps/{step['id']}", headers=auth, json={"timestamp_s": 500})
     assert r.status_code == 422
     assert r.json()["error"]["code"] == "validation_error"
     assert "past the end of the video" in r.json()["error"]["message"]
@@ -499,14 +504,14 @@ def test_patch_timestamp_past_the_end_422(client, auth, testsrc_bytes):
     assert after["timestamp_s"] == step["timestamp_s"]
 
 
-def test_patch_timestamp_works_on_published_recipe(client, auth, testsrc_bytes):
-    rid, body = ingest_video(client, auth, testsrc_bytes)
+def test_patch_timestamp_works_on_published_recipe(client, auth, take_bytes):
+    rid, body = ingest_video(client, auth, take_bytes)
     assert client.post(f"/recipes/{rid}/publish", headers=auth).status_code == 200
     r = client.patch(f"/steps/{body['steps'][0]['id']}", headers=auth, json={"timestamp_s": 2.0})
     assert r.status_code == 200 and r.json()["timestamp_s"] == 2.0
 
 
-def test_patch_timestamp_gives_a_missing_step_its_image(client, auth, testsrc_bytes, monkeypatch):
+def test_patch_timestamp_gives_a_missing_step_its_image(client, auth, take_bytes, monkeypatch):
     real = ingest.extract_still
 
     async def fail_first(path, at_s, out_path, **kw):
@@ -516,7 +521,7 @@ def test_patch_timestamp_gives_a_missing_step_its_image(client, auth, testsrc_by
         await real(path, at_s, out_path, **kw)
 
     monkeypatch.setattr(ingest, "extract_still", fail_first)
-    rid, body = ingest_video(client, auth, testsrc_bytes)
+    rid, body = ingest_video(client, auth, take_bytes)
     broken = [s for s in body["steps"] if s["ref_image_url"] is None]
     assert len(broken) == 1
     assert client.post(f"/recipes/{rid}/publish", headers=auth).status_code == 409
@@ -525,8 +530,8 @@ def test_patch_timestamp_gives_a_missing_step_its_image(client, auth, testsrc_by
     assert client.post(f"/recipes/{rid}/publish", headers=auth).status_code == 200
 
 
-def test_patch_timestamp_with_source_video_gone(client, auth, testsrc_bytes):
-    rid, body = ingest_video(client, auth, testsrc_bytes)
+def test_patch_timestamp_with_source_video_gone(client, auth, take_bytes):
+    rid, body = ingest_video(client, auth, take_bytes)
     videocache.clear()
     asyncio.run(get_store().delete_prefix("videos", rid))
     r = client.patch(f"/steps/{body['steps'][0]['id']}", headers=auth, json={"timestamp_s": 1.0})
@@ -535,11 +540,11 @@ def test_patch_timestamp_with_source_video_gone(client, auth, testsrc_bytes):
 
 
 def test_patch_timestamp_extraction_failure_keeps_old_still(
-    client, auth, testsrc_bytes, monkeypatch
+    client, auth, take_bytes, monkeypatch
 ):
     from app.routers import steps as steps_router
 
-    _, body = ingest_video(client, auth, testsrc_bytes)
+    _, body = ingest_video(client, auth, take_bytes)
     step = body["steps"][0]
     before = client.get(step["ref_image_url"]).content
 
@@ -578,7 +583,7 @@ def test_delete_other_recipe_needs_no_force(client, auth):
     assert client.get(f"/recipes/{SEED_RECIPE_ID}", headers=auth).status_code == 200
 
 
-def test_video_cache_is_bounded(tmp_path, testsrc_mp4):
+def test_video_cache_is_bounded(tmp_path, take_mp4):
     async def go():
         info = {"duration_s": 5.0, "width": 1, "height": 1, "rotation": 0}
         for i in range(4):
@@ -618,11 +623,11 @@ async def test_failing_startup_sweep_does_not_break_boot(app, monkeypatch, caplo
 
 
 def test_patch_step_racing_delete_is_404_and_leaves_no_orphan(
-    client, auth, testsrc_bytes, monkeypatch
+    client, auth, take_bytes, monkeypatch
 ):
     from app.store.ops import purge_recipe
 
-    rid, body = ingest_video(client, auth, testsrc_bytes)
+    rid, body = ingest_video(client, auth, take_bytes)
     store = get_store()
     real = store.put_blob
 
@@ -688,7 +693,7 @@ def test_videocache_evict_beats_an_inflight_download(tmp_path):
         vc.probe = orig
 
 
-async def test_sweep_leaves_a_running_job_alone(app, testsrc_bytes, monkeypatch):
+async def test_sweep_leaves_a_running_job_alone(app, take_bytes, monkeypatch):
     from echo_ai import fake
 
     release = asyncio.Event()
@@ -709,7 +714,7 @@ async def test_sweep_leaves_a_running_job_alone(app, testsrc_bytes, monkeypatch)
                 await c.post("/recipes", headers=h, json={"title": "S", "consent": True})
             ).json()
             rid = created["recipe_id"]
-            await c.put(created["upload_url"].replace("http://t", ""), content=testsrc_bytes)
+            await c.put(created["upload_url"].replace("http://t", ""), content=take_bytes)
             store = get_store()
             await store.update_recipe(rid, created_at=utcnow() - timedelta(minutes=30))
             await c.post(f"/recipes/{rid}/process", headers=h)

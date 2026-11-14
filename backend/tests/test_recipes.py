@@ -169,7 +169,7 @@ def test_create_recipe_missing_consent(client, auth):
 
 
 @requires_ffmpeg
-def test_upload_process_review_publish_flow(client, auth, testsrc_bytes):
+def test_upload_process_review_publish_flow(client, auth, take_bytes):
     created = _create(client, auth).json()
     rid = created["recipe_id"]
 
@@ -181,7 +181,7 @@ def test_upload_process_review_publish_flow(client, auth, testsrc_bytes):
     assert client.put(bad, content=tiny_mp4()).status_code == 403
 
     up = client.put(
-        created["upload_url"], content=testsrc_bytes, headers={"Content-Type": "video/mp4"}
+        created["upload_url"], content=take_bytes, headers={"Content-Type": "video/mp4"}
     )
     assert up.status_code == 200
 

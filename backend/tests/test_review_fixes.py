@@ -72,7 +72,7 @@ def test_patch_step_rejects_non_finite_timestamp(client, auth):
 
 @requires_ai
 @requires_ffmpeg
-async def test_concurrent_process_starts_one_job(app, testsrc_bytes):
+async def test_concurrent_process_starts_one_job(app, take_bytes):
     from app.jobs import ingest
 
     transport = httpx.ASGITransport(app=app)
@@ -82,7 +82,7 @@ async def test_concurrent_process_starts_one_job(app, testsrc_bytes):
             created = (
                 await c.post("/recipes", headers=h, json={"title": "Sandwich", "consent": True})
             ).json()
-            up = await c.put(created["upload_url"].replace("http://t", ""), content=testsrc_bytes)
+            up = await c.put(created["upload_url"].replace("http://t", ""), content=take_bytes)
             assert up.status_code == 200
             rid = created["recipe_id"]
             results = await asyncio.gather(

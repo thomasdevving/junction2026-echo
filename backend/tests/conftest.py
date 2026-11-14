@@ -39,44 +39,76 @@ def _ffmpeg(*args: str) -> None:
     )
 
 
-def _make_testsrc(path: Path, seconds: int, size: str, rate: int) -> Path:
-    _ffmpeg(
-        "-f", "lavfi", "-i", f"testsrc=duration={seconds}:size={size}:rate={rate}",
-        "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p", str(path),
-    )  # fmt: skip
-    return path
+# --------------------------------------------------------------------------- real footage
+# Every video test uses the team's real chef take (sandwich lesson, recorded through the glasses,
+# 2:14, 720x1280 portrait, H.264 + AAC). It is NOT in git: the repository is public (README: no
+# raw footage). Each laptop keeps a private copy at ai/footage/chef-take-sandwich.mp4
+# (git-ignored), or points ECHO_REAL_TAKE at it. Without it, the video tests fail and say so.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+REAL_TAKE = Path(
+    os.environ.get("ECHO_REAL_TAKE") or REPO_ROOT / "ai" / "footage" / "chef-take-sandwich.mp4"
+)
 
 
-@pytest.fixture(scope="session")
-def testsrc_mp4(tmp_path_factory) -> Path:
-    """5 s, 1920x1080, 10 fps."""
+def _require_real_take() -> Path:
     if not HAVE_FFMPEG:
         pytest.skip("ffmpeg not installed")
-    return _make_testsrc(tmp_path_factory.mktemp("media") / "testsrc.mp4", 5, "1920x1080", 10)
+    if not REAL_TAKE.is_file():
+        pytest.fail(
+            f"Real chef take missing: {REAL_TAKE}. Get the file privately from the team (it is "
+            "not in git) and save it there, or set ECHO_REAL_TAKE to its path.",
+            pytrace=False,
+        )
+    return REAL_TAKE
+
+
+def _ffprobe_duration(path: Path) -> float:
+    out = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    return float(out.strip())
 
 
 @pytest.fixture(scope="session")
-def testsrc_rotated_mp4(testsrc_mp4, tmp_path_factory) -> Path:
-    """Same video with a 90 degree display-matrix rotation (a phone held upright)."""
+def take_mp4() -> Path:
+    """The real chef take: about 134 s, 720x1280 portrait, with audio."""
+    return _require_real_take()
+
+
+@pytest.fixture(scope="session")
+def take_duration_s(take_mp4) -> float:
+    return _ffprobe_duration(take_mp4)
+
+
+@pytest.fixture(scope="session")
+def take_rotated_mp4(take_mp4, tmp_path_factory) -> Path:
+    """The real take with a 90 degree display-matrix rotation added (stream copy)."""
     out = tmp_path_factory.mktemp("media") / "rotated.mp4"
     try:
-        _ffmpeg("-display_rotation", "90", "-i", str(testsrc_mp4), "-c", "copy", str(out))
+        _ffmpeg("-display_rotation", "90", "-i", str(take_mp4), "-c", "copy", str(out))
     except subprocess.CalledProcessError:
         pytest.skip("this ffmpeg does not support -display_rotation")
     return out
 
 
 @pytest.fixture(scope="session")
-def testsrc_long_mp4(tmp_path_factory) -> Path:
-    """8 s, 320x240."""
-    if not HAVE_FFMPEG:
-        pytest.skip("ffmpeg not installed")
-    return _make_testsrc(tmp_path_factory.mktemp("media") / "long.mp4", 8, "320x240", 10)
+def take_small_mp4(take_mp4, tmp_path_factory) -> Path:
+    """The real take's first 8 s, scaled down to 240x426: smaller than any output size, so
+    tests can check that nothing is upscaled."""
+    out = tmp_path_factory.mktemp("media") / "small.mp4"
+    _ffmpeg(
+        "-i", str(take_mp4), "-t", "8", "-vf", "scale=240:426", "-an",
+        "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p", str(out),
+    )  # fmt: skip
+    return out
 
 
 @pytest.fixture(scope="session")
-def testsrc_bytes(testsrc_mp4) -> bytes:
-    return testsrc_mp4.read_bytes()
+def take_bytes(take_mp4) -> bytes:
+    return take_mp4.read_bytes()
 
 
 @pytest.fixture(autouse=True)
