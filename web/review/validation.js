@@ -1,14 +1,17 @@
-export const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
+// Contract 2.2: Supabase Free plan's global upload limit (50 MiB). The server's own value comes back
+// as `upload_max_bytes` from POST /recipes and is checked again before the PUT.
+export const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+export const sizeLabel = bytes => `${Math.round(bytes / 1024 / 1024)} MB`;
 export const wordCount = value => String(value ?? '').trim().split(/\s+/u).filter(Boolean).length;
 
-export function uploadErrors({ file, title, consent }) {
+export function uploadErrors({ file, title, consent, maxBytes = MAX_VIDEO_BYTES }) {
   const errors = [];
   if (!String(title ?? '').trim() || title.trim().length > 80) errors.push('Enter a title of 1–80 characters.');
   if (!consent) errors.push('Consent is required before uploading.');
   if (!file) errors.push('Choose an MP4 recording.');
   else {
     if (!/\.mp4$/i.test(file.name) || !['', 'video/mp4', 'application/mp4'].includes(file.type)) errors.push('Choose an MP4 file. Other video formats are not supported.');
-    if (file.size <= 0 || file.size > MAX_VIDEO_BYTES) errors.push('The recording must be non-empty and no larger than 500 MB.');
+    if (file.size <= 0 || file.size > maxBytes) errors.push(`The recording must be non-empty and no larger than ${sizeLabel(maxBytes)}.`);
   }
   return errors;
 }

@@ -89,3 +89,11 @@ test('signed video PUT has no demo-key or credential header, reports progress, a
     controller.abort(); await assert.rejects(aborted, /stopped/);
   } finally { globalThis.XMLHttpRequest = previous; }
 });
+
+test('upload limit follows contract 2.2 and the server value', () => {
+  assert.equal(MAX_VIDEO_BYTES, 52_428_800);
+  const file = { name: 'lesson.mp4', type: 'video/mp4', size: MAX_VIDEO_BYTES };
+  assert.deepEqual(uploadErrors({ file, title: 'Lesson', consent: true }), []);
+  assert.match(uploadErrors({ file: { ...file, size: MAX_VIDEO_BYTES + 1 }, title: 'Lesson', consent: true }).join(' '), /50 MB/);
+  assert.ok(uploadErrors({ file, title: 'Lesson', consent: true, maxBytes: 1000 }).length);
+});

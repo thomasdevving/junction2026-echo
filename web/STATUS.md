@@ -71,6 +71,10 @@ Verification observed in this session:
 
 Not verified: real Gemini extraction through this page, production signed-video upload/CORS, Safari, actual iOS Chef-mode ingestion, or a real chef reviewing the results. WEB-02.5 processing/review time, number of hand edits and re-picked frames on a **real take** are therefore not measured; generated-video checks are not substitutes. Batch remains PARTIAL.
 
+## Upload limit 50 MiB (2026-11-14, contract 2.2)
+
+Changed at the user's request by the backend owner's session: the dev-fallback upload now allows at most 52,428,800 bytes (50 MiB, the Supabase Free plan's global upload limit measured on production, see `backend/STATUS.md` "Upload limit") instead of 500 MB, and checks the server's `upload_max_bytes` from `POST /recipes` before the `PUT`, so an upload that Supabase would refuse is never started. Verified: `node --test "web/tests/*.test.mjs"` → 41 pass (new test for the limit). Not verified in a browser or against production.
+
 ## WEB-03 verification (2026-11-14, fake mode)
 
 Implemented `monitor/` using the existing session/monitor API, shared settings, shared lens renderer and status strip. One-second feed polling never overlaps; discovery checks every five seconds, follows new sessions, respects a picker or URL pin, and pauses while hidden or playing backup video. Last good data stays visible on connection loss. The actual lens panel remains black and is explicitly labelled as a reconstruction. Frame URLs are changed only when `last_frame_at` changes, preserving signed query parameters.

@@ -4,7 +4,7 @@ import { mountChrome } from '../shared/chrome.js';
 import { renderLens } from '../shared/lens.js';
 import { icon } from '../shared/icons.js';
 import { hasApiAccess } from '../shared/browser-session.js';
-import { wordCount, uploadErrors, mistakeId, validateStep, stepDraft, imageUrl } from './validation.js';
+import { wordCount, uploadErrors, mistakeId, validateStep, stepDraft, imageUrl, MAX_VIDEO_BYTES, sizeLabel } from './validation.js';
 
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -317,7 +317,7 @@ $('#delete-form').addEventListener('submit', async event => {
 
 function uploadInputState(clear = false) {
   const file = uploadForm.elements.video.files[0];
-  $('#file-size').textContent = file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB · maximum 500 MB` : 'MP4 only · up to 500 MB';
+  $('#file-size').textContent = file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB · maximum ${sizeLabel(MAX_VIDEO_BYTES)}` : `MP4 only · up to ${sizeLabel(MAX_VIDEO_BYTES)}`;
   const errors = uploadErrors({ file, title: uploadForm.elements.title.value, consent: uploadForm.elements.consent.checked });
   $('#upload-submit').disabled = uploadBusy || Boolean(upload) || errors.length > 0;
   if (file && uploadErrors({ file, title: 'Valid', consent: true }).length) message($('#upload-message'), errors.filter(error => !error.startsWith('Enter') && !error.startsWith('Consent')).join(' '), 'error');
@@ -360,6 +360,9 @@ async function sendUpload() {
     }
     if (connection !== connectionVersion) return;
     if (!task.uploaded) {
+      // The server's real limit (contract 2.2). Above it Supabase refuses the PUT, so do not start one.
+      const maxBytes = task.created.upload_max_bytes;
+      if (Number.isFinite(maxBytes) && task.file.size > maxBytes) throw Object.assign(new Error(`The recording is ${(task.file.size / 1024 / 1024).toFixed(1)} MB; the server accepts at most ${sizeLabel(maxBytes)}. Export a smaller MP4 (lower bitrate or shorter) and choose it with New upload.`), { tooLarge: true });
       if (Date.parse(task.created.upload_expires_at) <= Date.now()) throw new Error('The upload link has expired. Choose another recording to create a fresh upload.');
       $('#upload-progress').hidden = false;
       task.attempts++;
@@ -387,7 +390,7 @@ async function sendUpload() {
     if (connection !== connectionVersion) return;
     message($('#upload-message'), error.message, 'error');
     $('#retry-upload').textContent = task.uploaded ? 'Retry processing' : 'Retry upload';
-    $('#retry-upload').hidden = !task.created || (!task.uploaded && Date.parse(task.created.upload_expires_at) <= Date.now());
+    $('#retry-upload').hidden = !task.created || error.tooLarge || (!task.uploaded && Date.parse(task.created.upload_expires_at) <= Date.now());
     $('#new-upload').hidden = false;
     if (!task.created) { upload = null; uploadFields.disabled = false; }
   } finally { if (connection === connectionVersion) { uploadBusy = false; selectListItem(); uploadInputState(); } }
