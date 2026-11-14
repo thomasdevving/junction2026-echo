@@ -155,7 +155,7 @@ Cut from the top. Never cut from the bottom group.
 
 ## 7. Working with Claude on each laptop
 
-1. `git clone https://github.com/thomasdevving/statai && cd statai` (or `git pull --rebase origin main`).
+1. `git clone https://github.com/thomasdevving/junction2026-echo && cd junction2026-echo` (or `git pull --rebase origin main`).
 2. Open Claude Code **in the repository root**, so `CLAUDE.md` loads.
 3. Start one batch with this prompt, replacing the two placeholders:
 

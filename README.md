@@ -22,11 +22,11 @@ Track sizes and the hand-over rule: [docs/PLAN.md §2](docs/PLAN.md#2-four-track
 ### On your laptop
 
 ```bash
-git clone https://github.com/thomasdevving/statai
+git clone https://github.com/thomasdevving/junction2026-echo
 ```
 
 ```bash
-cd statai
+cd junction2026-echo
 ```
 
 Open Claude Code **in the repository root** (so [CLAUDE.md](CLAUDE.md) loads) and start one batch with:
