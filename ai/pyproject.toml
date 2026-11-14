@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ghostchef-ai"
+name = "echo-ai"
 version = "0.1.0"
-description = "Ghost Chef: every prompt and Gemini call, plus fake mode for development"
+description = "Echo: every prompt and Gemini call, plus fake mode for development"
 requires-python = ">=3.11"
 dependencies = [
     # Pinned: client.py, live.py and ingest.py were verified against 3.3.0 (ai/STATUS.md).
@@ -28,7 +28,7 @@ dev = [
 where = ["src"]
 
 [tool.setuptools.package-data]
-ghostchef_ai = ["prompts/*.md"]
+echo_ai = ["prompts/*.md"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

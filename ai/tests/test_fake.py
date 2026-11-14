@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-import ghostchef_ai as gc
-from ghostchef_ai import fake
-from ghostchef_ai.schemas import CheckResult, LiveToken, RecipeDraft, WatchResult
+import echo_ai as gc
+from echo_ai import fake
+from echo_ai.schemas import CheckResult, LiveToken, RecipeDraft, WatchResult
 
 
 async def test_check_sequence_fix_then_pass(recipe, big_frame):
@@ -93,7 +93,7 @@ def test_build_live_config(recipe):
 
 
 async def test_real_extract_reports_missing_video(monkeypatch):
-    monkeypatch.setenv("GHOSTCHEF_AI_FAKE", "0")
+    monkeypatch.setenv("ECHO_AI_FAKE", "0")
     with pytest.raises(gc.AIUnavailable, match="video not found"):
         await gc.extract_recipe(Path("no-such-video.mp4"))
 

@@ -36,7 +36,7 @@ The two core judgments, implemented against Gemini with structured output, fast 
 
 ### AI-04.1 Prompts
 
-**Do** — `src/ghostchef_ai/prompts/check.md` and `prompts/watch.md` (or `.py` constants).
+**Do** — `src/echo_ai/prompts/check.md` and `prompts/watch.md` (or `.py` constants).
 
 `check` prompt must establish:
 - Role: comparing a learner's first-person photo with a chef's first-person reference photo for **one step** of a recipe.
@@ -59,7 +59,7 @@ The two core judgments, implemented against Gemini with structured output, fast 
 
 ### AI-04.2 `check_frame`
 
-**Do** — `src/ghostchef_ai/check.py`:
+**Do** — `src/echo_ai/check.py`:
 - Build the request with the check model from `model_ids()`, structured output with this response schema: `verdict` (enum), `mistake_id` (nullable string), `headline`, `fix`, `spoken`, `confidence` (number), plus an optional short `evidence` string (what the model saw; logged, not returned).
 - `ref_image_jpeg=None` is allowed: the prompt then says no reference is available and relies on criteria only (this path is also the "no-ref" ablation in AI-07).
 - Post-processing, in this order:
@@ -73,11 +73,11 @@ The two core judgments, implemented against Gemini with structured output, fast 
 
 **Acceptance**
 - Unit tests with a stubbed client cover every post-processing rule, the timeout → `AITimeout`, and quota → `AIQuotaError`.
-- `python -m ghostchef_ai check --step 3 --frame <a real dev frame> --ref fixtures/images/step-3.jpg` returns a valid result against the real API.
+- `python -m echo_ai check --step 3 --frame <a real dev frame> --ref fixtures/images/step-3.jpg` returns a valid result against the real API.
 
 ### AI-04.3 `watch_frame`
 
-**Do** — `src/ghostchef_ai/watch.py`:
+**Do** — `src/echo_ai/watch.py`:
 - If the step has no `watch_fors` → return `ok` immediately, no model call.
 - Request with the watch model, the lowest image-resolution setting that still works (from AI-02), response schema `status` (enum), `mistake_id` (nullable), `confidence`.
 - Post-processing: `warn` with an unknown or null id → `ok`; on `warn` copy `headline`, `fix`, `spoken` from the `WatchFor`; on `ok` set them to `""`.
@@ -91,7 +91,7 @@ The two core judgments, implemented against Gemini with structured output, fast 
 
 **Do** — `__init__.py` dispatches the real path to `check.check_frame` and `watch.watch_frame`. Fake mode unchanged.
 
-**Acceptance:** `GHOSTCHEF_AI_FAKE=1 pytest` still passes; with fake off and a key set, the CLI uses the real functions.
+**Acceptance:** `ECHO_AI_FAKE=1 pytest` still passes; with fake off and a key set, the CLI uses the real functions.
 
 ### AI-04.5 Iterate on the dev set
 
@@ -110,9 +110,9 @@ The two core judgments, implemented against Gemini with structured output, fast 
 ```bash
 cd ai
 ruff check .
-GHOSTCHEF_AI_FAKE=1 GHOSTCHEF_AI_FAKE_DELAY=0 pytest -q
-python -m ghostchef_ai check --step 3 --frame eval/frames/dev/<some-frame>.jpg --ref fixtures/images/step-3.jpg
-python -m ghostchef_ai watch --step 3 --frame eval/frames/dev/<some-frame>.jpg
+ECHO_AI_FAKE=1 ECHO_AI_FAKE_DELAY=0 pytest -q
+python -m echo_ai check --step 3 --frame eval/frames/dev/<some-frame>.jpg --ref fixtures/images/step-3.jpg
+python -m echo_ai watch --step 3 --frame eval/frames/dev/<some-frame>.jpg
 ```
 
 ## Out of scope
@@ -121,4 +121,4 @@ Debounce logic (clients own it; AI-07 simulates it for measurement). Held-out ev
 
 ## When done
 
-Update `STATUS.md` (batch 04, the tuned frame sizes in "Tuned values the clients need"), commit `[ai] AI-04 real check_frame and watch_frame`, push, and tell the backend owner that BE-03 can switch `GHOSTCHEF_AI_FAKE` off.
+Update `STATUS.md` (batch 04, the tuned frame sizes in "Tuned values the clients need"), commit `[ai] AI-04 real check_frame and watch_frame`, push, and tell the backend owner that BE-03 can switch `ECHO_AI_FAKE` off.

@@ -30,10 +30,10 @@ from pathlib import Path
 AI_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AI_DIR / "src"))
 
-from ghostchef_ai import check, client, watch  # noqa: E402
-from ghostchef_ai.config import fixture_dir, is_fake, load_env  # noqa: E402
-from ghostchef_ai.errors import AIError  # noqa: E402
-from ghostchef_ai.schemas import RecipeDraft  # noqa: E402
+from echo_ai import check, client, watch  # noqa: E402
+from echo_ai.config import fixture_dir, is_fake, load_env  # noqa: E402
+from echo_ai.errors import AIError  # noqa: E402
+from echo_ai.schemas import RecipeDraft  # noqa: E402
 
 
 @dataclass
@@ -194,10 +194,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--max-calls", type=int, default=80, help="cap on paid calls for this run")
     args = p.parse_args(argv)
     if is_fake():
-        print("fake mode is on (GHOSTCHEF_AI_FAKE=1): this script needs real calls",
+        print("fake mode is on (ECHO_AI_FAKE=1): this script needs real calls",
               file=sys.stderr)
         return 1
-    os.environ["GHOSTCHEF_MAX_CALLS"] = str(args.max_calls)
+    os.environ["ECHO_MAX_CALLS"] = str(args.max_calls)
     recipe = RecipeDraft.model_validate(
         json.loads((fixture_dir() / "sushi_recipe.json").read_text(encoding="utf-8")))
     if args.mode == "cases":

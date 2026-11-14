@@ -7,7 +7,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from ghostchef_ai.errors import AIUnavailable
+from echo_ai.errors import AIUnavailable
 
 # The package itself reads no .env file on import (API-CONTRACT §7: environment variables
 # only). The old upward search let any program that imported the package pick up ai/.env,
@@ -30,7 +30,7 @@ _GEMINI_MODELS = {
 }
 # OpenAI: TEMPORARY development stand-in while Gemini access is pending (ai/STATUS.md).
 # Only check/watch can run on it; video and live are Gemini-only. Chosen by the AI-02 smoke
-# test on 2026-11-14 (ai/STATUS.md); overridable with GHOSTCHEF_MODEL_*.
+# test on 2026-11-14 (ai/STATUS.md); overridable with ECHO_MODEL_*.
 _OPENAI_MODELS = {
     "video": "unsupported-on-openai",
     "check": "gpt-5.4-mini",
@@ -41,24 +41,24 @@ _PROVIDERS = {"gemini": _GEMINI_MODELS, "openai": _OPENAI_MODELS}
 # Per-process cap on paid model calls. Protects the small OpenAI credit; 0 = unlimited.
 _DEFAULT_MAX_CALLS = {"gemini": 0, "openai": 300}
 _ENV_KEYS = {
-    "video": "GHOSTCHEF_MODEL_VIDEO",
-    "check": "GHOSTCHEF_MODEL_CHECK",
-    "watch": "GHOSTCHEF_MODEL_WATCH",
-    "live": "GHOSTCHEF_MODEL_LIVE",
+    "video": "ECHO_MODEL_VIDEO",
+    "check": "ECHO_MODEL_CHECK",
+    "watch": "ECHO_MODEL_WATCH",
+    "live": "ECHO_MODEL_LIVE",
 }
 _TRUE = {"1", "true", "yes"}
 
 
 def is_fake() -> bool:
-    return os.environ.get("GHOSTCHEF_AI_FAKE", "").strip().lower() in _TRUE
+    return os.environ.get("ECHO_AI_FAKE", "").strip().lower() in _TRUE
 
 
 def provider() -> str:
-    """'gemini' (the product) or 'openai' (temporary dev stand-in). GHOSTCHEF_PROVIDER."""
-    p = os.environ.get("GHOSTCHEF_PROVIDER", "gemini").strip().lower()
+    """'gemini' (the product) or 'openai' (temporary dev stand-in). ECHO_PROVIDER."""
+    p = os.environ.get("ECHO_PROVIDER", "gemini").strip().lower()
     if p not in _PROVIDERS:
         raise AIUnavailable(
-            f"GHOSTCHEF_PROVIDER must be one of {sorted(_PROVIDERS)}, got {p!r}")
+            f"ECHO_PROVIDER must be one of {sorted(_PROVIDERS)}, got {p!r}")
     return p
 
 
@@ -70,27 +70,27 @@ def model_ids() -> dict[str, str]:
 
 
 def max_calls() -> int:
-    """GHOSTCHEF_MAX_CALLS, else the provider default (OpenAI 300, Gemini unlimited)."""
-    raw = os.environ.get("GHOSTCHEF_MAX_CALLS")
+    """ECHO_MAX_CALLS, else the provider default (OpenAI 300, Gemini unlimited)."""
+    raw = os.environ.get("ECHO_MAX_CALLS")
     if raw:
         try:
             return max(0, int(raw))
         except ValueError as exc:
             raise AIUnavailable(
-                f"GHOSTCHEF_MAX_CALLS must be a whole number, got {raw!r}") from exc
+                f"ECHO_MAX_CALLS must be a whole number, got {raw!r}") from exc
     return _DEFAULT_MAX_CALLS[provider()]
 
 
 def fixture_dir() -> Path:
-    override = os.environ.get("GHOSTCHEF_FIXTURE_DIR")
+    override = os.environ.get("ECHO_FIXTURE_DIR")
     if override:
         return Path(override).expanduser().resolve()
-    # src/ghostchef_ai/config.py -> ai/fixtures (works for editable installs)
+    # src/echo_ai/config.py -> ai/fixtures (works for editable installs)
     return (Path(__file__).resolve().parents[2] / "fixtures").resolve()
 
 
 def fake_delay_s() -> float:
     try:
-        return max(0.0, float(os.environ.get("GHOSTCHEF_AI_FAKE_DELAY", "0.3")))
+        return max(0.0, float(os.environ.get("ECHO_AI_FAKE_DELAY", "0.3")))
     except ValueError:
         return 0.3

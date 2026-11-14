@@ -69,7 +69,7 @@ def main() -> None:
 
 def write_manifest(images: Path, files: list[Path]) -> None:
     """Record the sha256 of each placeholder, so the eval runner can tell a placeholder card
-    from a real chef still (python -m ghostchef_ai.eval warns on placeholder references).
+    from a real chef still (python -m echo_ai.eval warns on placeholder references).
     A still extracted from the chef take (AI-03.5) has a different hash and is not listed."""
     manifest = {f.name: hashlib.sha256(f.read_bytes()).hexdigest() for f in files}
     path = images / "placeholders.json"

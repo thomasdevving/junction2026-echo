@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from ghostchef_ai.schemas import CheckResult, RecipeDraft, StepSpec, WatchFor, clamp_words
+from echo_ai.schemas import CheckResult, RecipeDraft, StepSpec, WatchFor, clamp_words
 
 WF = dict(id="rice_too_thick", mistake="m", headline="Too much rice",
           fix="Spread thinner, 2cm nori free", spoken="s")

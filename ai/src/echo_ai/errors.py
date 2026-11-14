@@ -1,4 +1,4 @@
-"""Errors raised by ghostchef_ai. Functions in this package raise only these.
+"""Errors raised by echo_ai. Functions in this package raise only these.
 
 HTTP mapping (done by backend/, see docs/API-CONTRACT.md §7):
 AITimeout -> 504 model_timeout, AIQuotaError -> 429 quota_exhausted,

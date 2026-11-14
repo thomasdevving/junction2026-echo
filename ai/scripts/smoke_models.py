@@ -1,14 +1,14 @@
 """AI-02 smoke test: which models can our key call, and how fast. Costs real credits.
 
-Usage (from ai/, with the key in ai/.env and GHOSTCHEF_AI_FAKE unset or 0):
+Usage (from ai/, with the key in ai/.env and ECHO_AI_FAKE unset or 0):
 
     python scripts/smoke_models.py list                         # free: models visible to the key
     python scripts/smoke_models.py test --models MODEL [MODEL…] # paid: capability + latency
 
-The provider comes from GHOSTCHEF_PROVIDER (gemini | openai). OpenAI is a TEMPORARY dev
+The provider comes from ECHO_PROVIDER (gemini | openai). OpenAI is a TEMPORARY dev
 stand-in while Gemini access is pending; its numbers are never Gemini results.
 
-Cost control: a hard cap of GHOSTCHEF_MAX_CALLS paid calls (this script defaults it to 40),
+Cost control: a hard cap of ECHO_MAX_CALLS paid calls (this script defaults it to 40),
 low image detail, and outputs capped at a few dozen tokens. Per model: `--repeats` image
 calls (default 5) + 2 two-image calls + 1 small-image call.
 """
@@ -25,7 +25,7 @@ import time
 from pathlib import Path
 
 AI_DIR = Path(__file__).resolve().parents[1]
-os.environ.setdefault("GHOSTCHEF_MAX_CALLS", "40")
+os.environ.setdefault("ECHO_MAX_CALLS", "40")
 
 from dotenv import load_dotenv  # noqa: E402
 
@@ -33,9 +33,9 @@ load_dotenv(AI_DIR / ".env", override=False)
 
 from PIL import Image  # noqa: E402
 
-from ghostchef_ai import client  # noqa: E402
-from ghostchef_ai.config import is_fake, max_calls, provider  # noqa: E402
-from ghostchef_ai.errors import AIError  # noqa: E402
+from echo_ai import client  # noqa: E402
+from echo_ai.config import is_fake, max_calls, provider  # noqa: E402
+from echo_ai.errors import AIError  # noqa: E402
 
 IMAGES = AI_DIR / "fixtures" / "images"
 
@@ -189,7 +189,7 @@ def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     if is_fake():
-        sys.exit("GHOSTCHEF_AI_FAKE is on; set GHOSTCHEF_AI_FAKE=0 for a real smoke test")
+        sys.exit("ECHO_AI_FAKE is on; set ECHO_AI_FAKE=0 for a real smoke test")
     p = argparse.ArgumentParser()
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("list")

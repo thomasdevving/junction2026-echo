@@ -22,8 +22,8 @@ from typing import Any, TypeVar
 
 from pydantic import ValidationError
 
-from ghostchef_ai.config import max_calls, provider
-from ghostchef_ai.errors import AIError, AIInvalidOutput, AIQuotaError, AITimeout, AIUnavailable
+from echo_ai.config import max_calls, provider
+from echo_ai.errors import AIError, AIInvalidOutput, AIQuotaError, AITimeout, AIUnavailable
 
 T = TypeVar("T")
 
@@ -60,7 +60,7 @@ def _spend_one_call() -> None:
     if cap and usage.calls >= cap:
         raise AIQuotaError(
             f"call budget exhausted ({usage.calls}/{cap} calls in this process); "
-            "raise GHOSTCHEF_MAX_CALLS deliberately if you mean to spend more"
+            "raise ECHO_MAX_CALLS deliberately if you mean to spend more"
         )
     usage.calls += 1
 
@@ -69,7 +69,7 @@ async def call_with_budget(coro: Awaitable[T], timeout_s: float) -> T:
     """Count one paid call against the cap, await it within timeout_s, map errors."""
     try:
         _spend_one_call()
-    except AIError:  # budget exhausted, or a bad GHOSTCHEF_MAX_CALLS / GHOSTCHEF_PROVIDER
+    except AIError:  # budget exhausted, or a bad ECHO_MAX_CALLS / ECHO_PROVIDER
         if asyncio.iscoroutine(coro):
             coro.close()  # never awaited: close it so no "never awaited" warning is logged
         raise

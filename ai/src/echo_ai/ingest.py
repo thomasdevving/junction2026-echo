@@ -22,10 +22,10 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from ghostchef_ai import client, prompts
-from ghostchef_ai.config import model_ids, provider
-from ghostchef_ai.errors import AIError, AIInvalidOutput, AITimeout, AIUnavailable
-from ghostchef_ai.schemas import RecipeDraft, clamp_words
+from echo_ai import client, prompts
+from echo_ai.config import model_ids, provider
+from echo_ai.errors import AIError, AIInvalidOutput, AITimeout, AIUnavailable
+from echo_ai.schemas import RecipeDraft, clamp_words
 
 log = logging.getLogger(__name__)
 
@@ -302,7 +302,7 @@ async def run_extract(video_path: Path, *, title_hint: str | None = None,
     """extract_recipe plus timings for the CLI and STATUS."""
     if provider() != "gemini":
         raise AIUnavailable("extract_recipe needs Gemini (video is not supported on the "
-                            f"{provider()} stand-in); set GHOSTCHEF_PROVIDER=gemini")
+                            f"{provider()} stand-in); set ECHO_PROVIDER=gemini")
     path = Path(video_path)
     if not path.is_file():
         raise AIUnavailable(f"video not found: {path}")

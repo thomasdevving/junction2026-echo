@@ -1,4 +1,4 @@
-"""Command line: python -m ghostchef_ai <models|check|watch|extract|live-config>."""
+"""Command line: python -m echo_ai <models|check|watch|extract|live-config>."""
 
 from __future__ import annotations
 
@@ -8,10 +8,10 @@ import json
 import sys
 from pathlib import Path
 
-import ghostchef_ai as gc
-from ghostchef_ai import check, ingest, watch
-from ghostchef_ai.config import fixture_dir, is_fake, load_env
-from ghostchef_ai.schemas import RecipeDraft
+import echo_ai as gc
+from echo_ai import check, ingest, watch
+from echo_ai.config import fixture_dir, is_fake, load_env
+from echo_ai.schemas import RecipeDraft
 
 
 def _recipe(path: str | None) -> RecipeDraft:
@@ -81,7 +81,7 @@ def main(argv: list[str] | None = None) -> int:
     load_env()  # ai/.env, for command-line use only
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    p = argparse.ArgumentParser(prog="python -m ghostchef_ai")
+    p = argparse.ArgumentParser(prog="python -m echo_ai")
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("models", help="print the model id used for each job")
     for name in ("check", "watch"):

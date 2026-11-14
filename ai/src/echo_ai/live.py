@@ -10,11 +10,11 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from ghostchef_ai.client import call_with_budget, gemini_client
-from ghostchef_ai.config import model_ids
-from ghostchef_ai.errors import AIQuotaError, AITimeout, AIUnavailable
-from ghostchef_ai.prompts import render
-from ghostchef_ai.schemas import LiveConfig, LiveToken, StepSpec
+from echo_ai.client import call_with_budget, gemini_client
+from echo_ai.config import model_ids
+from echo_ai.errors import AIQuotaError, AITimeout, AIUnavailable
+from echo_ai.prompts import render
+from echo_ai.schemas import LiveConfig, LiveToken, StepSpec
 
 # Ephemeral tokens and Live both need an explicit API version: the SDK default answered HTTP 404
 # (AI-02), and the token docs say tokens work "only with the v1beta version". The backend

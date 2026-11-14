@@ -7,8 +7,8 @@ from types import SimpleNamespace
 
 import pytest
 
-import ghostchef_ai as gc
-from ghostchef_ai import client, live
+import echo_ai as gc
+from echo_ai import client, live
 
 FIVE = ["check_my_work", "next_step", "previous_step", "show_me", "repeat_instruction"]
 
@@ -54,8 +54,8 @@ def test_config_fields(recipe):
 
 
 def test_model_comes_from_model_ids(monkeypatch, recipe):
-    monkeypatch.setenv("GHOSTCHEF_AI_FAKE", "0")
-    monkeypatch.setenv("GHOSTCHEF_MODEL_LIVE", "some-live-model")
+    monkeypatch.setenv("ECHO_AI_FAKE", "0")
+    monkeypatch.setenv("ECHO_MODEL_LIVE", "some-live-model")
     assert _cfg(recipe).model == "some-live-model"
 
 
@@ -97,7 +97,7 @@ def stub(monkeypatch):
             seen["api_version"] = api_version
             return SimpleNamespace(aio=SimpleNamespace(auth_tokens=tokens))
 
-        monkeypatch.setenv("GHOSTCHEF_AI_FAKE", "0")
+        monkeypatch.setenv("ECHO_AI_FAKE", "0")
         monkeypatch.setattr(live, "gemini_client", fake_client)
         client.reset_usage()
         return seen
@@ -195,7 +195,7 @@ async def test_bad_token_name_is_rejected(stub, recipe):
 
 
 async def test_missing_key_is_unavailable(monkeypatch, recipe):
-    monkeypatch.setenv("GHOSTCHEF_AI_FAKE", "0")
+    monkeypatch.setenv("ECHO_AI_FAKE", "0")
     client.reset_clients()
     with pytest.raises(gc.AIUnavailable, match="GEMINI_API_KEY"):
         await gc.mint_live_token(_cfg(recipe))

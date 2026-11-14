@@ -32,7 +32,7 @@ Know, from our own account and not from documentation, **which model does each o
 
 ### AI-02.2 Client wrapper
 
-**Do** — `src/ghostchef_ai/client.py`:
+**Do** — `src/echo_ai/client.py`:
 - A lazily created `google.genai.Client` (async calls through `client.aio`). A second client configured for API version `v1beta` for token minting (AI-05).
 - `async def call_with_budget(coro, timeout_s)`: wraps `asyncio.wait_for`; on timeout raises `AITimeout`.
 - `map_error(exc) -> AIError`: HTTP 429 / resource-exhausted → `AIQuotaError`; other API errors → `AIUnavailable`; JSON / schema validation failures → `AIInvalidOutput`. Inspect the SDK's actual exception classes rather than guessing their names.
@@ -89,7 +89,7 @@ While doing this, find and write down the current way to:
 - Fill in the latency baseline table in `STATUS.md` (n, p50, max, date, network: venue Wi-Fi or hotspot).
 
 **Acceptance**
-- `python -m ghostchef_ai models` (fake mode off) prints the four chosen IDs.
+- `python -m echo_ai models` (fake mode off) prints the four chosen IDs.
 - `STATUS.md` "Gemini account facts" and "Latency baseline" have no dashes left for watch, check, and live.
 
 ## Verification
@@ -97,8 +97,8 @@ While doing this, find and write down the current way to:
 ```bash
 cd ai
 pytest -q
-python scripts/smoke_models.py            # needs GEMINI_API_KEY, GHOSTCHEF_AI_FAKE unset or 0
-python -m ghostchef_ai models
+python scripts/smoke_models.py            # needs GEMINI_API_KEY, ECHO_AI_FAKE unset or 0
+python -m echo_ai models
 ```
 
 ## Out of scope

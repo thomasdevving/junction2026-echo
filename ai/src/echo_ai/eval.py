@@ -1,11 +1,11 @@
-"""AI-07 evaluation runner: python -m ghostchef_ai.eval (ai/tasks/07, docs/EVALUATION.md §4).
+"""AI-07 evaluation runner: python -m echo_ai.eval (ai/tasks/07, docs/EVALUATION.md §4).
 
 Runs check_frame or watch_frame over the labelled rows of eval/cases.csv and writes one JSON
 file (every case) and one Markdown summary (the EVALUATION.md metrics) per run to eval/results/.
 
-    python -m ghostchef_ai.eval --split dev --config full                 # tuning
-    python -m ghostchef_ai.eval --split dev --mode watch --threshold 0.7
-    python -m ghostchef_ai.eval --split heldout --config full --confirm-heldout   # once, frozen
+    python -m echo_ai.eval --split dev --config full                 # tuning
+    python -m echo_ai.eval --split dev --mode watch --threshold 0.7
+    python -m echo_ai.eval --split heldout --config full --confirm-heldout   # once, frozen
 
 Configs (the ablation): full = reference photo + criteria + mistakes (what ships);
 no-ref = criteria + mistakes, no reference photo; generic = a plain "is this step done
@@ -13,7 +13,7 @@ correctly?" prompt with no criteria and no reference. Watch mode always uses the
 
 Rules: tune on dev only; the held-out split needs --confirm-heldout and is run once, after the
 prompts are frozen. Every result file records the date, model, prompt hashes, git commit and set
-size. Works in fake mode (GHOSTCHEF_AI_FAKE=1), which is how the runner itself is tested; fake
+size. Works in fake mode (ECHO_AI_FAKE=1), which is how the runner itself is tested; fake
 results are labelled as such and are never evaluation results.
 """
 
@@ -34,11 +34,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-import ghostchef_ai as gc
-from ghostchef_ai import check, client, prompts, watch
-from ghostchef_ai.config import AI_DIR, fixture_dir, is_fake, load_env, model_ids
-from ghostchef_ai.errors import AIError, AIInvalidOutput
-from ghostchef_ai.schemas import CheckResult, RecipeDraft, StepSpec
+import echo_ai as gc
+from echo_ai import check, client, prompts, watch
+from echo_ai.config import AI_DIR, fixture_dir, is_fake, load_env, model_ids
+from echo_ai.errors import AIError, AIInvalidOutput
+from echo_ai.schemas import CheckResult, RecipeDraft, StepSpec
 
 CONFIGS = ("full", "no-ref", "generic")
 MODES = ("check", "watch")
@@ -440,7 +440,7 @@ def main(argv: list[str] | None = None) -> int:
     load_env()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    p = argparse.ArgumentParser(prog="python -m ghostchef_ai.eval",
+    p = argparse.ArgumentParser(prog="python -m echo_ai.eval",
                                 description=__doc__.splitlines()[0])
     p.add_argument("--split", choices=("dev", "heldout"), required=True)
     p.add_argument("--config", choices=CONFIGS, default="full")

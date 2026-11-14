@@ -7,15 +7,15 @@ from types import SimpleNamespace
 import pytest
 from pydantic import BaseModel
 
-from ghostchef_ai import client, config
-from ghostchef_ai.errors import AIInvalidOutput, AIQuotaError, AITimeout, AIUnavailable
+from echo_ai import client, config
+from echo_ai.errors import AIInvalidOutput, AIQuotaError, AITimeout, AIUnavailable
 
 
 @pytest.fixture(autouse=True)
 def _clean(monkeypatch):
-    monkeypatch.setenv("GHOSTCHEF_AI_FAKE", "0")
-    monkeypatch.delenv("GHOSTCHEF_PROVIDER", raising=False)
-    monkeypatch.delenv("GHOSTCHEF_MAX_CALLS", raising=False)
+    monkeypatch.setenv("ECHO_AI_FAKE", "0")
+    monkeypatch.delenv("ECHO_PROVIDER", raising=False)
+    monkeypatch.delenv("ECHO_MAX_CALLS", raising=False)
     client.reset_usage()
     client.reset_clients()
     client._openai_unsupported.clear()
@@ -86,7 +86,7 @@ async def test_provider_error_is_mapped():
 
 
 async def test_call_cap(monkeypatch):
-    monkeypatch.setenv("GHOSTCHEF_MAX_CALLS", "2")
+    monkeypatch.setenv("ECHO_MAX_CALLS", "2")
 
     async def ok():
         return 1
@@ -100,11 +100,11 @@ async def test_call_cap(monkeypatch):
 def test_provider_switch_and_defaults(monkeypatch):
     assert config.provider() == "gemini"
     assert config.max_calls() == 0
-    monkeypatch.setenv("GHOSTCHEF_PROVIDER", "openai")
+    monkeypatch.setenv("ECHO_PROVIDER", "openai")
     assert config.provider() == "openai"
     assert config.max_calls() == 300
     assert config.model_ids()["live"] == "unsupported-on-openai"
-    monkeypatch.setenv("GHOSTCHEF_PROVIDER", "anthropic")
+    monkeypatch.setenv("ECHO_PROVIDER", "anthropic")
     with pytest.raises(AIUnavailable):
         config.provider()
 
@@ -142,7 +142,7 @@ class StubCompletions:
 
 
 def _stub(monkeypatch, comp):
-    monkeypatch.setenv("GHOSTCHEF_PROVIDER", "openai")
+    monkeypatch.setenv("ECHO_PROVIDER", "openai")
     stub = SimpleNamespace(chat=SimpleNamespace(completions=comp))
     monkeypatch.setattr(client, "openai_client", lambda: stub)
 
@@ -213,7 +213,7 @@ class StubGemini:
 
 
 def _stub_gemini(monkeypatch, stub):
-    monkeypatch.setenv("GHOSTCHEF_PROVIDER", "gemini")
+    monkeypatch.setenv("ECHO_PROVIDER", "gemini")
     client._gemini_no_thinking_cfg.clear()
     client._gemini_thinking_level.clear()
     fake = SimpleNamespace(aio=SimpleNamespace(models=stub))
@@ -268,16 +268,16 @@ def test_server_side_504_is_a_timeout():
 
 
 def test_bad_max_calls_is_an_ai_error(monkeypatch):
-    monkeypatch.setenv("GHOSTCHEF_MAX_CALLS", "lots")
+    monkeypatch.setenv("ECHO_MAX_CALLS", "lots")
     with pytest.raises(AIUnavailable, match="whole number"):
         config.max_calls()
 
 
 async def test_unspent_call_is_closed_on_bad_settings(monkeypatch):
-    """A bad GHOSTCHEF_MAX_CALLS raises AIUnavailable and the coroutine is closed, not leaked."""
+    """A bad ECHO_MAX_CALLS raises AIUnavailable and the coroutine is closed, not leaked."""
     import inspect
 
-    monkeypatch.setenv("GHOSTCHEF_MAX_CALLS", "lots")
+    monkeypatch.setenv("ECHO_MAX_CALLS", "lots")
 
     async def call():
         return 1

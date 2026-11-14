@@ -6,9 +6,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from ghostchef_ai import client, ingest
-from ghostchef_ai.errors import AIInvalidOutput, AITimeout, AIUnavailable
-from ghostchef_ai.schemas import RecipeDraft
+from echo_ai import client, ingest
+from echo_ai.errors import AIInvalidOutput, AITimeout, AIUnavailable
+from echo_ai.schemas import RecipeDraft
 
 
 def raw_step(**over):
@@ -207,8 +207,8 @@ def video(tmp_path):
 
 
 def _stub(monkeypatch, files, models):
-    monkeypatch.setenv("GHOSTCHEF_AI_FAKE", "0")
-    monkeypatch.delenv("GHOSTCHEF_PROVIDER", raising=False)
+    monkeypatch.setenv("ECHO_AI_FAKE", "0")
+    monkeypatch.delenv("ECHO_PROVIDER", raising=False)
     monkeypatch.setattr(ingest, "POLL_INTERVAL_S", 0)
     client.reset_usage()
     stub = SimpleNamespace(aio=SimpleNamespace(files=files, models=models))
@@ -268,7 +268,7 @@ async def test_quota_error_is_mapped_and_deletes(monkeypatch, video):
 
 
 async def test_openai_provider_is_refused(monkeypatch, video):
-    monkeypatch.setenv("GHOSTCHEF_PROVIDER", "openai")
+    monkeypatch.setenv("ECHO_PROVIDER", "openai")
     with pytest.raises(AIUnavailable, match="needs Gemini"):
         await ingest.run_extract(video)
 

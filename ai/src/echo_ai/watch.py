@@ -15,10 +15,10 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ValidationError
 
-from ghostchef_ai import client, prompts
-from ghostchef_ai.config import model_ids
-from ghostchef_ai.errors import AIError, AIInvalidOutput
-from ghostchef_ai.schemas import StepSpec, WatchResult
+from echo_ai import client, prompts
+from echo_ai.config import model_ids
+from echo_ai.errors import AIError, AIInvalidOutput
+from echo_ai.schemas import StepSpec, WatchResult
 
 log = logging.getLogger(__name__)
 

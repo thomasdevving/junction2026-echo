@@ -2,7 +2,7 @@
 
 **Owner: Aleksandr**
 
-You own **every prompt and every Gemini call** in Ghost Chef, the fixture recipe everyone develops against, and the evaluation that produces the numbers for the pitch. Your code is a Python package, `ghostchef_ai`, that the backend imports. You never write HTTP endpoints, database code, or ffmpeg calls.
+You own **every prompt and every Gemini call** in Echo, the fixture recipe everyone develops against, and the evaluation that produces the numbers for the pitch. Your code is a Python package, `echo_ai`, that the backend imports. You never write HTTP endpoints, database code, or ffmpeg calls.
 
 New here? Read [../README.md](../README.md), then [../docs/API-CONTRACT.md](../docs/API-CONTRACT.md) §7 and §8 (your public interface), then this file.
 
@@ -10,8 +10,8 @@ New here? Read [../README.md](../README.md), then [../docs/API-CONTRACT.md](../d
 
 | Deliverable | Consumer |
 |---|---|
-| `ghostchef_ai` package with the exact public surface in API-CONTRACT §7 | `backend/` |
-| Fake mode (`GHOSTCHEF_AI_FAKE=1`) | `backend/` tests, early `ios/` and `web/` work |
+| `echo_ai` package with the exact public surface in API-CONTRACT §7 | `backend/` |
+| Fake mode (`ECHO_AI_FAKE=1`) | `backend/` tests, early `ios/` and `web/` work |
 | `fixtures/sushi_recipe.json` + `fixtures/images/step-N.jpg` | `backend/` seed, client fixtures |
 | Verified model IDs, rate limits, Live protocol facts in [STATUS.md](STATUS.md) | everyone |
 | Chef footage and a labelled evaluation set | yourself, the pitch |
@@ -39,7 +39,7 @@ ai/
   pyproject.toml
   .env.example
   README.md  STATUS.md
-  src/ghostchef_ai/
+  src/echo_ai/
     __init__.py        public surface, dispatches to fake or real
     schemas.py         pydantic models (API-CONTRACT §7)
     errors.py          AIError and subclasses
@@ -50,7 +50,7 @@ ai/
     watch.py           watch_frame                                        (AI-04)
     live.py            build_live_config, mint_live_token                 (AI-05)
     ingest.py          extract_recipe                                     (AI-06)
-    eval.py            evaluation runner (python -m ghostchef_ai.eval)    (AI-07)
+    eval.py            evaluation runner (python -m echo_ai.eval)    (AI-07)
     cli.py / __main__.py   command line
     prompts/           prompt text as .md or .py constants, one per call
   fixtures/
@@ -85,7 +85,7 @@ Run them in order. One Claude session per batch. The kickoff prompt is in [../do
 ## Rules for this track
 
 - **The public surface is frozen.** Function names, signatures, and model fields in API-CONTRACT §7 change only through the contract's change protocol. Add private helpers freely.
-- **Fake mode must keep working forever.** Every later batch keeps `GHOSTCHEF_AI_FAKE=1` passing its tests. The backend's test suite depends on it.
+- **Fake mode must keep working forever.** Every later batch keeps `ECHO_AI_FAKE=1` passing its tests. The backend's test suite depends on it.
 - **Prompts are code.** Keep each prompt in `prompts/`, one file per call, and commit prompt changes with the dev-set result that motivated them.
 - **Model IDs come from the account, not from memory.** AI-02 verifies them and writes them to STATUS.md. Until then the defaults in `config.py` are placeholders.
 - **Look at `dev` frames only** while writing prompts. `heldout` frames are run once, at the end, in AI-07.
@@ -96,12 +96,12 @@ Run them in order. One Claude session per batch. The kickoff prompt is in [../do
 ## Command line (available from AI-01, real from AI-04 onward)
 
 ```bash
-python -m ghostchef_ai models
-python -m ghostchef_ai check --step 4 --frame path/to/frame.jpg --ref fixtures/images/step-4.jpg
-python -m ghostchef_ai watch --step 4 --frame path/to/frame.jpg
-python -m ghostchef_ai extract path/to/chef.mp4 -o out.json
-python -m ghostchef_ai live-config
-python -m ghostchef_ai.eval --split dev --config full
+python -m echo_ai models
+python -m echo_ai check --step 4 --frame path/to/frame.jpg --ref fixtures/images/step-4.jpg
+python -m echo_ai watch --step 4 --frame path/to/frame.jpg
+python -m echo_ai extract path/to/chef.mp4 -o out.json
+python -m echo_ai live-config
+python -m echo_ai.eval --split dev --config full
 ```
 
 `--step N` loads step N from `fixtures/sushi_recipe.json` unless `--recipe other.json` is given. `check --no-ref` sends no reference image; `-v` (real mode) also prints latency and the raw model answer (with `evidence`) to stderr. For several frames at two sizes, use `python scripts/dev_eval.py` (AI-04.5; dev rows only).

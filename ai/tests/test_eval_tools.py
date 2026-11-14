@@ -10,7 +10,7 @@ import sys
 import pytest
 from conftest import AI_DIR
 
-from ghostchef_ai import eval as ev
+from echo_ai import eval as ev
 
 HAS_FFMPEG = bool(shutil.which("ffmpeg") and shutil.which("ffprobe"))
 COLUMNS = ["case_id", "file", "step_idx", "split", "label", "mistake_id", "labeller",

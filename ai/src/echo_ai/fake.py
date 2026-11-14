@@ -1,4 +1,4 @@
-"""Deterministic fake implementations (GHOSTCHEF_AI_FAKE=1). No network, no key.
+"""Deterministic fake implementations (ECHO_AI_FAKE=1). No network, no key.
 
 The sequences are part of the contract other tracks test against (ai/tasks/01, AI-01.4):
 - check_frame: frame < 5000 bytes -> unsure. Otherwise, per step: odd calls -> fix with the
@@ -14,8 +14,8 @@ from collections import Counter
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from ghostchef_ai.config import fake_delay_s, fixture_dir
-from ghostchef_ai.schemas import (
+from echo_ai.config import fake_delay_s, fixture_dir
+from echo_ai.schemas import (
     CheckResult,
     LiveConfig,
     LiveToken,

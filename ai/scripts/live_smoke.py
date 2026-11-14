@@ -5,7 +5,7 @@
     python scripts/live_smoke.py --question-wav footage/live-smoke/question-spread-edges-16k.wav
 
 Each attempt: build the config from the fixture, mint a real token with
-ghostchef_ai.mint_live_token (needs GEMINI_API_KEY, fake mode off), open the Live WebSocket with
+echo_ai.mint_live_token (needs GEMINI_API_KEY, fake mode off), open the Live WebSocket with
 ONLY the token (never the API key), send the AI-05.3 exchanges and print PASS / FAIL per row.
 Attempt 1 also runs the protocol extras for ai/STATUS.md "Live facts for ios/": spoken audio
 input, session resumption with the same token, reuse of a spent token, and the access_token
@@ -36,10 +36,10 @@ from websockets.exceptions import ConnectionClosed
 AI_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AI_DIR / "src"))
 
-import ghostchef_ai as gc  # noqa: E402
-from ghostchef_ai.config import load_env  # noqa: E402
-from ghostchef_ai.live import LIVE_API_VERSION, SILENT_FUNCTIONS  # noqa: E402
-from ghostchef_ai.schemas import RecipeDraft  # noqa: E402
+import echo_ai as gc  # noqa: E402
+from echo_ai.config import load_env  # noqa: E402
+from echo_ai.live import LIVE_API_VERSION, SILENT_FUNCTIONS  # noqa: E402
+from echo_ai.schemas import RecipeDraft  # noqa: E402
 
 # Demo beat 6 and the words a grounded answer uses. The placeholder narration gives two reasons
 # for "to the edges": for the spread, "so every bite has flavour and the filling has something to
@@ -458,7 +458,7 @@ async def protocol_extras(n: int, token: str, model: str, handle: str | None, re
 
 async def main_async(args) -> int:
     if gc.model_ids()["live"] == "fake" or not os.environ.get("GEMINI_API_KEY"):
-        print("needs GHOSTCHEF_AI_FAKE=0 and GEMINI_API_KEY (ai/.env)")
+        print("needs ECHO_AI_FAKE=0 and GEMINI_API_KEY (ai/.env)")
         return 2
     recipe = RecipeDraft.model_validate(json.loads(
         (AI_DIR / "fixtures" / "sushi_recipe.json").read_text(encoding="utf-8")))

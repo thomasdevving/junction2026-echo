@@ -30,7 +30,7 @@ Measured, reproducible answers to: does it approve wrong work, does it reject ri
 
 ### AI-07.1 Evaluation runner
 
-**Do** — `src/ghostchef_ai/eval.py`, runnable as `python -m ghostchef_ai.eval`:
+**Do** — `src/echo_ai/eval.py`, runnable as `python -m echo_ai.eval`:
 
 ```
 --split dev|heldout
@@ -73,10 +73,10 @@ Measured, reproducible answers to: does it approve wrong work, does it reject ri
 **Do** — once, after the freeze:
 
 ```bash
-python -m ghostchef_ai.eval --split heldout --config full
-python -m ghostchef_ai.eval --split heldout --config no-ref
-python -m ghostchef_ai.eval --split heldout --config generic
-python -m ghostchef_ai.eval --split heldout --config full --mode watch
+python -m echo_ai.eval --split heldout --config full
+python -m echo_ai.eval --split heldout --config no-ref
+python -m echo_ai.eval --split heldout --config generic
+python -m echo_ai.eval --split heldout --config full --mode watch
 python scripts/watch_clip.py …            # each held-out clip
 ```
 
@@ -110,8 +110,8 @@ Run each question in `eval/qa.csv` through `scripts/live_smoke.py` (extend it to
 ```bash
 cd ai
 ruff check .
-GHOSTCHEF_AI_FAKE=1 GHOSTCHEF_AI_FAKE_DELAY=0 pytest -q
-python -m ghostchef_ai.eval --split dev --config full
+ECHO_AI_FAKE=1 ECHO_AI_FAKE_DELAY=0 pytest -q
+python -m echo_ai.eval --split dev --config full
 ls eval/results/
 ```
 

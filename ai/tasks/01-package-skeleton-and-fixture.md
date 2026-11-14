@@ -12,7 +12,7 @@
 
 ## Goal
 
-An installable Python package `ghostchef_ai` whose public surface matches [API-CONTRACT §7](../../docs/API-CONTRACT.md#7-internal-interface-backend--ai) exactly, working end to end in **fake mode** with no network and no API key, plus a hand-written sushi fixture recipe with placeholder images.
+An installable Python package `echo_ai` whose public surface matches [API-CONTRACT §7](../../docs/API-CONTRACT.md#7-internal-interface-backend--ai) exactly, working end to end in **fake mode** with no network and no API key, plus a hand-written sushi fixture recipe with placeholder images.
 
 ## Read first
 
@@ -25,22 +25,22 @@ An installable Python package `ghostchef_ai` whose public surface matches [API-C
 ### AI-01.1 Project scaffold
 
 **Do**
-- Create `ai/pyproject.toml`: project name `ghostchef-ai`, version `0.1.0`, `requires-python = ">=3.11"`, `src/` layout, package `ghostchef_ai`.
+- Create `ai/pyproject.toml`: project name `echo-ai`, version `0.1.0`, `requires-python = ">=3.11"`, `src/` layout, package `echo_ai`.
 - Runtime dependencies: `google-genai`, `pydantic>=2`, `python-dotenv`. Optional group `dev`: `pytest`, `pytest-asyncio`, `ruff`, `pillow`.
 - Configure pytest (`asyncio_mode = "auto"`, `testpaths = ["tests"]`) and ruff (line length 100) in `pyproject.toml`.
-- Create `ai/.env.example` with `GEMINI_API_KEY=`, `GHOSTCHEF_AI_FAKE=1`, and commented `GHOSTCHEF_MODEL_VIDEO`, `GHOSTCHEF_MODEL_CHECK`, `GHOSTCHEF_MODEL_WATCH`, `GHOSTCHEF_MODEL_LIVE`, `GHOSTCHEF_FIXTURE_DIR`, `GHOSTCHEF_AI_FAKE_DELAY`.
+- Create `ai/.env.example` with `GEMINI_API_KEY=`, `ECHO_AI_FAKE=1`, and commented `ECHO_MODEL_VIDEO`, `ECHO_MODEL_CHECK`, `ECHO_MODEL_WATCH`, `ECHO_MODEL_LIVE`, `ECHO_FIXTURE_DIR`, `ECHO_AI_FAKE_DELAY`.
 
 **Acceptance**
 - `pip install -e ".[dev]"` succeeds in a fresh virtualenv.
-- `python -c "import ghostchef_ai"` succeeds.
+- `python -c "import echo_ai"` succeeds.
 
 ### AI-01.2 Schemas and errors
 
 **Do**
-- `src/ghostchef_ai/schemas.py`: the pydantic models `WatchFor`, `StepSpec`, `RecipeDraft`, `CheckResult`, `WatchResult`, `LiveConfig`, `LiveToken`, copied field-for-field from API-CONTRACT §7.
+- `src/echo_ai/schemas.py`: the pydantic models `WatchFor`, `StepSpec`, `RecipeDraft`, `CheckResult`, `WatchResult`, `LiveConfig`, `LiveToken`, copied field-for-field from API-CONTRACT §7.
 - Add validation that fails loudly on contract violations: `StepSpec.title` ≤ 4 words, `key_line` ≤ 8 words, `WatchFor.headline` ≤ 4 words, `WatchFor.fix` ≤ 8 words, `WatchFor.id` matches `^[a-z][a-z0-9_]*$` and is unique within a step, `idx ≥ 1`, `0 ≤ confidence ≤ 1`, `RecipeDraft.steps` have consecutive `idx` starting at 1.
 - A helper `clamp_words(text, n)` (used later to repair model output) in `schemas.py` or a small `text.py`.
-- `src/ghostchef_ai/errors.py`: `AIError(Exception)` and subclasses `AITimeout`, `AIQuotaError`, `AIUnavailable`, `AIInvalidOutput`.
+- `src/echo_ai/errors.py`: `AIError(Exception)` and subclasses `AITimeout`, `AIQuotaError`, `AIUnavailable`, `AIInvalidOutput`.
 
 **Acceptance**
 - Unit tests cover: a valid step parses; each word-limit violation raises; duplicate `watch_fors` ids raise; `CheckResult(verdict="maybe", …)` raises.
@@ -48,10 +48,10 @@ An installable Python package `ghostchef_ai` whose public surface matches [API-C
 ### AI-01.3 Configuration
 
 **Do**
-- `src/ghostchef_ai/config.py`:
-  - `is_fake() -> bool`: true when `GHOSTCHEF_AI_FAKE` is `1`, `true`, or `yes` (case-insensitive).
-  - `model_ids() -> dict[str, str]` with keys `video`, `check`, `watch`, `live`. Defaults are **placeholders** to be replaced in AI-02; each is overridable by its `GHOSTCHEF_MODEL_*` env var. In fake mode every value is the string `"fake"`.
-  - `fixture_dir() -> Path`: `GHOSTCHEF_FIXTURE_DIR` if set, else `<this file>/../../../fixtures` resolved. Works for editable installs, which is how the backend installs the package.
+- `src/echo_ai/config.py`:
+  - `is_fake() -> bool`: true when `ECHO_AI_FAKE` is `1`, `true`, or `yes` (case-insensitive).
+  - `model_ids() -> dict[str, str]` with keys `video`, `check`, `watch`, `live`. Defaults are **placeholders** to be replaced in AI-02; each is overridable by its `ECHO_MODEL_*` env var. In fake mode every value is the string `"fake"`.
+  - `fixture_dir() -> Path`: `ECHO_FIXTURE_DIR` if set, else `<this file>/../../../fixtures` resolved. Works for editable installs, which is how the backend installs the package.
   - Load `.env` from the current directory if present (`python-dotenv`), without overriding real environment variables.
 
 **Acceptance**
@@ -59,7 +59,7 @@ An installable Python package `ghostchef_ai` whose public surface matches [API-C
 
 ### AI-01.4 Fake implementations
 
-**Do** — `src/ghostchef_ai/fake.py`, all deterministic, no network:
+**Do** — `src/echo_ai/fake.py`, all deterministic, no network:
 
 | Function | Fake behaviour |
 |---|---|
@@ -69,7 +69,7 @@ An installable Python package `ghostchef_ai` whose public surface matches [API-C
 | `build_live_config` | Not faked: this is a pure function. Implement a simple first version here or in `live.py`: model from `model_ids()["live"]`, a short system instruction that includes the recipe title, every step's `idx`, `title`, `instruction`, and the transcript; `response_modalities=["AUDIO"]`; `voice=None`; `tools` containing the five function declarations from API-CONTRACT §5.2; `session_resumption=True`. AI-05 refines it. |
 | `mint_live_token` | Returns `LiveToken(token="fake-token", expires_at=now+30min, new_session_expires_at=now+1min, locked=False)`. |
 
-- Fake delay: `GHOSTCHEF_AI_FAKE_DELAY` seconds (default `0.3` for watch, ×2.5 for check). Tests set it to `0`.
+- Fake delay: `ECHO_AI_FAKE_DELAY` seconds (default `0.3` for watch, ×2.5 for check). Tests set it to `0`.
 - Provide `fake.reset()` to clear the counters (used by tests and by the backend's test fixtures).
 - `model` field in fake results is `"fake"`.
 
@@ -79,12 +79,12 @@ An installable Python package `ghostchef_ai` whose public surface matches [API-C
 ### AI-01.5 Public surface and CLI
 
 **Do**
-- `src/ghostchef_ai/__init__.py` exports exactly the names in API-CONTRACT §7. Each async function dispatches: fake mode → `fake.py`; otherwise → the real module. Until the real module exists, the real path raises `AIUnavailable("<function> is not implemented yet; set GHOSTCHEF_AI_FAKE=1")`.
-- `src/ghostchef_ai/cli.py` + `__main__.py` using `argparse`, with subcommands `models`, `check`, `watch`, `extract`, `live-config` as shown in [../README.md](../README.md#command-line-available-from-ai-01-real-from-ai-04-onward). Output is pretty-printed JSON on stdout; errors go to stderr with a non-zero exit code.
+- `src/echo_ai/__init__.py` exports exactly the names in API-CONTRACT §7. Each async function dispatches: fake mode → `fake.py`; otherwise → the real module. Until the real module exists, the real path raises `AIUnavailable("<function> is not implemented yet; set ECHO_AI_FAKE=1")`.
+- `src/echo_ai/cli.py` + `__main__.py` using `argparse`, with subcommands `models`, `check`, `watch`, `extract`, `live-config` as shown in [../README.md](../README.md#command-line-available-from-ai-01-real-from-ai-04-onward). Output is pretty-printed JSON on stdout; errors go to stderr with a non-zero exit code.
 
 **Acceptance**
-- `GHOSTCHEF_AI_FAKE=1 python -m ghostchef_ai check --step 3 --frame fixtures/images/step-3.jpg` prints a valid `CheckResult`.
-- `python -m ghostchef_ai models` prints four keys.
+- `ECHO_AI_FAKE=1 python -m echo_ai check --step 3 --frame fixtures/images/step-3.jpg` prints a valid `CheckResult`.
+- `python -m echo_ai models` prints four keys.
 - With fake mode off and no key, `check` exits non-zero with the "not implemented yet" message, not a stack trace.
 
 ### AI-01.6 Fixture recipe (hand-written first version)
@@ -109,7 +109,7 @@ An installable Python package `ghostchef_ai` whose public surface matches [API-C
 - Respect every word limit; the schema validation from AI-01.2 must pass.
 
 **Acceptance**
-- `python -c "from ghostchef_ai.schemas import RecipeDraft; import json,pathlib; RecipeDraft.model_validate(json.loads(pathlib.Path('fixtures/sushi_recipe.json').read_text(encoding='utf-8')))"` exits 0.
+- `python -c "from echo_ai.schemas import RecipeDraft; import json,pathlib; RecipeDraft.model_validate(json.loads(pathlib.Path('fixtures/sushi_recipe.json').read_text(encoding='utf-8')))"` exits 0.
 - A test loads the fixture and asserts step 3 contains a watch-for with id `rice_too_thick`.
 
 ### AI-01.7 Placeholder reference images
@@ -132,13 +132,13 @@ An installable Python package `ghostchef_ai` whose public surface matches [API-C
 ```bash
 cd ai
 ruff check .
-GHOSTCHEF_AI_FAKE=1 GHOSTCHEF_AI_FAKE_DELAY=0 pytest -q
-GHOSTCHEF_AI_FAKE=1 python -m ghostchef_ai check --step 3 --frame fixtures/images/step-3.jpg
-GHOSTCHEF_AI_FAKE=1 python -m ghostchef_ai watch --step 3 --frame fixtures/images/step-3.jpg
-GHOSTCHEF_AI_FAKE=1 python -m ghostchef_ai live-config
+ECHO_AI_FAKE=1 ECHO_AI_FAKE_DELAY=0 pytest -q
+ECHO_AI_FAKE=1 python -m echo_ai check --step 3 --frame fixtures/images/step-3.jpg
+ECHO_AI_FAKE=1 python -m echo_ai watch --step 3 --frame fixtures/images/step-3.jpg
+ECHO_AI_FAKE=1 python -m echo_ai live-config
 ```
 
-On Windows PowerShell set the variables first: `$env:GHOSTCHEF_AI_FAKE='1'; $env:GHOSTCHEF_AI_FAKE_DELAY='0'; pytest -q`.
+On Windows PowerShell set the variables first: `$env:ECHO_AI_FAKE='1'; $env:ECHO_AI_FAKE_DELAY='0'; pytest -q`.
 
 ## Out of scope
 

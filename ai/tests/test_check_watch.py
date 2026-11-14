@@ -8,9 +8,9 @@ import json
 
 import pytest
 
-import ghostchef_ai as gc
-from ghostchef_ai import check, client, prompts, watch
-from ghostchef_ai.errors import AIInvalidOutput, AIQuotaError, AITimeout, AIUnavailable
+import echo_ai as gc
+from echo_ai import check, client, prompts, watch
+from echo_ai.errors import AIInvalidOutput, AIQuotaError, AITimeout, AIUnavailable
 
 
 class Stub:
@@ -31,8 +31,8 @@ class Stub:
 
 @pytest.fixture(autouse=True)
 def _real_mode(monkeypatch):
-    monkeypatch.setenv("GHOSTCHEF_AI_FAKE", "0")
-    monkeypatch.setenv("GHOSTCHEF_PROVIDER", "gemini")
+    monkeypatch.setenv("ECHO_AI_FAKE", "0")
+    monkeypatch.setenv("ECHO_PROVIDER", "gemini")
 
 
 @pytest.fixture
@@ -118,7 +118,7 @@ async def test_check_confidence_exactly_half_is_kept(stub, recipe):
 
 
 async def test_check_rule6_model_is_the_one_used(stub, recipe, monkeypatch):
-    monkeypatch.setenv("GHOSTCHEF_MODEL_CHECK", "gemini-test-model")
+    monkeypatch.setenv("ECHO_MODEL_CHECK", "gemini-test-model")
     s = stub(raw("pass"))
     r = await check.check_frame(FRAME, recipe.step(4), REF)
     assert r.model == "gemini-test-model" == s.calls[0]["model"]
@@ -253,7 +253,7 @@ async def test_watch_ok_has_empty_strings_and_clamped_confidence(stub, recipe):
 
 
 async def test_watch_request(stub, recipe, monkeypatch):
-    monkeypatch.setenv("GHOSTCHEF_MODEL_WATCH", "gemini-watch-test")
+    monkeypatch.setenv("ECHO_MODEL_WATCH", "gemini-watch-test")
     s = stub(wraw())
     r = await watch.watch_frame(FRAME, recipe.step(4))
     kw = s.calls[0]
@@ -312,7 +312,7 @@ async def test_public_surface_dispatches_to_real_functions(stub, recipe):
 
 
 async def test_fake_mode_unchanged(stub, recipe, monkeypatch, big_frame):
-    monkeypatch.setenv("GHOSTCHEF_AI_FAKE", "1")
+    monkeypatch.setenv("ECHO_AI_FAKE", "1")
     s = stub(AssertionError("fake mode must not call the model"))
     assert (await gc.check_frame(big_frame, recipe.step(4), None)).model == "fake"
     assert (await gc.watch_frame(big_frame, recipe.step(4))).model == "fake"

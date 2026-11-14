@@ -15,7 +15,7 @@ defines it. Each frame goes through watch_frame once; the client debounce (2 in 
 confidence >= threshold, the 12 s warning screen with the watcher paused, then a 20 s mute) is
 replayed for every --thresholds value, so a threshold sweep costs no extra model calls.
 Approximation: frames are taken on the unpaused schedule, and the replay drops those that fall
-inside a warning screen (see ghostchef_ai.eval.debounce_alerts).
+inside a warning screen (see echo_ai.eval.debounce_alerts).
 
 Writes <UTC>-clip-<name>.json and .md to eval/results/.
 """
@@ -35,11 +35,11 @@ from pathlib import Path
 AI_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AI_DIR / "src"))
 
-import ghostchef_ai as gc  # noqa: E402
-from ghostchef_ai import config  # noqa: E402
-from ghostchef_ai.config import is_fake, model_ids  # noqa: E402
-from ghostchef_ai.errors import AIError  # noqa: E402
-from ghostchef_ai.eval import debounce_alerts, load_recipe, provenance  # noqa: E402
+import echo_ai as gc  # noqa: E402
+from echo_ai import config  # noqa: E402
+from echo_ai.config import is_fake, model_ids  # noqa: E402
+from echo_ai.errors import AIError  # noqa: E402
+from echo_ai.eval import debounce_alerts, load_recipe, provenance  # noqa: E402
 
 
 def _extract_frames_module():

@@ -25,7 +25,7 @@ One function that takes the chef's MP4 and returns a `RecipeDraft`: ordered step
 
 ### AI-06.1 Prompt
 
-**Do** — `src/ghostchef_ai/prompts/extract.md`. The model watches a first-person cooking video with narration and must return JSON matching the schema. Rules to state:
+**Do** — `src/echo_ai/prompts/extract.md`. The model watches a first-person cooking video with narration and must return JSON matching the schema. Rules to state:
 
 - **Steps:** between 4 and 10. A step is one action with a visible finished state. Merge trivial actions; split a step if it has two separately checkable results.
 - **`title`** ≤ 4 words, imperative. **`key_line`** ≤ 8 words: the one thing to get right, readable in a second.
@@ -44,7 +44,7 @@ One function that takes the chef's MP4 and returns a `RecipeDraft`: ordered step
 
 ### AI-06.2 Implementation
 
-**Do** — `src/ghostchef_ai/ingest.py::extract_recipe(video_path, *, title_hint=None, step_marks_s=None)` (signature from API-CONTRACT §7, v2.0):
+**Do** — `src/echo_ai/ingest.py::extract_recipe(video_path, *, title_hint=None, step_marks_s=None)` (signature from API-CONTRACT §7, v2.0):
 1. Upload the file through the Files API; poll until it is ready to use; raise `AIUnavailable` with a clear message if processing fails or exceeds 5 minutes.
 2. One generate call with the video model, the prompt, structured output using a schema equivalent to `RecipeDraft`. Use a longer timeout here (default 180 s; this runs in a background job).
 3. **Repair before validating**, because one slightly long title should not fail a 3-minute job:
@@ -64,7 +64,7 @@ One function that takes the chef's MP4 and returns a `RecipeDraft`: ordered step
 ### AI-06.3 Run on the real chef video *(human reviews)*
 
 ```bash
-python -m ghostchef_ai extract footage/chef-take-1.mp4 -o /tmp/extracted.json
+python -m echo_ai extract footage/chef-take-1.mp4 -o /tmp/extracted.json
 ```
 
 Review `/tmp/extracted.json` against the video and against the hand-corrected fixture:
@@ -102,9 +102,9 @@ Either way the fixture must validate and `pytest` must pass. Tell the backend ow
 ```bash
 cd ai
 ruff check .
-GHOSTCHEF_AI_FAKE=1 GHOSTCHEF_AI_FAKE_DELAY=0 pytest -q
-python -m ghostchef_ai extract footage/chef-take-1.mp4 -o /tmp/extracted.json
-python -c "import json,pathlib; from ghostchef_ai.schemas import RecipeDraft; RecipeDraft.model_validate(json.loads(pathlib.Path('/tmp/extracted.json').read_text(encoding='utf-8'))); print('valid')"
+ECHO_AI_FAKE=1 ECHO_AI_FAKE_DELAY=0 pytest -q
+python -m echo_ai extract footage/chef-take-1.mp4 -o /tmp/extracted.json
+python -c "import json,pathlib; from echo_ai.schemas import RecipeDraft; RecipeDraft.model_validate(json.loads(pathlib.Path('/tmp/extracted.json').read_text(encoding='utf-8'))); print('valid')"
 ```
 
 ## Out of scope

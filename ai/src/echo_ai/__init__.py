@@ -1,6 +1,6 @@
-"""ghostchef_ai — the complete public surface (docs/API-CONTRACT.md §7).
+"""echo_ai — the complete public surface (docs/API-CONTRACT.md §7).
 
-Every async function dispatches per call: fake mode (GHOSTCHEF_AI_FAKE=1) -> ghostchef_ai.fake,
+Every async function dispatches per call: fake mode (ECHO_AI_FAKE=1) -> echo_ai.fake,
 otherwise the real implementation: check.check_frame and watch.watch_frame (AI-04),
 live.mint_live_token (AI-05), ingest.extract_recipe (AI-06).
 """
@@ -9,12 +9,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ghostchef_ai import check, fake, ingest, watch
-from ghostchef_ai.config import is_fake, model_ids
-from ghostchef_ai.errors import AIError, AIInvalidOutput, AIQuotaError, AITimeout, AIUnavailable
-from ghostchef_ai.live import build_live_config
-from ghostchef_ai.live import mint_live_token as _real_mint_live_token
-from ghostchef_ai.schemas import (
+from echo_ai import check, fake, ingest, watch
+from echo_ai.config import is_fake, model_ids
+from echo_ai.errors import AIError, AIInvalidOutput, AIQuotaError, AITimeout, AIUnavailable
+from echo_ai.live import build_live_config
+from echo_ai.live import mint_live_token as _real_mint_live_token
+from echo_ai.schemas import (
     CheckResult,
     LiveConfig,
     LiveToken,

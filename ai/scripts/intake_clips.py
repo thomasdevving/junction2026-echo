@@ -2,7 +2,7 @@
 
 Usage (from ai/, ffmpeg on PATH), after downloading the shared drive folder:
 
-    python scripts/intake_clips.py --src "C:/Users/me/Downloads/ghostchef-clips" \
+    python scripts/intake_clips.py --src "C:/Users/me/Downloads/echo-clips" \
         --labeller AK --device "Ray-Ban Meta Display (glasses)" --dry-run
     python scripts/intake_clips.py --src ... --labeller AK --device "..."
 

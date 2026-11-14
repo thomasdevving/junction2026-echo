@@ -24,7 +24,7 @@ Everything the phone needs to hold a grounded voice conversation, produced serve
 
 ### AI-05.1 System instruction
 
-**Do** — `src/ghostchef_ai/prompts/live_system.md` and `src/ghostchef_ai/live.py::build_live_config`.
+**Do** — `src/echo_ai/prompts/live_system.md` and `src/echo_ai/live.py::build_live_config`.
 
 The instruction is assembled from a fixed part plus the recipe. The fixed part must say:
 
@@ -45,11 +45,11 @@ Function declarations (exact names, no parameters): `check_my_work`, `next_step`
 
 **Acceptance**
 - Unit test: the returned instruction contains every step title, the transcript text, and the string `[CONTEXT]`; `tools` declares exactly the five names.
-- `python -m ghostchef_ai live-config` prints it.
+- `python -m echo_ai live-config` prints it.
 
 ### AI-05.2 Ephemeral token
 
-**Do** — `src/ghostchef_ai/live.py::mint_live_token(live_config)`:
+**Do** — `src/echo_ai/live.py::mint_live_token(live_config)`:
 - Use the `v1beta` client. Create a token with: 1 use, `expire_time` = now + 30 minutes, `new_session_expire_time` = now + 2 minutes.
 - Try to **lock** the token to the model and configuration (`live_connect_constraints` in the SDK): model, response modalities, session resumption, and — **if the API accepts them** — the system instruction and tools. Check the current SDK reference for which fields can be constrained.
   - If everything locks: `locked = True`. The phone sends no config.
@@ -102,8 +102,8 @@ The iOS app will not use the Python SDK; it speaks the WebSocket protocol direct
 
 ```bash
 cd ai
-GHOSTCHEF_AI_FAKE=1 GHOSTCHEF_AI_FAKE_DELAY=0 pytest -q
-python -m ghostchef_ai live-config
+ECHO_AI_FAKE=1 ECHO_AI_FAKE_DELAY=0 pytest -q
+python -m echo_ai live-config
 python scripts/live_smoke.py           # real key required
 ```
 

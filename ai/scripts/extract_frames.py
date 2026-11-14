@@ -11,7 +11,7 @@ Usage (from ai/):
 Frames are named <prefix>-<seconds>.jpg, e.g. take1-0074.50.jpg (prefix defaults to the video
 file name). Images are never upscaled; rotation metadata from phones is applied by ffmpeg.
 Needs the ffmpeg and ffprobe binaries on the PATH. This is a helper script: the
-ghostchef_ai package itself never calls ffmpeg (that is backend/'s job).
+echo_ai package itself never calls ffmpeg (that is backend/'s job).
 """
 
 from __future__ import annotations
