@@ -24,7 +24,7 @@ While a step card is showing, the app quietly sends a low-res frame every 2.5 se
 
 ### IOS-04.1 `WatchDebouncer` (pure logic)
 
-**Do** — `GhostChef/Watcher/WatchDebouncer.swift`, a value type with no I/O and no clock of its own:
+**Do** — `Echo/Watcher/WatchDebouncer.swift`, a value type with no I/O and no clock of its own:
 
 ```swift
 struct WatchDebouncer {
@@ -44,7 +44,7 @@ Rules: a streak counts only `warn` responses with the **same** `mistake_id` and 
 
 ### IOS-04.2 `WatcherLoop`
 
-**Do** — `GhostChef/Watcher/WatcherLoop.swift`, an actor or main-actor class driven by `CookSession`:
+**Do** — `Echo/Watcher/WatcherLoop.swift`, an actor or main-actor class driven by `CookSession`:
 - While **active**: grab a frame (`maxLongEdge` 512, quality 0.6 — or the tuned values), send `/watch` with a fresh `request_id`, wait for the answer, then wait until **2.5 s after the answer** before the next tick. Never two calls in flight.
 - Apply the stale-result rule to every response.
 - Feed responses and errors to the debouncer. On an alert, call back into `CookSession`.
@@ -85,7 +85,7 @@ With real Gemini, on step 4 (Add fillings): lay an even layer of ham and cheese 
 
 ```bash
 cd ios && xcodegen generate
-xcodebuild -project GhostChef.xcodeproj -scheme GhostChef -destination 'platform=iOS Simulator,name=<an available iPhone>' test
+xcodebuild -project Echo.xcodeproj -scheme Echo -destination 'platform=iOS Simulator,name=<an available iPhone>' test
 ```
 
 ## Out of scope

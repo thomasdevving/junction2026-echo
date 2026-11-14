@@ -29,7 +29,7 @@ What was read in the documentation on 2026-11-13: ephemeral tokens are Live-only
 
 ### IOS-05.1 Wire types and a text-only session
 
-**Do** — `GhostChef/Voice/LiveClient.swift` on `URLSessionWebSocketTask`:
+**Do** — `Echo/Voice/LiveClient.swift` on `URLSessionWebSocketTask`:
 - Codable types for exactly the messages in the protocol notes: setup, setup-complete, realtime audio input, client text turn, server content (audio chunks, transcriptions if enabled, turn-complete, interrupted), tool call, tool response, session-resumption update, go-away.
 - `connect(token: LiveTokenResponse)`: open the socket with the token; send the setup message (no config when `locked` is true; `config` from the token response when false); wait for setup-complete.
 - `sendText(_:)`, an `AsyncStream` of decoded server events, `close()`.
@@ -39,7 +39,7 @@ What was read in the documentation on 2026-11-13: ephemeral tokens are Live-only
 
 ### IOS-05.2 Audio out
 
-**Do** — `GhostChef/Voice/AudioIO.swift`:
+**Do** — `Echo/Voice/AudioIO.swift`:
 - `AVAudioEngine` with a player node; schedule incoming PCM chunks (format from the protocol notes) as buffers, converting to the engine's output format.
 - On an `interrupted` server event: stop the player and drop queued buffers immediately (barge-in).
 - Expose `isPlayingLiveAudio`.
@@ -106,7 +106,7 @@ Unknown function → respond with an error object; never leave a tool call unans
 
 ```bash
 cd ios && xcodegen generate
-xcodebuild -project GhostChef.xcodeproj -scheme GhostChef -destination 'platform=iOS Simulator,name=<an available iPhone>' test
+xcodebuild -project Echo.xcodeproj -scheme Echo -destination 'platform=iOS Simulator,name=<an available iPhone>' test
 ```
 
 Unit-test the message encoding/decoding against literal JSON from the protocol notes, the tool-call mapping, and the arbiter's decisions. Audio is verified by ear on the device.

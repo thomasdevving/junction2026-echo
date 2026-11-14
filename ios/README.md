@@ -10,7 +10,7 @@ New here? Read [../README.md](../README.md), then [../docs/API-CONTRACT.md](../d
 
 | Deliverable | Notes |
 |---|---|
-| iOS app `GhostChef` (SwiftUI, iOS 17.2+) | **One app, two modes.** Cook: recipe library → prefetch → cook-along → done. Chef: record through the glasses with pinch step marks → upload → processing (IOS-08) |
+| iOS app `Echo` (SwiftUI, iOS 17.2+) | **One app, two modes.** Cook: recipe library → prefetch → cook-along → done. Chef: record through the glasses with pinch step marks → upload → processing (IOS-08) |
 | A swappable **frame source** | iPhone camera now, glasses stream later; everything downstream sees "a JPEG" |
 | A **lens model** rendered two ways | On the phone screen (preview) and on the glasses display |
 | Watcher loop with the contract's debounce and pause rules | Identical behaviour to the web simulator |
@@ -50,7 +50,7 @@ cd ios
 cp Config/Secrets.example.xcconfig Config/Secrets.xcconfig     # then edit: backend URL + demo key
 swift scripts/make-mock-feed.swift      # MockDeviceKit camera feed for the simulator (mp4s are git-ignored)
 xcodegen generate
-open GhostChef.xcodeproj
+open Echo.xcodeproj
 ```
 
 Works after IOS-01 has created `project.yml` and `Config/`. The backend URL and key can also be changed at runtime in the app's Settings screen.
@@ -64,8 +64,8 @@ ios/
     Config.xcconfig                committed; includes Secrets.xcconfig if present
     Secrets.example.xcconfig       committed template
     Secrets.xcconfig               untracked
-  GhostChef/
-    App/          GhostChefApp.swift, AppEnvironment.swift (dependency container)
+  Echo/
+    App/          EchoApp.swift, AppEnvironment.swift (dependency container)
     Models/       Codable types mirroring API-CONTRACT (Recipe, Step, WatchFor, CheckResponse, …)
     Networking/   APIClient, APIError, multipart encoding
     Frames/       FrameSource protocol, PhoneCameraFrameSource, DATFrameSource (IOS-06)
@@ -77,7 +77,7 @@ ios/
     Chef/         ChefRecorder (DAT/phone → MP4 + step marks), ChefUploader (TUS / PUT)   (IOS-08)
     UI/           ModePickerView, RecipeListView, CookView, ChefRecordView, SettingsView, DoneView
     Resources/    Fixtures/sushi_recipe.json (copy of ai/fixtures; the sandwich lesson since D-19, file name kept until after the demo), assets, chime
-  GhostChefTests/
+  EchoTests/
   README.md  STATUS.md  tasks/
 ```
 

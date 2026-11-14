@@ -96,7 +96,7 @@ Chef recording through the glasses is no longer a nice-to-have: it is its own ba
 
 ```bash
 cd ios && xcodegen generate
-xcodebuild -project GhostChef.xcodeproj -scheme GhostChef -destination 'generic/platform=iOS' build
+xcodebuild -project Echo.xcodeproj -scheme Echo -destination 'generic/platform=iOS' build
 ```
 
 Device behaviour is verified wearing the glasses and written in `STATUS.md`.

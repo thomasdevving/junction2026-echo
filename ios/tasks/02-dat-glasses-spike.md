@@ -42,7 +42,7 @@ Ask, and write the answers in `STATUS.md` → "Hardware access":
 - Install the agent tooling (README). Add the Swift Package to `project.yml`, **pinned to exact version 1.0.1** (or the newest tag if the booth says to use another; record which).
 - Add the products the proofs need (core, camera, display, inputs, mock device — take the exact product names from the package manifest).
 - Add whatever the SDK documentation requires in Info.plist: the `MWDAT` dictionary, app identifiers, URL scheme for the registration callback, background modes, Bluetooth / external-accessory entries. Opt out of SDK analytics if the team prefers (`MWDAT > Analytics > OptOut`).
-- Create `GhostChef/Glasses/GlassesManager.swift` (owns SDK setup, registration, device state) and `GlassesLabView.swift` (reachable from Settings → "Glasses Lab").
+- Create `Echo/Glasses/GlassesManager.swift` (owns SDK setup, registration, device state) and `GlassesLabView.swift` (reachable from Settings → "Glasses Lab").
 
 **Acceptance:** the app builds with the package; the Lab screen opens.
 
@@ -98,7 +98,7 @@ Keep `GlassesLabView` working. It is the fastest way to diagnose the device on d
 
 ```bash
 cd ios && xcodegen generate
-xcodebuild -project GhostChef.xcodeproj -scheme GhostChef -destination 'generic/platform=iOS' build
+xcodebuild -project Echo.xcodeproj -scheme Echo -destination 'generic/platform=iOS' build
 ```
 
 Everything else is verified by hand on the device and written in `STATUS.md`.

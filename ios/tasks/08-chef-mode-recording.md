@@ -26,20 +26,20 @@ The app has two modes, picked on the first screen: **Cook** (everything from IOS
 
 ### IOS-08.1 Mode picker
 
-**Do** — `GhostChef/UI/ModePickerView.swift` as the root: two large buttons, **Cook** (→ `RecipeListView`) and **Chef** (→ `ChefRecordView`). Remember the last choice in `Settings`. Settings stays reachable from both.
+**Do** — `Echo/UI/ModePickerView.swift` as the root: two large buttons, **Cook** (→ `RecipeListView`) and **Chef** (→ `ChefRecordView`). Remember the last choice in `Settings`. Settings stays reachable from both.
 
 **Acceptance:** both modes open; the Cook path is unchanged.
 
 ### IOS-08.2 API client additions
 
-**Do** — extend `GhostChefAPI` / `APIClient` / `MockAPI` with `createRecipe(title:chefName:stepMarksS:consent:) -> RecipeUpload` (decodes every field of the `201` body, `resumable_endpoint` optional) and `processRecipe(id:)`. Decode the new status `uploading` and the `step_marks_s` field; unknown statuses must not crash.
+**Do** — extend `EchoAPI` / `APIClient` / `MockAPI` with `createRecipe(title:chefName:stepMarksS:consent:) -> RecipeUpload` (decodes every field of the `201` body, `resumable_endpoint` optional) and `processRecipe(id:)`. Decode the new status `uploading` and the `step_marks_s` field; unknown statuses must not crash.
 
 **Acceptance:** unit tests decode the literal `201` example from API-CONTRACT §2 with and without `resumable_endpoint`, and a `409 upload_missing` envelope.
 
 ### IOS-08.3 Recorder and step marks
 
-**Do** — `GhostChef/Chef/ChefRecorder.swift` (`@MainActor @Observable`, dependencies injected as protocols so the logic is testable without a device):
-- Before the first recording, a **consent screen**: "Everyone in this recording agrees to it being processed by Google Gemini and shown in the Ghost Chef demo." Recording cannot start without it; the answer is sent as `consent: true`.
+**Do** — `Echo/Chef/ChefRecorder.swift` (`@MainActor @Observable`, dependencies injected as protocols so the logic is testable without a device):
+- Before the first recording, a **consent screen**: "Everyone in this recording agrees to it being processed by Google Gemini and shown in the Echo demo." Recording cannot start without it; the answer is sent as `consent: true`.
 - Recording source: the DAT camera stream when glasses are connected (reuse `DATFrameSource`'s stream if IOS-06 exists, else the IOS-02 Lab code), the phone camera otherwise. **The screen and the saved metadata say which source was used**; a phone-camera take is a development fallback, never presented as recorded on the glasses.
 - Write video frames and microphone audio to `Documents/takes/<uuid>.mp4` with `AVAssetWriter` (H.264, AAC, `expectsMediaDataInRealTime = true`), using sample timestamps so audio and video stay in sync. Use the audio route IOS-02 proof f found (glasses mic if it works alongside the stream).
 - **Step marks:** each "pinch" (the input chosen in the spike decision; a phone button and a display button as fallbacks) appends `elapsed seconds since recording start` to `stepMarksS`, plays a short click, and briefly shows "Step 3 marked" in the lens. Marks are strictly ascending; two marks within 1 s collapse into one.
@@ -50,7 +50,7 @@ The app has two modes, picked on the first screen: **Cook** (everything from IOS
 
 ### IOS-08.4 Upload and process
 
-**Do** — `GhostChef/Chef/ChefUploader.swift`:
+**Do** — `Echo/Chef/ChefUploader.swift`:
 1. `createRecipe(...)` → `RecipeUpload`.
 2. If `resumable_endpoint` is non-null: TUS upload against it with header `x-signature: <upload_token>`, metadata `bucketName`, `objectName` (= `object_path`), `contentType = video/mp4`, chunk size **exactly 6 MB**, retries with backoff (0, 3, 5, 10, 20 s). Use a small, maintained Swift TUS client if one fits (check it before adding; pin the exact version) or the TUS protocol by hand (`POST` create, `PATCH` chunks, `HEAD` to resume). If TUS fails twice, or `resumable_endpoint` is null (backend in memory mode), fall back to a single `PUT upload_url` with the file as the body and `Content-Type: video/mp4`, **without** `X-Demo-Key`.
 3. Show progress (bytes and percent), "Retrying…" on errors, and keep going if the screen locks (background `URLSession` for the simple `PUT`; for TUS, resume from the last confirmed offset when the app returns).
@@ -68,8 +68,8 @@ Record the real chef take of the sandwich lesson (D-19) in Chef mode, following 
 
 ```bash
 cd ios && xcodegen generate
-xcodebuild -project GhostChef.xcodeproj -scheme GhostChef -destination 'generic/platform=iOS Simulator' test
-xcodebuild -project GhostChef.xcodeproj -scheme GhostChef -destination 'generic/platform=iOS' build
+xcodebuild -project Echo.xcodeproj -scheme Echo -destination 'generic/platform=iOS Simulator' test
+xcodebuild -project Echo.xcodeproj -scheme Echo -destination 'generic/platform=iOS' build
 ```
 
 Recording, upload, and the lens are verified on the device and written in `STATUS.md`.

@@ -2,7 +2,7 @@
 // a 6 s, 720×1280, 24 fps HEVC clip that slowly pans over a fixture reference image.
 //
 // Usage (from ios/):  swift scripts/make-mock-feed.swift
-// Output:             GhostChef/Resources/MockFeed/mock-feed.mp4
+// Output:             Echo/Resources/MockFeed/mock-feed.mp4
 //
 // MockDeviceKit accepts h.265 (HEVC) video files as a mock camera feed (SDK 1.0.1 docs).
 
@@ -14,8 +14,8 @@ let width = 720
 let height = 1280
 let fps: Int32 = 24
 let seconds = 6
-let source = URL(fileURLWithPath: "GhostChef/Resources/Fixtures/images/step-3.jpg")
-let outDir = URL(fileURLWithPath: "GhostChef/Resources/MockFeed", isDirectory: true)
+let source = URL(fileURLWithPath: "Echo/Resources/Fixtures/images/step-3.jpg")
+let outDir = URL(fileURLWithPath: "Echo/Resources/MockFeed", isDirectory: true)
 let output = outDir.appendingPathComponent("mock-feed.mp4")
 
 guard let base = CIImage(contentsOf: source) else {

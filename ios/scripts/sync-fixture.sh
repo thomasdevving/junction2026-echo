@@ -5,7 +5,7 @@
 set -euo pipefail
 here="$(cd "$(dirname "$0")/.." && pwd)"
 src="$here/../ai/fixtures"
-dst="$here/GhostChef/Resources/Fixtures"
+dst="$here/Echo/Resources/Fixtures"
 if [[ ! -f "$src/sushi_recipe.json" ]]; then
   echo "error: $src/sushi_recipe.json not found (has AI-01 been pushed and pulled?)" >&2
   exit 1

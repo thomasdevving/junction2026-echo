@@ -89,7 +89,7 @@ Every failure in [ARCHITECTURE §6](../../docs/ARCHITECTURE.md#6-failure-behavio
 
 ```bash
 cd ios && xcodegen generate
-xcodebuild -project GhostChef.xcodeproj -scheme GhostChef -destination 'platform=iOS Simulator,name=<an available iPhone>' test
+xcodebuild -project Echo.xcodeproj -scheme Echo -destination 'platform=iOS Simulator,name=<an available iPhone>' test
 ```
 
 ## Out of scope

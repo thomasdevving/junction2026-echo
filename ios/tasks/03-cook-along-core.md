@@ -25,7 +25,7 @@ The core loop on the iPhone, using the phone camera and an on-screen lens previe
 
 ### IOS-03.1 Lens model and inputs
 
-**Do** — `GhostChef/Session/LensScreen.swift`, `CookInput.swift`:
+**Do** — `Echo/Session/LensScreen.swift`, `CookInput.swift`:
 
 ```swift
 struct StepCard: Equatable { let idx: Int; let total: Int; let title: String; let keyLine: String
@@ -52,7 +52,7 @@ enum CookInput: Equatable { case primary, next, previous, showMe, dismiss, repea
 
 ### IOS-03.2 `CookSession` state machine
 
-**Do** — `GhostChef/Session/CookSession.swift`, `@MainActor @Observable`, dependencies injected as protocols (`GhostChefAPI`, `FrameSource`, `SpeechOutput`, a `Clock`).
+**Do** — `Echo/Session/CookSession.swift`, `@MainActor @Observable`, dependencies injected as protocols (`EchoAPI`, `FrameSource`, `SpeechOutput`, a `Clock`).
 
 State: recipe, current step index, `lens: LensScreen`, session id, the latest check `request_id`, a pending-check task.
 
@@ -89,7 +89,7 @@ Rules:
 
 ### IOS-03.3 Phone lens preview
 
-**Do** — `GhostChef/Lens/PhoneLensView.swift`: renders any `LensScreen` in a fixed-aspect black panel that imitates the lens. Follow the Display spec: bright elements on black, at most two short text lines, step counter and title on top, reference image in the middle, key line below, the watching dot. Amber for fix / warning, green for pass. Large type: it must be readable at a glance and on the demo monitor.
+**Do** — `Echo/Lens/PhoneLensView.swift`: renders any `LensScreen` in a fixed-aspect black panel that imitates the lens. Follow the Display spec: bright elements on black, at most two short text lines, step counter and title on top, reference image in the middle, key line below, the watching dot. Amber for fix / warning, green for pass. Large type: it must be readable at a glance and on the demo monitor.
 
 `CookView` layout on the phone: the lens preview on top; below it the live camera preview (small) and operator buttons mapped to `CookInput` (`Check / Next` = primary, `◀`, `▶`, `Show me`, `Dismiss`). The buttons stay in the app permanently: they are the operator's remote on demo day.
 
@@ -97,7 +97,7 @@ Rules:
 
 ### IOS-03.4 Speech output and chime
 
-**Do** — `GhostChef/Voice/SpeechOutput.swift`:
+**Do** — `Echo/Voice/SpeechOutput.swift`:
 - `protocol SpeechOutput { func speak(_ text: String, priority: SpeechPriority); func stop(); var isSpeaking: Bool { get } }` with `.result` (interrupts anything) and `.info` (queued, dropped if a result arrives).
 - Implementation with `AVSpeechSynthesizer`, an English voice, slightly faster than default. A short chime sound for pass (bundle a small audio file or use a system sound).
 - Configure `AVAudioSession` once (`playback` for now; IOS-05 switches to `playAndRecord`).
@@ -127,7 +127,7 @@ With the backend on real Gemini (BE-03.1) and a real sandwich: check a correct e
 
 ```bash
 cd ios && xcodegen generate
-xcodebuild -project GhostChef.xcodeproj -scheme GhostChef -destination 'platform=iOS Simulator,name=<an available iPhone>' test
+xcodebuild -project Echo.xcodeproj -scheme Echo -destination 'platform=iOS Simulator,name=<an available iPhone>' test
 ```
 
 Then the manual loop on the iPhone.
