@@ -474,7 +474,7 @@ kbd {
 .tool-header-actions { display: flex; align-items: center; gap: 8px; }
 .tool-header-actions .btn { min-height: 40px; font-size: 13px; padding-inline: 12px; }
 .tool-header-actions .btn-icon { width: 40px; padding: 0; }
-.setup-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: .15em; color: var(--text-faint); }
+.setup-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .15em; color: var(--text-faint); }
 .browser-login { display: grid; gap: 18px; margin: 20px 0; }
 .browser-login-actions { display: flex; gap: 12px; }
 .advanced-connection { border-top: 1px solid var(--line); padding-top: 18px; margin-top: 20px; }

@@ -65,7 +65,7 @@
 .device-facts dt { color: var(--text-faint); }
 .device-facts dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
 #ai-storage[data-fake="true"] { color: #ff9eae; font-weight: 800; }
-.monitor-page .status-strip { flex: none; font-size: 10px; padding: 7px 24px; }
+.monitor-page .status-strip { flex: none; font-size: 12px; padding: 7px 24px; }
 .backup-dialog p { font-size: 14px; color: var(--text-dim); }
 .backup-dialog input[type="file"] { padding-block: 10px; }
 .backup-error { color: #ffb5bf !important; }
