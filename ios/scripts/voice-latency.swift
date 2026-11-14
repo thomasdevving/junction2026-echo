@@ -32,7 +32,7 @@ guard !base.isEmpty, !demoKey.isEmpty, !elKey.isEmpty, !voice.isEmpty else { fai
 let runs = CommandLine.arguments.count > 1 ? Int(CommandLine.arguments[1]) ?? 3 : 3
 let recipeID = "00000000-0000-4000-8000-000000000001"
 let flushByWords = ProcessInfo.processInfo.environment["FLUSH"] == "words"
-let questions = ["Why spread it to the edges?", "How much filling should I use?", "Why put the lettuce in first?"]
+let questions = ["Where should the cheese go?", "How much mayo should I put on?", "How many lettuce leaves do I need?"]
 
 func ms(_ from: Date, _ to: Date?) -> String { to.map { String(Int($0.timeIntervalSince(from) * 1000)) } ?? "—" }
 

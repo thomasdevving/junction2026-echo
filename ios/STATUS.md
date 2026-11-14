@@ -109,6 +109,10 @@ Looking down at a board: is the work in frame? —
 
 `scripts/sync-fixture.sh` re-run after `b9b01bb` (ai/fixtures switched to the ham and cheese sandwich; the file keeps the name `sushi_recipe.json` until after the demo). Tests and previews that hard-coded the maki strings now use the sandwich: the demo mistake test pins step 4 `filling_piled_center` ("Filling piled up" / "Spread it to the edges"); the watcher tests use step 1 `slices_overlapping`, and the "step without watch-fors" test moved to step 3 (lettuce), since step 2 (spread) now has `spread_misses_edges`; contract tests follow the API-CONTRACT examples (step 4 "Add fillings"). `StillImageFrameSource` still draws the old generic test card (the fake AI only looks at file size). Covered by the 149-test run above, except `LensAndCacheTests` and the previews (not compiled here).
 
+## Fixture sync: real chef take (2026-11-15)
+
+`scripts/sync-fixture.sh` re-run after the ai fixture moved to the real glasses take: real narration, real step stills (720x1280), same six step titles and `watch_fors` strings; step 3 `key_line` now "Two leaves, torn to fit". `VoiceLabView` default question and `scripts/voice-latency.swift` questions changed to ones the real chef answers ("Where should the cheese go?" is the new demo question; the old "Why spread it to the edges?" is not answered by the chef). **Not built or tested:** edited on Linux, no Xcode. Strings and bundled resources only; run the test suite on the Mac before the next build.
+
 ## Rename to Echo (2026-11-14, built and tested on the Mac 19:28)
 
 - Target/folders `GhostChef` → `Echo`, `GhostChefTests` → `EchoTests`, `GhostChefAPI` → `EchoAPI`, `GhostChefApp` → `EchoApp`, URL scheme `ghostchef://` → `echoapp://`, `GHOSTCHEF_BUNDLE_ID` → `ECHO_BUNDLE_ID` (default `com.echo.app`).

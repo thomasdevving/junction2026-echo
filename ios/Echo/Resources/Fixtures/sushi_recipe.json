@@ -1,16 +1,16 @@
 {
   "title": "Ham and cheese sandwich",
-  "transcript": "[PLACEHOLDER NARRATION — replace with the real chef transcript]\nToday we're making a simple ham and cheese sandwich, and I'll show you exactly what it should look like at every step. First, lay two slices of bread side by side on the board, flat, not overlapping. Next, take the spread and cover both slices in a thin, even layer. Go all the way to the crust on every side. You spread it right to the edges so every bite has flavour and the filling has something to stick to; bare corners are the first thing people leave behind. Now lay one lettuce leaf flat on the spread side. Tear it if it's too big, so it covers the slice without hanging over. Then the fillings: ham first, then cheese, in one even layer that reaches the edges of the bread. Don't pile it all up in the middle. That's the most common mistake, and it makes the sandwich fat in the centre and empty at the corners, so it falls apart when you cut it. Close the sandwich with the second slice, spread side down, and line the edges up with the bottom slice before you press gently. Finally, cut it once, corner to corner, with one clean stroke. Two even triangles, and you're done.",
+  "transcript": "Go ahead. Okay guys, today we are making a ham and cheese sandwich. I'm going to show you how to do it, and how it should look like at each step. So, we start with the bread. I think the most important thing for the sandwich is the bread choice, so we are going with a regular sandwich bread. After we put it next to each other, we are going to apply our sauce. In this case, it's a mayo. Be careful not to apply too much, and try not to leave any blank points. In this case, like this. A bit more. After, we will have a lettuce. I think it will be enough, just two leaves, and if it's too big for it, you can tear it off a little bit, maybe like this. After, we will have our ham, and you can put it like this. One slice, two. Then, our cheese. And a pro tip: just be careful, don't put it in the middle like this, it should reach the edges, or greater. And we will close our sandwich, like this. It's already a sandwich. And at the end, we can cut it from corner to corner, like this, push gently. You will have a perfect ham and cheese sandwich. Like this.",
   "steps": [
     {
       "idx": 1,
       "title": "Lay out bread",
       "key_line": "Two slices side by side, flat",
-      "instruction": "Lay two slices of bread side by side on the board, flat, not overlapping.",
-      "chef_quote": "Lay two slices of bread side by side on the board, flat, not overlapping.",
-      "timestamp_s": 12.0,
-      "clip_start_s": 7.0,
-      "clip_end_s": 11.5,
+      "instruction": "Start with regular sandwich bread: put two slices next to each other on the board, flat, not overlapping.",
+      "chef_quote": "So, we start with the bread.",
+      "timestamp_s": 24.0,
+      "clip_start_s": 17.0,
+      "clip_end_s": 22.0,
       "success_criteria": [
         "Two slices of bread lie flat on the board",
         "The slices sit side by side without overlapping"
@@ -30,14 +30,14 @@
       "idx": 2,
       "title": "Spread",
       "key_line": "Thin layer, right to every edge",
-      "instruction": "Cover both slices with the spread in a thin, even layer, all the way to the crust on every side.",
-      "chef_quote": "Go all the way to the crust on every side.",
-      "timestamp_s": 41.0,
-      "clip_start_s": 34.0,
-      "clip_end_s": 38.5,
+      "instruction": "Apply the sauce (mayo here) to both slices: not too much, and leave no blank points, all the way to the crust.",
+      "chef_quote": "Be careful not to apply too much, and try not to leave any blank points.",
+      "timestamp_s": 60.0,
+      "clip_start_s": 44.0,
+      "clip_end_s": 49.0,
       "success_criteria": [
-        "Spread covers both slices in a thin, even layer",
-        "Spread reaches the crust on all four sides of each slice, with no bare corners"
+        "Mayo covers both slices in a thin, even layer",
+        "No blank points: mayo reaches the crust on all four sides of each slice"
       ],
       "watch_fors": [
         {
@@ -53,14 +53,14 @@
     {
       "idx": 3,
       "title": "Add lettuce",
-      "key_line": "One leaf, flat, no overhang",
-      "instruction": "Lay one lettuce leaf flat on the spread side, tearing it if needed so it covers the slice without hanging over.",
-      "chef_quote": "Tear it if it's too big, so it covers the slice without hanging over.",
-      "timestamp_s": 66.0,
-      "clip_start_s": 60.0,
-      "clip_end_s": 64.5,
+      "key_line": "Two leaves, torn to fit",
+      "instruction": "Lay two lettuce leaves on one slice; if they're too big for it, tear a little off so they fit the bread.",
+      "chef_quote": "I think it will be enough, just two leaves, and if it's too big for it, you can tear it off a little bit, maybe like this.",
+      "timestamp_s": 83.0,
+      "clip_start_s": 72.0,
+      "clip_end_s": 77.0,
       "success_criteria": [
-        "A lettuce leaf lies flat on the spread slice",
+        "Lettuce lies on one spread slice",
         "The lettuce stays within the edges of the bread"
       ],
       "watch_fors": [],
@@ -70,11 +70,11 @@
       "idx": 4,
       "title": "Add fillings",
       "key_line": "One even layer, edge to edge",
-      "instruction": "Lay the ham, then the cheese, in one even layer that reaches the edges of the bread.",
-      "chef_quote": "Don't pile it all up in the middle.",
-      "timestamp_s": 98.0,
-      "clip_start_s": 90.0,
-      "clip_end_s": 94.5,
+      "instruction": "Lay the ham on the lettuce, one slice, then two, then the cheese. The cheese reaches the edges of the bread instead of sitting in the middle.",
+      "chef_quote": "Just be careful, don't put it in the middle like this, it should reach the edges, or greater.",
+      "timestamp_s": 111.0,
+      "clip_start_s": 96.0,
+      "clip_end_s": 101.0,
       "success_criteria": [
         "Ham and cheese cover the slice in one even layer, reaching the edges",
         "No bare bread or lettuce shows around the edge of the filling"
@@ -94,11 +94,11 @@
       "idx": 5,
       "title": "Close",
       "key_line": "Spread side down, edges lined up",
-      "instruction": "Close the sandwich with the second slice, spread side down, and line its edges up with the bottom slice before pressing gently.",
-      "chef_quote": "Line the edges up with the bottom slice before you press gently.",
-      "timestamp_s": 124.0,
-      "clip_start_s": 117.0,
-      "clip_end_s": 121.5,
+      "instruction": "Close the sandwich with the second slice on top.",
+      "chef_quote": "And we will close our sandwich, like this. It's already a sandwich.",
+      "timestamp_s": 120.0,
+      "clip_start_s": 112.0,
+      "clip_end_s": 117.0,
       "success_criteria": [
         "The top slice covers the bottom slice completely",
         "The edges of the two slices line up"
@@ -118,11 +118,11 @@
       "idx": 6,
       "title": "Cut",
       "key_line": "Corner to corner, one clean cut",
-      "instruction": "Cut the sandwich once, corner to corner, with one clean stroke.",
-      "chef_quote": "Two even triangles, and you're done.",
-      "timestamp_s": 150.0,
-      "clip_start_s": 142.0,
-      "clip_end_s": 146.5,
+      "instruction": "Cut the sandwich once, from corner to corner, pushing gently.",
+      "chef_quote": "And at the end, we can cut it from corner to corner, like this, push gently.",
+      "timestamp_s": 131.0,
+      "clip_start_s": 123.0,
+      "clip_end_s": 128.0,
       "success_criteria": [
         "The sandwich is cut into two triangles of similar size",
         "The cut runs from one corner to the opposite corner"

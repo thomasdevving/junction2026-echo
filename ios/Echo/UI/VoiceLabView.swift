@@ -6,7 +6,7 @@ struct VoiceLabView: View {
     @Environment(AppEnvironment.self) private var env
     @State private var voice: VoiceController?
     @State private var host = VoiceLabHost()
-    @State private var question = "Why spread it to the edges?"  // the demo question, ai/eval/qa.csv
+    @State private var question = "Where should the cheese go?"  // the demo question, ai/eval/qa.csv
     @State private var recipeError: String?
 
     var body: some View {
