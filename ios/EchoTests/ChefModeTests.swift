@@ -636,3 +636,133 @@ struct TakeSizeTests {
         #expect(!(UploadError.http(status: 500, body: "x").errorDescription ?? "").contains("50 MB"))
     }
 }
+
+// MARK: - Shrinking large takes before upload (HTTP 413 from storage)
+
+final class FakeShrinker: TakeShrinking, @unchecked Sendable {
+    private let lock = NSLock()
+    private var _calls: [(URL, Int64)] = []
+    var fail = false
+    var calls: [(URL, Int64)] { lock.withLock { _calls } }
+
+    func shrink(_ file: URL, toFit limitBytes: Int64, progress: @escaping @Sendable (Double) -> Void) async throws {
+        lock.withLock { _calls.append((file, limitBytes)) }
+        if fail { throw AVTakeShrinker.ShrinkError.failed("test") }
+        progress(0.5)
+        try Data(count: 2000).write(to: file)  // "shrunk"
+        progress(1)
+    }
+}
+
+@MainActor
+@Suite("Chef upload shrinking")
+struct ChefUploadShrinkTests {
+    let api: MockAPI
+    let server = FakeUploadServer()
+    let clock = ImmediateClock()
+    let store = tempStore()
+    let shrinker = FakeShrinker()
+    let uploader: ChefUploader
+
+    init() throws {
+        api = MockAPI(recipe: try FixtureRecipe.load())
+        uploader = ChefUploader(api: api, transport: server, store: store, clock: clock, shrinker: shrinker)
+    }
+
+    /// A titled take whose file is `bytes` long (sparse, so 46 MB costs nothing).
+    private func take(bytes: Int64) throws -> TakeRecord {
+        try store.prepare()
+        let id = store.newTakeID()
+        let url = store.videoURL(for: id)
+        FileManager.default.createFile(atPath: url.path, contents: nil)
+        let handle = try FileHandle(forWritingTo: url)
+        try handle.truncate(atOffset: UInt64(bytes))
+        try handle.close()
+        var record = TakeRecord(id: id, source: .glasses, recordedAt: clock.now, durationS: 134, stepMarksS: [72], consent: true)
+        record.title = "Ham and Cheese sandwich"
+        try store.save(record)
+        return record
+    }
+
+    @Test func aTakeOverTheLimitIsShrunkBeforeTheRecipeIsCreated() async throws {
+        let record = try take(bytes: 97_000_000)
+        await uploader.upload(record)
+        #expect(shrinker.calls.count == 1)
+        #expect(shrinker.calls.first?.1 == ChefUploader.uploadLimitBytes)
+        guard case .done = uploader.phase else {
+            Issue.record("expected done, got \(uploader.phase)")
+            return
+        }
+        #expect(server.seen.first?.bodyBytes == 2000, "the shrunk file is what gets uploaded")
+    }
+
+    @Test func aTakeUnderTheLimitIsNotTouched() async throws {
+        let record = try take(bytes: 21_000_000)
+        await uploader.upload(record)
+        #expect(shrinker.calls.isEmpty)
+        #expect(server.seen.first?.bodyBytes == 21_000_000)
+    }
+
+    @Test func aFailedShrinkCreatesNothingOnTheServerAndKeepsTheTake() async throws {
+        shrinker.fail = true
+        let record = try take(bytes: 60_000_000)
+        await uploader.upload(record)
+        guard case .failed(let message) = uploader.phase else {
+            Issue.record("expected failed, got \(uploader.phase)")
+            return
+        }
+        #expect(message.contains("still on the phone"))
+        let calls = await api.calls
+        #expect(!calls.contains { if case .createRecipe = $0 { true } else { false } })
+        #expect(FileManager.default.fileExists(atPath: store.videoURL(for: record.id).path))
+    }
+
+    @Test func bitrateFitsTheLimitForLongTakesAndKeepsQualityForShortOnes() {
+        let limit = ChefUploader.uploadLimitBytes
+        // 2 min 14 s: plenty of room, so the normal rate.
+        #expect(AVTakeShrinker.videoBitRate(seconds: 134, limitBytes: limit, width: 720, height: 1280) == TakeWriter.videoBitRateAt720p)
+        // 10 min: squeezed to fit.
+        let tenMin = AVTakeShrinker.videoBitRate(seconds: 600, limitBytes: limit, width: 720, height: 1280)
+        #expect(tenMin < TakeWriter.videoBitRateAt720p)
+        #expect(Double(tenMin + AVTakeShrinker.audioBitRate) / 8 * 600 < Double(limit))
+        // 40 min: floor (may not fit; the 413 message then explains).
+        #expect(AVTakeShrinker.videoBitRate(seconds: 2400, limitBytes: limit, width: 720, height: 1280) == AVTakeShrinker.floorBitRate)
+    }
+}
+
+@Suite("Take shrinker")
+struct TakeShrinkerTests {
+    /// The real AVFoundation path on a real 2 s MP4: the file is replaced by a valid, playable
+    /// video with both tracks.
+    @Test func shrinksARealTakeInPlace() async throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("shrink-\(UUID().uuidString).mp4")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let writer = TakeWriter(url: url)
+        let start = CMTime(seconds: 50, preferredTimescale: 600)
+        for i in 0..<48 {
+            let t = CMTimeAdd(start, CMTime(value: CMTimeValue(i * 25), timescale: 600))
+            writer.appendVideo(try bgraFrame(320, 240, shade: UInt8(i * 5)), at: t)
+            if i % 2 == 0, i < 46 {
+                writer.appendAudio(try audioSample(at: CMTimeAdd(start, CMTime(seconds: Double(i) / 24, preferredTimescale: 600))))
+            }
+            try await Task.sleep(for: .milliseconds(41))
+        }
+        _ = try await writer.finish()
+
+        let progress = ProgressLog()
+        try await AVTakeShrinker().shrink(url, toFit: 1_000, progress: { progress.add($0) })
+        let asset = AVURLAsset(url: url)
+        #expect(abs(try await asset.load(.duration).seconds - 2.0) < 0.3)
+        #expect(try await asset.loadTracks(withMediaType: .video).count == 1)
+        #expect(try await asset.loadTracks(withMediaType: .audio).count == 1)
+        #expect(progress.values.last == 1)
+        #expect(!FileManager.default.fileExists(atPath: url.deletingPathExtension().appendingPathExtension("shrinking.mp4").path))
+    }
+
+    final class ProgressLog: @unchecked Sendable {
+        private let lock = NSLock()
+        private var _values: [Double] = []
+        var values: [Double] { lock.withLock { _values } }
+        func add(_ v: Double) { lock.withLock { _values.append(v) } }
+    }
+}

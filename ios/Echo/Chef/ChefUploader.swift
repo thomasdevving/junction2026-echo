@@ -33,6 +33,12 @@ enum UploadError: Error, Equatable, LocalizedError {
     }
 }
 
+/// Makes a take small enough for the storage upload limit, in place. `AVTakeShrinker` is the
+/// device implementation; tests use a fake.
+protocol TakeShrinking: Sendable {
+    func shrink(_ file: URL, toFit limitBytes: Int64, progress: @escaping @Sendable (Double) -> Void) async throws
+}
+
 @MainActor
 @Observable
 final class ChefUploader {
@@ -43,6 +49,8 @@ final class ChefUploader {
 
     enum Phase: Equatable {
         case idle
+        /// Re-encoding a take that is too large for the storage (0…1).
+        case compressing(progress: Double)
         case creating
         case uploading(Method, sent: Int64, total: Int64)
         case retrying(String, inSeconds: Int)
@@ -52,6 +60,9 @@ final class ChefUploader {
     }
 
     static let chunkSize = 6 * 1024 * 1024
+    /// Takes above this are shrunk before upload: the Supabase free plan refuses files over
+    /// ~50 MB with HTTP 413 (2026-11-14); 45 MB leaves a margin.
+    static let uploadLimitBytes: Int64 = 45_000_000
     /// Delay before each try (IOS-08.4): 0, 3, 5, 10, 20 s.
     static let backoff: [Duration] = [.zero, .seconds(3), .seconds(5), .seconds(10), .seconds(20)]
     /// Whole TUS runs before falling back to a single PUT.
@@ -66,23 +77,26 @@ final class ChefUploader {
     @ObservationIgnored private let store: TakeStore
     @ObservationIgnored private let clock: any CookClock
     @ObservationIgnored private let reviewURL: @MainActor () -> URL?
+    @ObservationIgnored private let shrinker: (any TakeShrinking)?
     /// The TUS upload URL per take, so a retry resumes instead of creating a new upload.
     @ObservationIgnored private var tusLocations: [String: URL] = [:]
 
     init(
         api: any EchoAPI, transport: any UploadTransport, store: TakeStore,
-        clock: any CookClock = SystemCookClock(), reviewURL: @escaping @MainActor () -> URL? = { nil }
+        clock: any CookClock = SystemCookClock(), reviewURL: @escaping @MainActor () -> URL? = { nil },
+        shrinker: (any TakeShrinking)? = nil
     ) {
         self.api = api
         self.transport = transport
         self.store = store
         self.clock = clock
         self.reviewURL = reviewURL
+        self.shrinker = shrinker
     }
 
     var isBusy: Bool {
         switch phase {
-        case .creating, .uploading, .retrying, .processing: true
+        case .compressing, .creating, .uploading, .retrying, .processing: true
         default: false
         }
     }
@@ -97,6 +111,22 @@ final class ChefUploader {
         guard FileManager.default.fileExists(atPath: file.path) else {
             phase = .failed(UploadError.fileMissing.localizedDescription)
             return
+        }
+        // 0. Too large for the storage (older takes, or very long ones): shrink it on the phone
+        //    first, before any recipe is created, so a failure leaves nothing behind on the server.
+        if let shrinker, let size = try? Self.fileSize(file), size > Self.uploadLimitBytes {
+            phase = .compressing(progress: 0)
+            do {
+                try await shrinker.shrink(file, toFit: Self.uploadLimitBytes) { fraction in
+                    Task { @MainActor [weak self] in
+                        guard let self, case .compressing = self.phase else { return }
+                        self.phase = .compressing(progress: fraction)
+                    }
+                }
+            } catch {
+                phase = .failed("\(error.localizedDescription). The take is still on the phone, unchanged.")
+                return
+            }
         }
         do {
             // 1. The recipe (once).

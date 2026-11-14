@@ -128,7 +128,7 @@ final class AppEnvironment {
     func makeChefUploader() -> ChefUploader {
         ChefUploader(
             api: api, transport: URLSessionUploadTransport(), store: takeStore,
-            reviewURL: { [weak self] in self?.reviewPageURL })
+            reviewURL: { [weak self] in self?.reviewPageURL }, shrinker: AVTakeShrinker())
     }
 
     /// A voice controller for Settings → Voice Lab (no cook-along around it).

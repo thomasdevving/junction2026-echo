@@ -243,6 +243,12 @@ private struct ChefContent: View {
     private var uploadSection: some View {
         Section {
             switch uploader.phase {
+            case .compressing(let progress):
+                VStack(alignment: .leading, spacing: 8) {
+                    ProgressView(value: progress)
+                    Text("Shrinking the video to fit the upload limit… \(Int(progress * 100))%")
+                        .font(.footnote.monospacedDigit())
+                }
             case .creating:
                 ProgressView("Creating the recipe…")
             case .uploading(let method, let sent, let total):

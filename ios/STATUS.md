@@ -103,7 +103,7 @@ Looking down at a board: is the work in frame? —
 
 | Date | Glasses / firmware | Source (glasses / phone) | Duration | Size | Resolution, fps | Marks | Upload (TUS / PUT), time | Reached `review`? |
 |---|---|---|---|---|---|---|---|---|
-| — | — | — | — | — | — | — | — | — |
+| 2026-11-14 22:36 | borrowed Meta glasses, firmware not recorded | **glasses** (Echo Chef mode) | 2 min 14 s | 97.2 MB as recorded (6 Mbit/s); 23.5 MB after `scripts/shrink-take.swift` | 720×1280 H.264 + AAC mono 44.1 kHz, sound present throughout (−25…−34 dBFS; which mic is not known) | 4 (72.4, 86.2, 99.3, 121.2 s) | Phone upload **failed: HTTP 413** from Supabase (free-plan ~50 MB limit; fixed for new takes in `0cc6f9a`). Shrunk copy uploaded from the Mac with Echo's API calls: `POST /recipes` 201 → single `PUT` 23.5 MB in 1.6 s → `/process` 202 | **Yes, in ~33 s**: 5 steps (bread+mayo, lettuce, ham, cheese+close, cut), every still and clip loads, chef quotes from the narration, step 4 watches for `centered_cheese`. Recipe `ee755841…` reviewed by API only and **published** 2026-11-14 22:05 (HTTP 200). Leftover failed recipe `cc8bcefd…` stays in `uploading`. |
 
 ## Fixture sync (D-19, 2026-11-14)
 
