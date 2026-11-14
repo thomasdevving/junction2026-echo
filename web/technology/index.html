@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How Echo uses Meta glasses, Gemini and ElevenLabs to turn a chef’s method into hands-free cooking guidance.">
+  <meta name="theme-color" content="#06162c">
+  <title>Echo · Technology</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg?v=3">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/ui.css">
+  <link rel="stylesheet" href="technology.css">
+</head>
+<body class="technology-page">
+<header class="topbar tool-header">
+  <a class="brand" href="../" aria-label="Echo home"><img class="brand-symbol" src="../assets/logos/echo-ripple-mark.svg" width="32" height="32" alt=""><span class="brand-word">echo</span> <span class="brand-page">Technology</span></a>
+  <nav class="topnav" aria-label="Main">
+    <a href="../sim/">Simulator</a>
+    <a href="../review/">Review</a>
+    <a href="../monitor/">Monitor</a>
+    <a href="./" aria-current="page">Technology</a>
+  </nav>
+  <div class="tool-header-actions">
+    <button class="btn btn-ghost setup-trigger" type="button" data-open-setup>Glasses setup</button>
+    <button class="btn btn-icon btn-ghost" type="button" data-open-settings aria-label="Settings"></button>
+  </div>
+</header>
+<main class="technology">
+  <div class="technology-intro">
+    <p class="eyebrow">BEHIND THE EXPERIENCE</p>
+    <h1>The technology.<br>The chef’s point of view.</h1>
+    <p>Meta brings Echo to the glasses. Gemini turns the chef’s method into guidance. ElevenLabs gives prepared instructions a consistent voice.</p>
+  </div>
+  <div class="provider-tabs" role="tablist" aria-label="Explore Echo’s technology">
+    <button type="button" id="tab-meta" role="tab" aria-selected="true" aria-controls="meta" tabindex="0">Meta <span>The glasses</span></button>
+    <button type="button" id="tab-gemini" role="tab" aria-selected="false" aria-controls="gemini" tabindex="-1">Gemini <span>The understanding</span></button>
+    <button type="button" id="tab-elevenlabs" role="tab" aria-selected="false" aria-controls="elevenlabs" tabindex="-1">ElevenLabs <span>The voice</span></button>
+  </div>
+
+  <section class="provider" id="meta" role="tabpanel" aria-labelledby="tab-meta" tabindex="0">
+    <div class="provider-hero glass">
+      <div class="provider-copy">
+        <p class="eyebrow">META · DEVICE ACCESS TOOLKIT</p>
+        <h2>From the chef’s eyes.<br>To your side of the board.</h2>
+        <p>We use Meta’s Device Access Toolkit in the native Echo app to connect the glasses to an iPhone. The same first-person perspective captures the chef’s method and helps the learner follow it.</p>
+        <button class="btn btn-light" type="button" data-open-setup>How to connect the glasses <span data-icon="arrowRight"></span></button>
+      </div>
+      <figure class="glasses-visual">
+        <img src="../assets/smart-glasses.png" width="1774" height="887" alt="Black smart glasses floating against Echo’s blue background">
+        <figcaption>First-person capture. Guidance close at hand.</figcaption>
+      </figure>
+    </div>
+    <div class="meta-flow" aria-label="How Meta glasses fit into Echo">
+      <article><span class="stage-label">01 · CAPTURE</span><h3>The chef wears them once.</h3><p>Record the recipe while explaining what to do and why. Pinch to mark a new step without putting down the food.</p></article>
+      <article><span class="stage-label">02 · CONNECT</span><h3>The iPhone runs Echo.</h3><p>The native app connects camera, controls and supported lens display to the lesson. Pairing starts on the phone; the browser is for review, simulation and monitoring.</p></article>
+      <article><span class="stage-label">03 · FOLLOW</span><h3>Keep your hands on the task.</h3><p>Follow a short step card with the chef’s reference, request a check and receive a specific correction while cooking.</p></article>
+    </div>
+    <aside class="implementation-note"><span data-icon="info"></span><p>A real chef lesson has been recorded through the glasses and processed into a published recipe. The complete Cook flow on physical glasses still needs end-to-end validation.</p></aside>
+  </section>
+
+  <section class="provider" id="gemini" role="tabpanel" aria-labelledby="tab-gemini" tabindex="0" hidden>
+    <div class="provider-hero glass gemini-hero">
+      <div class="provider-copy">
+        <p class="eyebrow">GOOGLE DEEPMIND · GEMINI</p>
+        <h2>Understand the method.<br>Help with the next move.</h2>
+        <p>Gemini connects what the chef demonstrated with what the learner is doing. Its guidance uses the lesson’s reference images, visible success criteria and the chef’s narration.</p>
+        <a class="btn btn-light" href="../sim/">Try a check in the simulator <span data-icon="arrowRight"></span></a>
+      </div>
+      <div class="comparison-visual" aria-label="Illustrative example of reference-led feedback">
+        <p class="visual-label">REFERENCE-LED FEEDBACK · ILLUSTRATION</p>
+        <div class="reference-row"><img src="../assets/sandwich-step.webp" width="256" height="256" alt="Illustrative sandwich reference"><div><span class="stage-label">THE CHEF’S REFERENCE</span><strong>One even layer,<br>edge to edge.</strong></div></div>
+        <div class="reference-path" aria-hidden="true"></div>
+        <div class="correction"><span data-icon="warn"></span><div><strong>Filling piled up</strong><p>Spread it to the edges.</p></div></div>
+        <p class="visual-caption">A specific correction, grounded in the current step.</p>
+      </div>
+    </div>
+    <div class="capability-grid">
+      <article><span class="stage-label">01 · STRUCTURE</span><h3>A recording becomes a lesson.</h3><p>Extract timestamped steps, reference moments, success criteria and known mistakes from the chef’s video. The chef reviews the draft before publishing.</p></article>
+      <article><span class="stage-label">02 · CHECK</span><h3>Compare the work.</h3><p>Compare the learner’s camera frame with the current step and chef reference. Return Pass, a concrete Fix, or Can’t tell when the view is unclear.</p></article>
+      <article><span class="stage-label">03 · WATCH</span><h3>Catch a known mistake.</h3><p>The watcher looks for the lesson’s known mistakes between checks. Repeated confident detections trigger a short warning and spoken instruction.</p></article>
+      <article><span class="stage-label">04 · EXPLAIN</span><h3>Ask about the method.</h3><p>Gemini Live supports spoken questions using the lesson and the chef’s narration as context, so help stays connected to the recipe.</p></article>
+    </div>
+  </section>
+
+  <section class="provider" id="elevenlabs" role="tabpanel" aria-labelledby="tab-elevenlabs" tabindex="0" hidden>
+    <div class="provider-hero glass voice-hero">
+      <div class="provider-copy">
+        <p class="eyebrow">ELEVENLABS · TEXT TO SPEECH</p>
+        <h2>A clear voice.<br>Without looking away.</h2>
+        <p>We use ElevenLabs to prepare spoken lesson lines for the native app. Step instructions and familiar prompts can play from bundled recordings, keeping the voice consistent while your hands are busy.</p>
+        <p class="voice-detail">Echo plays the prepared recording when one is available and falls back to iOS speech for missing or dynamic lines.</p>
+      </div>
+      <div class="voice-visual" aria-label="Illustration of a prepared spoken instruction">
+        <p class="visual-label">A LESSON LINE, READY TO PLAY</p>
+        <div class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <blockquote>“Spread it to the edges.”</blockquote>
+        <span class="voice-tag">PREPARED AUDIO · ILLUSTRATION</span>
+      </div>
+    </div>
+    <ol class="voice-pipeline" aria-label="How the prepared voice works">
+      <li><span class="stage-label">LESSON TEXT</span><h3>Prepare the lines.</h3><p>Recipe instructions and common prompts are collected for the lesson.</p></li>
+      <li><span class="stage-label">ELEVENLABS</span><h3>Render the voice.</h3><p>Text-to-speech turns the prepared lines into audio recordings.</p></li>
+      <li><span class="stage-label">ECHO APP</span><h3>Play the right prompt.</h3><p>The app matches the line to its recording and plays it at the right moment.</p></li>
+    </ol>
+    <aside class="implementation-note"><span data-icon="info"></span><p>Prepared ElevenLabs playback is implemented with an iOS speech fallback. Re-voicing every live Gemini answer through ElevenLabs is still a separate integration step.</p></aside>
+  </section>
+  <footer class="technology-footer"><p>One chef’s method. Three technologies working together.</p><a href="../sim/">Explore Echo <span data-icon="arrowRight"></span></a></footer>
+</main>
+<script type="module" src="technology.js"></script>
+</body>
+</html>

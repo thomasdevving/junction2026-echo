@@ -56,7 +56,8 @@ a.tool:hover { transform: translateY(-5px); border-color: #b4daff77; background:
   .tool { padding: 20px; }
 }
 @media (max-width: 700px) {
-  .home-page .topbar { padding: 20px 24px; }
+  .home-page .topbar { padding: 20px 24px; flex-wrap: wrap; row-gap: 14px; }
+  .home-page .topnav { flex: 1 1 100%; justify-content: space-between; gap: 6px; }
   .home-page .topnav a:first-child { display: none; }
   .home { padding-inline: 24px; }
   .hero { grid-template-columns: 1fr; gap: 20px; padding-top: 30px; }

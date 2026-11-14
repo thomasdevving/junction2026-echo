@@ -465,7 +465,7 @@ kbd {
 
 .brand:has(.brand-symbol) { gap: 9px; }
 
-/* The same three destinations stay visible on every tool page. */
+/* Shared destinations stay visible on every tool page. */
 .tool-header { flex-wrap: wrap; gap: 16px; padding: 18px clamp(16px, 4vw, 56px); }
 .tool-header a.brand { font-size: 24px; flex: none; }
 .tool-header .brand-page { font-size: 16px; }
@@ -506,6 +506,7 @@ kbd {
   .tool-header .brand-page { font-size: 14px; }
   .tool-header-actions { gap: 3px; }
   .tool-header-actions .btn { padding-inline: 8px; font-size: 11px; }
-  .tool-header nav.topnav a { font-size: 13px; padding-inline: 16px; }
+  .tool-header nav.topnav { gap: 0; justify-content: space-between; }
+  .tool-header nav.topnav a { font-size: 12px; padding-inline: 10px; }
   .glasses-setup { padding: 23px; }
 }

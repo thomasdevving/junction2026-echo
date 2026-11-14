@@ -13,6 +13,7 @@ New here? Read [../README.md](../README.md), [../docs/PRODUCT.md](../docs/PRODUC
 | **Simulator** (`sim/`) — the cook-along loop in a browser with a webcam or uploaded photos | Lets `backend/` and `ai/` be tested end to end without the Mac or the glasses; last-resort demo fallback |
 | **Review page** (`review/`) — review, edit, publish recipes the iOS app recorded; plus an MP4 upload as a **dev fallback** | A Must in the spec; the chef records in the app's Chef mode (`ios/`), and reviews here on a laptop |
 | **Demo monitor** (`monitor/`) — live view of a running session | The audience cannot see inside a lens |
+| **Technology** (`technology/`) — public Meta → Gemini → ElevenLabs tabs | Explains each integration, with Meta selected first and implementation boundaries made clear |
 | **Pitch pack** (`pitch/`) — one-liners, deck, evidence, Q&A, user notes | Judging |
 | Demo kit, run sheet, backup recording, **submission** | Deadlines |
 
@@ -40,6 +41,7 @@ Optional: Node 18+ to run the web tests (`node --test "web/tests/*.test.mjs"`; N
 ```
 web/
   index.html              landing page: Simulator · Review · Monitor · Settings
+  technology/ index.html  technology.css  technology.js
   shared/
     config.js             API base + demo key (localStorage; defaults to same origin under /app/)
     api.js                fetch wrapper: X-Demo-Key, error envelope → ApiError, multipart helpers, signed-URL video PUT
