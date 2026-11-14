@@ -12,10 +12,10 @@ Four people, four laptops, four folders. You work in exactly one folder, so nobo
 
 | Owner | Track | Open | Machine | First batch |
 |---|---|---|---|---|
-| **Thomas** | The iPhone / glasses app | [ios/README.md](ios/README.md) | **The Mac** + an iPhone | [IOS-01](ios/tasks/01-project-foundation.md) |
-| **Stelios** | The API, storage, deployment | [backend/README.md](backend/README.md) | Any | [BE-01](backend/tasks/01-skeleton-and-mock-api.md) |
+| **Thomas** | Web tools and the iPhone / glasses app | [web/README.md](web/README.md) · [ios/README.md](ios/README.md) | Any for web; **the Mac** + an iPhone for iOS | [WEB-01](web/tasks/01-foundation-and-simulator.md) · [IOS-01](ios/tasks/01-project-foundation.md) |
+| **Stylianos** | The API, storage, deployment | [backend/README.md](backend/README.md) | Any | [BE-01](backend/tasks/01-skeleton-and-mock-api.md) |
 | **Aleksandr** | Prompts, Gemini calls, evaluation | [ai/README.md](ai/README.md) | Any | [AI-01](ai/tasks/01-package-skeleton-and-fixture.md) |
-| **Türker** | Web tools, pitch, demo, submission | [web/README.md](web/README.md) | Any | [WEB-05 task 1](web/tasks/05-demo-ops-and-submission.md), then [WEB-01](web/tasks/01-foundation-and-simulator.md) |
+| **Türker** | The iPhone / glasses app (with Thomas) | [ios/README.md](ios/README.md) | **The Mac** + an iPhone | [IOS-01](ios/tasks/01-project-foundation.md) |
 
 Track sizes and the hand-over rule: [docs/PLAN.md §2](docs/PLAN.md#2-four-tracks-four-folders-four-laptops).
 

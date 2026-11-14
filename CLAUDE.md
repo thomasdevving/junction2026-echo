@@ -24,5 +24,6 @@ Junction 2026 hackathon project. Four people work in parallel on four laptops, o
 
 - Trunk-based on `main`. Commit small and often, message prefix = track: `[ios] …`, `[backend] …`, `[ai] …`, `[web] …`, `[docs] …`.
 - Before every push: `git pull --rebase origin main`. Never force-push. Never rewrite history.
+- Commits and pushes made by this assistant use GitHub account `thomasdevving`. Verify `gh api user --jq .login` before pushing. Use repo-local author `thomasdevving` and `242667605+thomasdevving@users.noreply.github.com`. This applies to the assistant’s work; preserve other contributors’ authorship.
 - A commit touches one track folder only. This is what keeps four laptops free of merge conflicts.
 - Commit or push only when the user asks you to.

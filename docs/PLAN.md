@@ -20,14 +20,14 @@ Each laptop works in exactly one folder. No two tracks ever edit the same file, 
 
 | Track | Folder | Machine | Size | Owner | What it delivers |
 |---|---|---|---|---|---|
-| **iOS** | [`ios/`](../ios/README.md) | **The Mac** (Xcode) + iPhone | **Largest and riskiest — 8 batches** | **Thomas** (the Mac; largest Claude allowance) | The app on the phone and glasses: Chef mode (record) and Cook mode (follow along) |
-| **Backend** | [`backend/`](../backend/README.md) | Any | Large — 7 batches, integration hub | **Stelios** | API, storage, ffmpeg, deploy, end-to-end tests |
+| **iOS** | [`ios/`](../ios/README.md) | **The Mac** (Xcode) + iPhone | **Largest and riskiest — 8 batches** | **Thomas and Türker** | The app on the phone and glasses: Chef mode (record) and Cook mode (follow along) |
+| **Backend** | [`backend/`](../backend/README.md) | Any | Large — 7 batches, integration hub | **Stylianos** | API, storage, ffmpeg, deploy, end-to-end tests |
 | **AI** | [`ai/`](../ai/README.md) | Any | Medium — 7 smaller batches, one is physical (filming) | **Aleksandr** | Every prompt and Gemini call, fixture recipe, evaluation |
-| **Web** | [`web/`](../web/README.md) | Any | Medium-light in code — 5 batches; carries users, pitch, demo, submission | **Türker** | Simulator, review page, demo monitor, pitch pack, submission |
+| **Web** | [`web/`](../web/README.md) | Any | Medium-light in code — 5 batches; carries users, pitch, demo, submission | **Thomas** | Simulator, review page, demo monitor, pitch pack, submission |
 
-**Owners** were assigned by the team on 2026-11-14. The `ai/` and `web/` assignment was arbitrary (either person could take either) and the two may swap by agreement. TECH-SPEC lists the Gemini SDK calls and the review web page under Stelios; in this four-way split they move to `ai/` (Aleksandr) and `web/` (Türker), and Stelios's backend imports and serves them. Chef-mode recording is part of the iOS app (Thomas).
+**Ownership updated by the team on 2026-11-15:** Thomas owns Web and shares iOS with Türker. Stylianos owns Backend; Aleksandr owns AI. The backend imports the AI package and serves the web tools. Chef-mode recording remains part of the iOS app.
 
-**The heavier load.** The Mac owner has the largest Claude allowance (team, 2026-11-14), and `ios/` is the largest and riskiest track, so the two line up: no rebalancing is needed. `backend/` is the second-largest. The limit on `ios/` is time at the one Mac, not usage, so a second person pairs there during IOS-06 (risk R-06).
+**Shared iOS work.** Thomas and Türker coordinate work on the Mac and keep one active writer per folder. Web work remains with Thomas; backend integration remains with Stylianos.
 
 **Hand-over rule.** A batch may be run by someone outside the track only when the track owner hands it over explicitly and stops working in that folder until the batch is pushed. One writer per folder at a time.
 
