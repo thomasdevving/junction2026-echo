@@ -87,6 +87,14 @@ The local backend ran on port 8100 with `GHOSTCHEF_AI_FAKE=1`, `STORAGE=memory`,
 
 Pending: actual iOS/glasses session (WEB-03.6), observed end-to-end delay on hardware, comparison with the iPhone lens preview, readability from three metres, Safari, and real camera use. Batch remains PARTIAL until those acceptance checks are run.
 
+## Public homepage connection and app entry (2026-11-14)
+
+The public homepage and logo gallery now probe `/health` only. They no longer query the private recipe library or show “Key rejected” merely because a visitor has not entered the demo key. Healthy real-AI service reads **Service online**; fake and offline states remain explicit. Simulator, Review and Monitor still verify the key-protected library. Failed library requests no longer appear as live; settings changes and newer probes supersede older status responses. No key was embedded and no backend access rule was changed.
+
+The header and hero both have **Open web app** links to the browser cook-along (`sim/`), with a browser-demo note. The technical Simulator label remains in the tools section.
+
+Verification: **37/37 web tests pass**, including public health without a private-library request, retained tool-key checks, fake/offline warnings and library-failure reporting. Real production `/health` is public; private tool use still requires the team’s demo key in Settings.
+
 ## WEB-04 finalization dependencies (2026-11-14)
 
 Scope confirmed by the web owner: finalize WEB-04 using AI-07 numbers and IOS-06 device facts. Pitch slot: **3 minutes** (user-confirmed; not independently checked with organizers). The user confirmed that no external user sessions or instructor conversation have happened. **Not yet tested with users. No instructor conversation happened.** Any pilot remains a proposed pilot.

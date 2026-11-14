@@ -32,7 +32,7 @@
 </main>
 <script type="module">
 import {mountChrome} from '../shared/chrome.js'; import {icon} from '../shared/icons.js';
-document.querySelector('[data-open-settings]').innerHTML=icon('gear',{size:21}); mountChrome();
+document.querySelector('[data-open-settings]').innerHTML=icon('gear',{size:21}); mountChrome({requiresKey:false});
 </script>
 </body>
 </html>

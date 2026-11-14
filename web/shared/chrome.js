@@ -2,7 +2,7 @@
 // footer status strip that always shows what this page is talking to.
 
 import { getConfig, setConfig, CONFIG_EVENT, DEFAULTS } from "./config.js";
-import { health, listRecipes, ApiError } from "./api.js";
+import { probeConnection } from './connection.js';
 import { icon } from "./icons.js";
 
 const POLL_MS = 10000;
@@ -77,13 +77,14 @@ function settingsDialog() {
   };
 }
 
-function statusStrip(openSettings, shouldPoll) {
+function statusStrip(openSettings, shouldPoll, requiresKey) {
   const strip = document.createElement("footer");
   strip.className = "status-strip";
   strip.setAttribute("aria-live", "polite");
   document.body.append(strip);
 
   let last = { state: "checking" };
+  let generation = 0;
 
   function draw(s) {
     last = s;
@@ -103,7 +104,7 @@ function statusStrip(openSettings, shouldPoll) {
         break;
       default: {
         const fake = s.h.ai_mode === "fake";
-        html = `${fake ? `<span class="status-flag">${icon("warn", { size: 18 })}Fake AI</span>` : `<span class="status-flag">Live</span>`}${base}<span class="status-item">ai_mode <b>${s.h.ai_mode}</b></span><span class="status-item">storage <b>${s.h.storage}</b></span><span class="status-item">contract <b>${s.h.contract_version}</b></span>`;
+        html = `${fake ? `<span class="status-flag">${icon("warn", { size: 18 })}Fake AI</span>` : `<span class="status-flag">${requiresKey ? 'Live' : 'Service online'}</span>`}${base}<span class="status-item">ai_mode <b>${s.h.ai_mode}</b></span><span class="status-item">storage <b>${s.h.storage}</b></span><span class="status-item">contract <b>${s.h.contract_version}</b></span>`;
       }
     }
     const needsKey = s.state === "unauthorized" || s.state === "down";
@@ -114,26 +115,16 @@ function statusStrip(openSettings, shouldPoll) {
 
   async function poll() {
     if (!shouldPoll()) return;
-    let h;
-    try {
-      h = await health();
-    } catch (e) {
-      draw({ state: "down", detail: e instanceof ApiError ? e.message : "No answer" });
-      return;
-    }
-    try {
-      await listRecipes("published");
-      draw({ state: h.ai_mode === "fake" ? "fake" : "ok", h });
-    } catch (e) {
-      if (e instanceof ApiError && e.status === 401) draw({ state: "unauthorized", h });
-      else draw({ state: h.ai_mode === "fake" ? "fake" : "ok", h });
-    }
+    const version = ++generation;
+    const result = await probeConnection({ requiresKey });
+    if (version === generation) draw(result);
   }
 
   draw(last);
   poll();
   let timer = setInterval(poll, POLL_MS);
   addEventListener(CONFIG_EVENT, () => {
+    generation++;
     draw({ state: "checking" });
     clearInterval(timer);
     poll();
@@ -148,9 +139,9 @@ function statusStrip(openSettings, shouldPoll) {
 }
 
 /** Wire the gear button (any element with [data-open-settings]) and the footer strip. */
-export function mountChrome({ shouldPoll = () => true } = {}) {
+export function mountChrome({ shouldPoll = () => true, requiresKey = true } = {}) {
   const settings = settingsDialog();
   document.querySelectorAll("[data-open-settings]").forEach((b) => b.addEventListener("click", () => settings.open()));
-  const status = statusStrip(() => settings.open(), shouldPoll);
+  const status = statusStrip(() => settings.open(), shouldPoll, requiresKey);
   return { settings, status };
 }
