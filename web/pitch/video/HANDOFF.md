@@ -91,13 +91,12 @@ Requirements: Node 24, ffmpeg (the whisper filter only for transcription), Chrom
 
 1. **Footage judder (user: "hand is shaking, like glitching").** Cause: the take is variable frame rate with dropped
    frames (gaps 15–107 ms), and seeking it to exact 1/30 s boundaries could pick neighbouring frames out of order.
-   Fix written but **not yet verified**: `FOOTAGE.src` points at `footage/chef-take-30.mp4` (motion-interpolated
-   constant 30 fps, keyframe every 15 frames) and paused seeks aim at frame centres (`film/footage.js`). To do:
-   `npm run footage:prep`, check the interpolated picture for warping on hands/knife (if bad, replace `minterpolate`
-   with plain `fps=30` in `prep-footage.mjs`), then `npm run film -- --fresh` and step through 0:21–0:23 and 0:44–0:47.
-2. Fixed in the page, MP4 not rebuilt yet: lens card corners (counter and watching dot were clipped), black bands
-   around the source boards, clipped "g" descender / "s" overhang in gradient headlines (`shared/tokens.css`).
-   Covered by the `--fresh` rebuild in 1.
+   **Fixed and verified (2026-11-15):** `FOOTAGE.src` points at `footage/chef-take-30.mp4` (motion-interpolated
+   constant 30 fps, keyframe every 15 frames; no warping seen on hands/knife) and paused seeks aim at frame centres.
+   The cutting shot steps forward evenly in the rebuilt MP4. On a new computer run `npm run footage:prep` (or copy
+   `chef-take-30.mp4`).
+2. Done: lens card corners, board bands and the "g"/"s" glyph clipping are fixed and in the rebuilt MP4
+   (`npm run film -- --fresh`, 97.00 s, −16.2 LUFS).
 3. Listen to the whole MP4 once with sound (music taste, voices, chef isolation): numbers were checked, ears weren't.
 4. For the web app (not the film): `web/shared/lens.css` rounds `.lens` with `border-radius: 6cqw`, which resolves
    against an outer container rather than the card; the film overrides it with `6%`. Worth fixing in the app.
