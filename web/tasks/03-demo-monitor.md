@@ -38,7 +38,7 @@ A single full-screen page that attaches itself to the running session and shows,
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ Ghost Chef · Maki roll · Step 3 of 6: Spread rice              ● LIVE    │
+│ Echo · Maki roll · Step 3 of 6: Spread rice              ● LIVE    │
 ├───────────────────────┬───────────────────────┬──────────────────────────┤
 │  CHEF'S REFERENCE     │  WEARER'S VIEW        │  IN THE LENS             │
 │  [ref image]          │  [latest frame]       │  [lens card]             │

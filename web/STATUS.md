@@ -16,7 +16,7 @@ Status words: `DONE`, `DONE (fake)`, `PARTIAL`, `BLOCKED`, `NOT STARTED` (define
 
 ## WEB-01 verification (2026-11-14, fake mode)
 
-Run against `backend/` at commit 14a8623 on `localhost:8000`, `STORAGE=memory`, `GHOSTCHEF_AI_FAKE=1`, in the Claude desktop app's built-in Chromium. Served both from the backend (`/app/`) and standalone (`python -m http.server 5173`, cross-origin). All results below are **fake-mode**; no Gemini call was made.
+Run against `backend/` at commit 14a8623 on `localhost:8000`, `STORAGE=memory`, `ECHO_AI_FAKE=1`, in the Claude desktop app's built-in Chromium. Served both from the backend (`/app/`) and standalone (`python -m http.server 5173`, cross-origin). All results below are **fake-mode**; no Gemini call was made.
 
 | Criterion | Result |
 |---|---|
@@ -63,7 +63,7 @@ The homepage now links Review and explains how a lesson is made: the chef wears 
 Verification observed in this session:
 
 - `node --test web/tests/*.test.mjs`: **33/33 pass** (23 existing plus 10 review tests). Syntax and `git diff --check` pass. New tests cover consent/MP4/size validation, word and numeric limits, stable unique mistake IDs, duplicate/blank watch-fors, independent drafts, signed reference URLs, authenticated API shapes and unsigned upload headers/progress/abort/errors.
-- An isolated local BE-07 server ran on `localhost:8101`, **`GHOSTCHEF_AI_FAKE=1`, `STORAGE=memory`**, with its own data directory. A generated 160-second colour-pattern MP4 was used; no person, chef footage, production mutation or Gemini request was involved.
+- An isolated local BE-07 server ran on `localhost:8101`, **`ECHO_AI_FAKE=1`, `STORAGE=memory`**, with its own data directory. A generated 160-second colour-pattern MP4 was used; no person, chef footage, production mutation or Gemini request was involved.
 - DOM integration walk-through (temporary jsdom harness, real local HTTP/XHR): missing consent makes no create call; MP4 PUT sends only its Content-Type header; upload → processing → review completes without a page reload. Five-word title makes no PATCH; valid text and added watch-for persist in backend reads, with ID fixed after saving. Metadata persists; publishing adds the recipe to `GET /recipes?status=published` (the simulator’s picker source). Typed-title deletion removes the disposable recipe (subsequent GET 404).
 - Re-picking a numeric timestamp changes the actual JPEG byte hash returned by ffmpeg, and the reference preview gets a cache-busting parameter. `422` for a timestamp beyond the source video is displayed beside the step. List refresh preserves unsaved text and blocks publish until saved.
 - Failed PUT is retried using the same recipe/upload URL, with no duplicate create. Library, pending-status and shared health polling make no new calls while hidden and resume on visibility. Protected-demo deletion returns its refusal without offering force-delete. A recipe created by another client appears automatically; invalid MP4 content reaches `failed` and shows the backend’s “not a readable MP4” reason. Wrong-key Settings state recovers after restoring the local test key. The integration runs reported no DOM runtime exceptions.
@@ -75,7 +75,7 @@ Not verified: real Gemini extraction through this page, production signed-video 
 
 Implemented `monitor/` using the existing session/monitor API, shared settings, shared lens renderer and status strip. One-second feed polling never overlaps; discovery checks every five seconds, follows new sessions, respects a picker or URL pin, and pauses while hidden or playing backup video. Last good data stays visible on connection loss. The actual lens panel remains black and is explicitly labelled as a reconstruction. Frame URLs are changed only when `last_frame_at` changes, preserving signed query parameters.
 
-The local backend ran on port 8100 with `GHOSTCHEF_AI_FAKE=1`, `STORAGE=memory`, isolated data under `/tmp`, and the sandwich fixture. No Gemini, production database or physical glasses were used.
+The local backend ran on port 8100 with `ECHO_AI_FAKE=1`, `STORAGE=memory`, isolated data under `/tmp`, and the sandwich fixture. No Gemini, production database or physical glasses were used.
 
 - `node --test "web/tests/*.test.mjs"`: **23/23 pass**. Covers reconstruction precedence and expiration, stale-step results, LIVE/IDLE/OFFLINE/REPLAY boundaries, signed frame URL handling, session switching/pinning, no overlapping slow polls, and hidden/replay pause behaviour.
 - Shared Chromium: started the sandwich recipe in the simulator in another tab; the monitor attached automatically. Restarted the simulator and selected the recipe again; the monitor moved to the new session and cleared old frames/events.
@@ -136,7 +136,7 @@ WEB-04 is blocked on those final inputs. No demo, recording, fabricated metrics 
 | Q-08d | Is the MIT licence required for the repository? | — | |
 | Q-09 | Are cooked food and knives allowed at the stand and on stage? | — | |
 | Q-10 | A cooking instructor or school we can talk to before Sunday? | — | |
-| Q-12 | Final product name (repository is `statai`, concept is "Ghost Chef") | — | |
+| Q-12 | Final product name (repository is `statai`) | **Echo** (was "Ghost Chef"); renamed in every folder | Team, 2026-11-14 |
 
 ## Demo kit
 
@@ -177,7 +177,7 @@ Backup recording: none yet.
 ## Repository checks (WEB-05.6, 2026-11-14 01:20)
 
 - Secret scan: `git log --all -p | grep -n -i -E "service_role|api[_-]?key\s*=|AIza|secret"` over all branches. Every hit is code that reads a key, an empty `.example` value, or a test placeholder (`dev-key`, `replace-me`, `secret-demo`). No real key, no `AIza`, no `service_role` value. **Clean.** Re-run before the final submission.
-- Committed images: only the 12 generated step placeholders (`ai/fixtures/images/`, `ios/GhostChef/Resources/Fixtures/images/`, made by `ai/scripts/make_placeholders.py`). No faces or bystanders. `ai/eval/frames/` and `web/pitch/` hold no images yet.
+- Committed images: only the 12 generated step placeholders (`ai/fixtures/images/`, `ios/Echo/Resources/Fixtures/images/`, made by `ai/scripts/make_placeholders.py`). No faces or bystanders. `ai/eval/frames/` and `web/pitch/` hold no images yet.
 
 ## Needs from other tracks
 
