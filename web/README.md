@@ -1,6 +1,6 @@
 # Track: `web/` — simulator, review page, demo monitor, pitch and submission
 
-**Owner: Türker**
+**Owner: Thomas**
 
 You own three small browser apps and everything that faces people outside the team: user conversations, the pitch pack, demo operations, and the submission. The code here is the lightest of the four tracks; the non-code work (users, deck, rehearsal, forms) is what usually gets forgotten at hackathons, so it has an owner: you.
 

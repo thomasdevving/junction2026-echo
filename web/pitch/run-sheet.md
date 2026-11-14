@@ -70,7 +70,7 @@ Short slot: drop 6 and 7. Watcher cut: beat 3 becomes beat 5 doing the catch.
 
 | Subsystem | Owner | Phone / handle |
 |---|---|---|
-| iOS app, glasses, Device Access Toolkit | Thomas | ⟨fill⟩ |
-| Backend, Railway, Supabase, emergency laptop | Stelios | ⟨fill⟩ |
+| iOS app, glasses, Device Access Toolkit | Thomas and Türker | ⟨fill⟩ |
+| Backend, Railway, Supabase, emergency laptop | Stylianos | ⟨fill⟩ |
 | Gemini, prompts, watch threshold | Aleksandr | ⟨fill⟩ |
-| Monitor, simulator, this sheet, submission | Türker | ⟨fill⟩ |
+| Monitor, simulator, this sheet, submission | Thomas | ⟨fill⟩ |
