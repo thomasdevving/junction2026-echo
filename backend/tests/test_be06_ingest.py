@@ -330,9 +330,7 @@ async def test_only_one_ingestion_at_a_time(app, take_bytes, monkeypatch):
                 created = (
                     await c.post("/recipes", headers=h, json={"title": "S", "consent": True})
                 ).json()
-                up = await c.put(
-                    created["upload_url"].replace("http://t", ""), content=take_bytes
-                )
+                up = await c.put(created["upload_url"].replace("http://t", ""), content=take_bytes)
                 assert up.status_code == 200
                 assert (
                     await c.post(f"/recipes/{created['recipe_id']}/process", headers=h)
@@ -539,9 +537,7 @@ def test_patch_timestamp_with_source_video_gone(client, auth, take_bytes):
     assert r.json()["error"]["message"] == "source video is gone"
 
 
-def test_patch_timestamp_extraction_failure_keeps_old_still(
-    client, auth, take_bytes, monkeypatch
-):
+def test_patch_timestamp_extraction_failure_keeps_old_still(client, auth, take_bytes, monkeypatch):
     from app.routers import steps as steps_router
 
     _, body = ingest_video(client, auth, take_bytes)

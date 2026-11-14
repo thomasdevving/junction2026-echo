@@ -51,7 +51,9 @@ def _key(cli: str | None) -> str:
 def _duration_s(path: Path) -> float:
     out = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
-        check=True, capture_output=True, text=True,
+        check=True,
+        capture_output=True,
+        text=True,
     ).stdout
     return float(out.strip())
 
@@ -68,11 +70,35 @@ def make_mp4(target_mb: float, out: Path) -> int:
     video_kbps = max(100, int(target_mb * 8_000 / duration) - audio_kbps)
     rate = f"{video_kbps}k"
     subprocess.run(
-        ["ffmpeg", "-loglevel", "error", "-y", "-i", str(REAL_TAKE),
-         "-c:v", "libx264", "-preset", "ultrafast",
-         "-b:v", rate, "-minrate", rate, "-maxrate", rate, "-bufsize", "2000k",
-         "-x264-params", "nal-hrd=cbr", "-c:a", "aac", "-b:a", f"{audio_kbps}k",
-         "-movflags", "+faststart", str(out)],
+        [
+            "ffmpeg",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            str(REAL_TAKE),
+            "-c:v",
+            "libx264",
+            "-preset",
+            "ultrafast",
+            "-b:v",
+            rate,
+            "-minrate",
+            rate,
+            "-maxrate",
+            rate,
+            "-bufsize",
+            "2000k",
+            "-x264-params",
+            "nal-hrd=cbr",
+            "-c:a",
+            "aac",
+            "-b:a",
+            f"{audio_kbps}k",
+            "-movflags",
+            "+faststart",
+            str(out),
+        ],
         check=True,
     )
     return out.stat().st_size
@@ -89,23 +115,38 @@ def tus_upload(rec: dict, data: bytes) -> bool:
     tus = {"Tus-Resumable": "1.0.0", "x-signature": rec["upload_token"]}
     meta = ",".join(
         f"{k} {b64(v)}"
-        for k, v in [("bucketName", rec["bucket"]), ("objectName", rec["object_path"]),
-                     ("contentType", "video/mp4")]
+        for k, v in [
+            ("bucketName", rec["bucket"]),
+            ("objectName", rec["object_path"]),
+            ("contentType", "video/mp4"),
+        ]
     )
     t0 = time.monotonic()
     with httpx.Client(timeout=120) as c:
-        r = c.post(rec["resumable_endpoint"],
-                   headers={**tus, "Upload-Length": str(len(data)), "Upload-Metadata": meta,
-                            "x-upsert": "true"})
+        r = c.post(
+            rec["resumable_endpoint"],
+            headers={
+                **tus,
+                "Upload-Length": str(len(data)),
+                "Upload-Metadata": meta,
+                "x-upsert": "true",
+            },
+        )
         print(f"    TUS create: {_short(r)}")
         if r.status_code != 201:
             return False
         loc = httpx.URL(rec["resumable_endpoint"]).join(r.headers["Location"])
         off = n = 0
         while off < len(data):
-            r = c.patch(loc, content=data[off:off + CHUNK],
-                        headers={**tus, "Upload-Offset": str(off),
-                                 "Content-Type": "application/offset+octet-stream"})
+            r = c.patch(
+                loc,
+                content=data[off : off + CHUNK],
+                headers={
+                    **tus,
+                    "Upload-Offset": str(off),
+                    "Content-Type": "application/offset+octet-stream",
+                },
+            )
             if r.status_code != 204:
                 print(f"    TUS patch @ {off}: {_short(r)}")
                 return False
@@ -124,8 +165,10 @@ def put_upload(rec: dict, data: bytes) -> bool:
 
 def probe(c: httpx.Client, path: Path, size: int, method: str, poll_s: float) -> None:
     print(f"  [{method}] {size:,} bytes ({size / 2**20:.2f} MiB)")
-    r = c.post("/recipes", json={"title": f"upload probe {method} {size}", "consent": True,
-                                 "step_marks_s": MARKS})
+    r = c.post(
+        "/recipes",
+        json={"title": f"upload probe {method} {size}", "consent": True, "step_marks_s": MARKS},
+    )
     print(f"    POST /recipes: {r.status_code}")
     r.raise_for_status()
     rec = r.json()
@@ -144,8 +187,10 @@ def probe(c: httpx.Client, path: Path, size: int, method: str, poll_s: float) ->
                 body = c.get(f"/recipes/{rid}").json()
                 st = body.get("status")
                 if st != last:
-                    print(f"    t+{time.monotonic() - t0:4.0f}s status={st} "
-                          f"error={body.get('error')!r} steps={len(body.get('steps') or [])}")
+                    print(
+                        f"    t+{time.monotonic() - t0:4.0f}s status={st} "
+                        f"error={body.get('error')!r} steps={len(body.get('steps') or [])}"
+                    )
                     last = st
                 if st in ("review", "failed", "published"):
                     break
@@ -159,14 +204,21 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--base", default="http://localhost:8000")
     ap.add_argument("--key")
-    ap.add_argument("--mb", type=float, action="append", required=True,
-                    help="target size in MB (10^6 bytes); repeatable")
+    ap.add_argument(
+        "--mb",
+        type=float,
+        action="append",
+        required=True,
+        help="target size in MB (10^6 bytes); repeatable",
+    )
     ap.add_argument("--method", choices=["tus", "put"], action="append")
     ap.add_argument("--poll", type=float, default=180, help="seconds to poll after /process")
     a = ap.parse_args()
     methods = a.method or ["tus", "put"]
-    with tempfile.TemporaryDirectory(prefix="echo-upload-probe-") as tmp, \
-            httpx.Client(base_url=a.base, headers={"X-Demo-Key": _key(a.key)}, timeout=60) as c:
+    with (
+        tempfile.TemporaryDirectory(prefix="echo-upload-probe-") as tmp,
+        httpx.Client(base_url=a.base, headers={"X-Demo-Key": _key(a.key)}, timeout=60) as c,
+    ):
         print(f"{a.base} /health: {httpx.get(a.base + '/health', timeout=20).text}")
         for mb in a.mb:
             path = Path(tmp) / f"probe-{mb}.mp4"

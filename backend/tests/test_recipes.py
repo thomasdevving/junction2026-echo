@@ -193,7 +193,7 @@ def test_upload_process_review_publish_flow(client, auth, take_bytes):
     assert r.status_code == 409
     assert r.json()["error"]["code"] == "recipe_not_ready"
 
-    deadline = time.monotonic() + 5
+    deadline = time.monotonic() + 60  # real chef take: ffmpeg stills + clips take seconds
     status = None
     while time.monotonic() < deadline:
         body = client.get(f"/recipes/{rid}", headers=auth).json()

@@ -187,8 +187,12 @@ async def test_signed_resumable_upload_with_ios_headers(store_and_recipe):
     with httpx.Client(timeout=60) as c:
         r = c.post(
             up["resumable_endpoint"],
-            headers={**tus, "Upload-Length": str(len(TINY_MP4)), "Upload-Metadata": meta,
-                     "x-upsert": "true"},
+            headers={
+                **tus,
+                "Upload-Length": str(len(TINY_MP4)),
+                "Upload-Metadata": meta,
+                "x-upsert": "true",
+            },
         )
         assert r.status_code == 201, (r.status_code, r.text[:200])
         location = httpx.URL(up["resumable_endpoint"]).join(r.headers["Location"])
