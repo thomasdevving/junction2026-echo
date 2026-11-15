@@ -1,98 +1,101 @@
-# Echo — product brief
+# Echo — product
 
-> Scope, audience, and what we may claim. The technical concept is [TECH-SPEC.md](TECH-SPEC.md); this file adds the audience, trust, and judging-facing framing the spec does not cover.
->
-> Labels: **[TEAM]** stated by the team · **[VERIFIED]** checked against a public source on 2026-11-13 · **[REC]** recommendation · **[OPEN]** not yet known or not yet tested.
+## One sentence
 
-## 1. One sentence
+A chef records a recipe once through smart glasses. Anyone wearing the glasses can then cook it hands-free while Gemini compares what they are doing with the chef's own point-of-view footage, corrects mistakes as they happen, and answers questions in the chef's method.
 
-A chef records a recipe once through smart glasses; anyone wearing the glasses can then cook it hands-free while Gemini compares what they are doing with the chef's own point-of-view footage, corrects mistakes as they happen, and answers questions in the chef's method. **[TEAM]**
+## The problem
 
-## 2. The problem
+Learning a hands-on technique from a video breaks at the moment it matters:
 
-Learning a hands-on technique from a video breaks at the exact moment it matters:
+- **Your hands are wet, sticky, or holding a knife.** You can't pause, scrub or search a phone.
+- **The video can't see your board.** You find out the filling was all in the middle when the sandwich falls apart at the first bite.
+- **A teacher's attention doesn't scale.** A teacher fixes this by glancing at your hands and saying one sentence, but that only works for a small class.
 
-- Your hands are wet, sticky, or holding a knife, so you cannot pause, scrub, or search a phone.
-- The video cannot see your board. You find out the filling was all in the middle when the sandwich falls apart at the first bite.
-- A human instructor fixes this by glancing at your hands and saying one sentence. That attention does not scale beyond a small class.
+The usual alternatives each miss something:
 
-The ordinary alternatives are a phone propped against a jar (no feedback, needs touching), a recipe app with voice control (no eyes on your work), and a generic visual assistant (not grounded in this chef's method, does not know which step you are on).
+| Alternative | What it misses |
+|---|---|
+| A phone propped against a jar | No feedback, and you have to touch it |
+| A recipe app with voice control | Nothing watches your work |
+| A generic visual assistant | It doesn't know this chef's method or which step you're on |
 
-## 3. Audience
+## Who it is for
 
 | Who | Situation | What they get |
 |---|---|---|
-| **Primary: a home cook learning a specific dish from a specific chef** | Hands busy and messy, following along for the first or second time | Step cards in the lens, a check against the chef's reference when asked, a warning when a known mistake appears, spoken answers |
-| **Secondary: the chef or instructor** | Teaches the same technique repeatedly | Records once in the app's Chef mode while cooking normally, pinching to mark each new step; reviews and corrects the extracted steps on a web page |
+| **A home cook learning a specific dish from a specific chef** | Hands busy, following the dish for the first or second time | Step cards in the lens, a check against the chef's reference on request, a warning when a known mistake appears, spoken answers |
+| **The chef or instructor** | Teaches the same technique again and again | Records once while cooking normally, pinching to mark steps. Reviews and corrects the extracted steps on a web page |
 
-**[OPEN]** Nobody outside the team has used it yet. Observed sessions with 2–3 novices are a task in [web/tasks/04](../web/tasks/04-user-evidence-and-pitch-pack.md).
+## Why glasses
 
-## 4. Why glasses, and why the wearer's perspective
+- **Same viewpoint on both sides.** The chef's reference is filmed from eye level looking down at the board. The learner's frame comes from the same place. Comparing like with like is what makes "does mine look like the chef's?" answerable.
+- **Hands stay on the food.** Input is a pinch, a swipe or speech. Output is two short lines in the lens and one spoken sentence.
+- **The system can speak first.** The camera already sees the work, so a known mistake can be flagged before the learner knows to ask.
 
-- **Same viewpoint on both sides.** The chef's reference is recorded from eye level looking down at the board. The learner's frame comes from the same position. Comparing like with like is what makes "does mine look like the chef's?" answerable. A propped phone sees a different angle from the one the lesson was filmed at.
-- **Hands stay on the food.** Input is a pinch, a swipe, or speech. Output is two short lines in the lens plus one spoken sentence.
-- **The system can speak first.** Because the camera already sees the work, a mistake can be flagged before the learner knows to ask.
+The phone stays in a pocket during the cook-along. The lens is not a mirrored phone screen.
 
-This is not a mirrored phone screen: the phone is in a pocket for the whole cook-along.
+## User journeys
 
-## 5. User journeys
+**Chef, once per recipe:**
+1. Open Echo in **Chef mode** and consent to recording.
+2. Cook wearing the glasses and talk through it, pinching at each new step. The lens shows "● REC".
+3. Stop. The take uploads.
+4. Gemini returns steps with timestamps, the chef's quotes, success criteria and common mistakes, using the pinch marks as hints.
+5. Fix wording and re-pick reference frames on the review page, then publish.
 
-**Chef (once per recipe).** Open the app in **Chef mode** → cook the dish wearing the glasses and talk through each step, pinching to mark each new step (the lens shows "● REC") → stop → the app uploads the video → Gemini returns steps with timestamps, success criteria, and common mistakes, using the pinch marks as hints → the chef fixes wording and re-picks any reference frame on the review web page → publish.
+**Cook, every time:**
+1. Open **Cook mode** and pick a recipe. All images and clips download before cooking starts.
+2. For each step, see the step card with the chef's reference still.
+3. If the watcher spots a known mistake, it warns you; you can also pinch or say "check" yourself. *Pass* moves you to the next step. *Fix* shows the reference and one instruction: fix it, re-check, pass.
+4. Ask a question out loud at any time.
+5. At the end, a Done summary.
 
-**Cook (every time).** Open the app in **Cook mode** → pick the recipe from the library (all its images and clips download before cooking starts) → see step card with the chef's reference still → work → the watcher flags a known mistake, or the cook pinches / says "check" → Pass advances; Fix shows the reference and one instruction → fix it → re-check passes → ask a question out loud at any time → Done summary.
+**Demo:**
+1. A volunteer makes a ham-and-cheese sandwich and piles the cheese in the middle.
+2. The watcher catches it and shows the chef's reference with "spread it to the edges".
+3. They fix it, and the check passes.
+4. They ask "Where should the cheese go?" and hear the answer from the chef's own narration.
 
-**Demo (the one journey that must work).** A volunteer makes a sandwich, piles the filling in the middle, the glasses catch it and show the chef's reference, they fix it, the check passes, they ask a question and get a spoken answer. **[TEAM]** Full script: [DEMO-AND-SUBMISSION.md](DEMO-AND-SUBMISSION.md).
+## What "correct" means
 
-## 6. Scope
+A step is judged only on criteria that are **visible in a single first-person frame**: coverage, placement, margins, alignment, shape. For example, "the cheese reaches the edges of the bread". Each step's `success_criteria` and `watch_fors` are written, and can be edited by the chef, to be that kind of criterion.
 
-The Must / Nice / Cut lists are in [TECH-SPEC.md § Scope](TECH-SPEC.md#scope) and are unchanged. The order in which things get cut when time runs out is in [PLAN.md § Cut order](PLAN.md#6-cut-order).
+- **When the frame can't show the criteria, the verdict is `unsure`.** It comes with how to give a better view. Verdicts under 0.5 confidence are turned into `unsure` in code.
+- **When a verdict matches a known mistake, the chef-reviewed text for that mistake is shown instead of the model's own words.** Unknown mistake IDs are dropped.
+- **No claims about taste, temperature, doneness or food safety.**
 
-**Non-goals for this weekend:** general cooking knowledge beyond the recorded lesson; judging taste, temperature, or doneness that a camera cannot see; AR overlays anchored to the food; accounts and multi-user features; any dish other than the one seeded recipe on stage; Arduino or any extra hardware.
+## Trust, consent, accessibility
 
-## 7. What "correct" means here
-
-A step is checked only against criteria that are **visible in a single first-person frame**: coverage, placement, margins, alignment, shape (for example "the filling reaches the edges of the bread"). Each step's `success_criteria` and `watch_fors` are written (or edited by the chef) to be that kind of criterion.
-
-- When the criteria are not visible in the frame, the answer is **`unsure`** with an instruction for getting a better view. It is never a guess.
-- Advice that comes from the chef's recording is presented as the chef's ("Chef says…"). Anything the model infers beyond the recording is not attributed to the chef.
-- The system makes no food-safety claims.
-
-## 8. Trust, consent, accessibility
-
-These map to the Meta rubric's "UX, accessibility, and trust" quarter.
-
-| Topic | What we do | Status |
-|---|---|---|
-| Chef consent | Chef mode asks for explicit consent before recording starts, and the web dev-fallback upload requires a consent tick (`consent: true` on `POST /recipes`); the lens shows "● REC" for the whole recording; `DELETE /recipes/{id}` removes the video and everything derived from it | Planned (IOS-08, BE-06, WEB-02) |
-| Wearer awareness | The lens shows "● watching" whenever frames are being sent; grey when not | Planned (IOS-04) |
-| Bystanders | The glasses' own capture LED behaviour is Meta's; our demo frames a work surface, not faces. We do not store watcher frames except those that triggered a warning | Planned (BE-03) |
-| Data retention | Wearer frames live in a private bucket and are deleted with the recipe or session; nothing is public; keys never reach the phone | Planned (BE-02) |
-| Gemini data handling | **[OPEN]** Depends on the account tier the event credits come with. Record the actual setting in `ai/STATUS.md`; do not state a policy we have not read | Open |
-| Audio-first parity | Every lens state has a spoken equivalent, so the experience works on displayless glasses and for people who cannot read the lens | Planned (IOS-07) |
-| Display-only parity | Every spoken result is also shown as headline + fix, for noisy rooms and for deaf or hard-of-hearing users | Planned (IOS-03) |
-| Uncertainty | `unsure` verdict; watcher only warns after two consecutive confident hits | Planned (AI-04, IOS-04) |
-| Permission / connectivity / device-state changes | Defined per failure in [ARCHITECTURE.md § Failure behaviour](ARCHITECTURE.md#6-failure-behaviour) | Planned (IOS-07) |
-
-## 9. Adoption and pilot path
-
-**[OPEN] — hypothesis, not a partnership.** The reachable first pilot is one cooking class with one instructor and shared glasses: the instructor records one technique, each student takes a turn following it. Success would be measured by instructor interventions per student and by whether students complete the step unaided.
-
-To make this credible before the pitch (owner: `web/` track): talk to one real instructor or cooking-school contact, or failing that one experienced cook at the event, and write down what they said. Until that conversation happens, the deck says "proposed pilot", never "pilot partner".
-
-## 10. What we can and cannot claim
-
-| Say | Only if |
+| Topic | What the code does |
 |---|---|
-| "Works on Meta Ray-Ban Display glasses" | It ran end to end on the actual device and `ios/STATUS.md` records it |
-| "Catches the mistake in N seconds" | N is a measured number from `ai/eval/results/` or the monitor's latency panel |
-| "Grounded in the chef's method" | The answer cites the chef's reference frame, criteria, or transcript |
-| "X of Y test cases correct" | The held-out set was run; say the set size and that it is one recipe |
+| Chef consent | Chef mode asks for consent before recording. `POST /recipes` rejects requests without `consent: true` and stores the consent time. The lens shows "● REC" while recording |
+| Deletion | `DELETE /recipes/{id}` removes the video and everything derived from it. The review page requires typing the title |
+| Wearer awareness | The lens shows "● watching" whenever watcher frames are being sent, and grey when paused or offline |
+| Frame retention | Only frames from `/check` calls and from `/watch` calls that returned a warning are stored, in a private bucket. Ordinary watcher frames are not kept |
+| Keys | Gemini, Supabase and ElevenLabs keys stay on the server. The phone gets a single-use Live token and signed URLs |
+| Uncertainty | `unsure` verdict. The watcher warns only after two consecutive confident hits for the same mistake |
+| Audio-only parity | Every lens state has a spoken form, and an audio-only mode serves glasses without a display |
+| Display-only parity | Every spoken result is also shown as a heading and a fix line |
+| No colour-only meaning | Pass and fix are told apart by icon and words. The glasses display has no colour text anyway |
 
-Never say "first", "only", "works for any recipe", or a percentage accuracy that was not measured. Related prior work exists: AROMA is a research system connecting a wearable camera, recipe video, and cooking assistance for blind and low-vision users ([paper](https://arxiv.org/abs/2507.10963)). Our distinction to demonstrate, not to assert: chef-approved checkpoints with source evidence, and a measured correct-and-recheck loop.
+## Pilot path (proposed, not a partnership)
 
-## 11. The four sentences every team member should be able to say
+The first pilot would be a cooking class with one instructor and shared glasses. The instructor records one technique, and each student takes a turn following it. We would measure two things:
 
-1. **Wearer's perspective:** "The learner's camera sits where the chef's camera sat, so we can compare your board with the chef's board directly, while your hands stay on the food."
-2. **Gemini's job:** "Gemini watches the chef's video and turns it into checkable steps, then compares your live view with the chef's reference frame to say pass, fix, or can't tell, and answers spoken questions from the chef's own narration."
-3. **What we built beyond an API call:** "A reference-grounded checking loop with a debounced watcher, stale-answer rejection, an explicit uncertainty outcome, and an evaluation set that measures false approvals."
-4. **Outcome:** "A beginner makes a real mistake, is told once what to change, fixes it, and gets a pass, without touching a screen."
+- instructor interventions per student
+- whether students complete the step unaided
+
+Nobody outside the team has used Echo yet.
+
+## What we claim and what we don't
+
+| We say | Because |
+|---|---|
+| "Recorded on Meta glasses" | One real Chef-mode take on borrowed glasses is recorded in `ios/STATUS.md` |
+| "Gemini turns a chef's video into checkable steps" | That take was processed on production into a published recipe |
+| Latency numbers | Only the measured values in [EVALUATION.md](EVALUATION.md) |
+
+**We don't say** "works for any recipe", "first", "only", or any accuracy percentage. Accuracy has not been measured on labelled frames.
+
+**Related work:** AROMA connects a wearable camera, recipe video and cooking assistance for blind and low-vision users ([paper](https://arxiv.org/abs/2507.10963)). The difference we aim to show: checkpoints the chef has approved, with source evidence, and a correct-and-recheck loop.

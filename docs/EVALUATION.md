@@ -1,124 +1,79 @@
-# Echo — evaluation and judging evidence
+# Echo — evaluation
 
-> What we have to be able to show, how we measure it, and the results once they exist.
-> **Every number in this file is either a proposed target (marked TARGET) or a measured result with its date and conditions. As of 2026-11-13 nothing has been measured.**
-> The evaluation is built and run by the `ai/` track ([ai/tasks/03](../ai/tasks/03-footage-and-eval-set.md), [ai/tasks/07](../ai/tasks/07-evaluation-and-tuning.md)); observed user sessions by the `web/` track ([web/tasks/04](../web/tasks/04-user-evidence-and-pitch-pack.md)).
+This page covers what we measured, how we measured it, and what has not been measured yet. Each number below gives its date, its conditions and the `STATUS.md` file where it was recorded. Targets are labelled **TARGET**.
 
-## 1. Criteria → evidence
+## 1. Latency (measured)
 
-### Meta — AI Glasses for Everyone, Everyday (four equal quarters, as reported by the team)
+All runs used real Gemini, on 14 Nov 2026.
 
-| Criterion | What we show | Where it comes from |
-|---|---|---|
-| Creativity and use case | The chef's first-person reference next to the learner's first-person frame; why a propped phone cannot do this | Demo monitor, PRODUCT.md §4 |
-| Technical execution | Glasses frame → Gemini → lens + audio, live; architecture slide; measured latency; one recovery shown on purpose | IOS-06, monitor latency panel, §6 below |
-| Real-world value and feasibility | Named audience, the task, notes from observed novice sessions, a proposed pilot with a measurable outcome | WEB-04, PRODUCT.md §9 |
-| UX, accessibility, trust | Two-line lens, one spoken sentence, "can't tell" outcome, watching indicator, consent + delete, audio-only and display-only modes | IOS-03/04/07, PRODUCT.md §8 |
-
-### Google DeepMind — Best Use of Gemini API
-
-| Question in the brief | What we show |
-|---|---|
-| What problem? | PRODUCT.md §2 |
-| How is Gemini integrated? | Four distinct uses: video → structured steps with timestamps; reference-vs-live image comparison; fast mistake watcher; Live voice with function calling grounded in the chef's transcript |
-| What is innovative or technically impressive? | Grounding: every verdict is tied to a chef reference frame and written criteria; the **ablation** in §4 shows what fails without them |
-| Why does Gemini matter? | Without multimodal video understanding there is no automatic step extraction; without multi-image reasoning there is no reference comparison |
-
-## 2. Evidence ledger
-
-| # | Claim | Evidence needed | Honest boundary | Owner | Status |
+| Call | Conditions | n | p50 | max | Source |
 |---|---|---|---|---|---|
-| E1 | Hands-free during the core task | A recording of a full run with no phone touch after "start" | Setup and recovery may need the phone | ios | NOT MEASURED |
-| E2 | Verdicts are grounded in the chef's reference | Monitor shows reference frame + criteria used for each verdict | Advice not in the recording is model inference | ai, web | NOT MEASURED |
-| E3 | Detects the defined mistake | Held-out correct / incorrect frames, §3 | One recipe, a few steps, our own kitchen | ai | NOT MEASURED |
-| E4 | Does not approve wrong work | False-approval count on the held-out set | Small sample | ai | NOT MEASURED |
-| E5 | Responds promptly | End-to-end latency from the deployed backend, p50 and max | Venue network varies | backend, ai | NOT MEASURED |
-| E6 | Handles uncertainty | `unsure` on obscured / out-of-frame / unsupported cases | — | ai | NOT MEASURED |
-| E7 | Watcher is not annoying | False alerts per minute on correct footage, after debounce | Short clips | ai | NOT MEASURED |
-| E8 | Answers come from the chef's method | Q&A set: in-lesson questions answered with the chef's content; out-of-lesson questions declined or flagged | Small set, judged by us | ai | NOT MEASURED |
-| E9 | A novice can use it | 2–3 observed sessions with people outside the team | Not a study | web | NOT MEASURED |
-| E10 | Works on the glasses | The G3 run on the device, recorded | Borrowed device, one firmware | ios | NOT MEASURED |
+| `/check` model time | Production (Railway + Supabase), two-session load run, Railway call logs | 18 | 1032 ms | 1455 ms | `backend/STATUS.md` |
+| `/watch` model time | Same run | 85 | 728 ms | 1188 ms | `backend/STATUS.md` |
+| `check_frame`, 1280 px | Laptop at the venue, warm process | 9 | 1017 ms | 1931 ms | `ai/STATUS.md` |
+| `watch_frame`, 512 px | Laptop at the venue, warm process | 9 | 902 ms | 1518 ms | `ai/STATUS.md` |
+| Live token mint | Laptop, warm process | 4 | 295 ms | 636 ms | `ai/STATUS.md` |
+| Live: question to first audio | Laptop, raw WebSocket using the ephemeral token | 5 | 594 ms | 697 ms | `ai/STATUS.md` |
+| Ingestion of the real chef take | Production, 2 min 14 s glasses take → 5 steps with stills and clips | 1 | ~33 s | — | `ios/STATUS.md` |
 
-## 3. Visual evaluation set
+**Targets:**
 
-Built from the team's own footage of the seeded recipe. Scope: the **checkable demo steps** only (at minimum "Add fillings"; add "Spread" and "Close" if time allows).
-
-**Case types per step** (aim for the mix, not the count):
-
-| Type | Label | Examples |
+| Metric | TARGET | Measured (model time) |
 |---|---|---|
-| Correct | `pass` | Filling in an even layer to the edges, different hands, slightly different angle, a correct variation the chef would accept |
-| Known mistake | `fix` + `mistake_id` | Filling piled in the middle (`filling_piled_center`), including the subtle case; spread missing the edges (`spread_misses_edges`) |
-| Unjudgeable | `unsure` | Hands covering the bread, blur, bread half out of frame, too dark |
-| Off-task | `unsure` or watcher `ok` | Looking away, empty board, wrong step in view |
+| `/check` p50 | ≤ 2000 ms | 1032 ms |
+| `/watch` p50 | ≤ 1500 ms | 728 ms |
 
-**Split.** `dev` frames are used while writing prompts. `heldout` frames are captured in a separate take (different person or session if possible) and are **not looked at** until the prompt is frozen. The split is a column in `ai/eval/cases.csv`.
+**End-to-end latency is worse than model time.** In the same load run, the client saw `/watch` p50 1473 ms and p90 5012 ms, with one timeout. Railway's proxy logged gaps in which neither session sent anything. A ping test on the venue Wi-Fi straight afterwards averaged 1020 ms with 1.7 % loss, so the network was the likely cause, but that is not proven. The run had no 429s and no 5xx errors at two concurrent sessions.
 
-**Size.** TARGET: about 20 dev + 20 held-out cases for the main step; fewer is acceptable if labelled carefully. Report the real number.
+## 2. Accuracy (not measured yet)
 
-**Labels** are assigned by a human looking at the frame and the chef's criteria, before running the model, and recorded with the labeller's initials.
+The evaluation set and runner are in place:
+- `ai/eval/cases.csv` holds labelled frames, split into `dev` and `heldout`.
+- `python -m echo_ai.eval` runs them.
 
-## 4. Metrics, targets, results
+**The set has no labelled frames yet, so there are no accuracy numbers.** Once frames are labelled, the planned measurements are:
 
-| Metric | Definition | TARGET (proposed) | Result | Date / conditions |
-|---|---|---|---|---|
-| False approvals (`/check`) | Label `fix`, model says `pass` | 0 on held-out | — | — |
-| False rejections (`/check`) | Label `pass`, model says `fix` | ≤ 2 in 20 | — | — |
-| Appropriate `unsure` | Label `unsure`, model says `unsure` | ≥ 80% | — | — |
-| Wrong `unsure` | Label `pass`/`fix`, model says `unsure` | ≤ 3 in 20 | — | — |
-| `/check` latency | Server `latency_ms` from the deployed backend, p50 / max | p50 ≤ 2000 ms | — | — |
-| `/watch` latency | Same, p50 / max | p50 ≤ 1500 ms | — | — |
-| Watcher detection delay | Mistake visible → alert shown, on clips | ≤ 8 s | — | — |
-| Watcher false alerts | Alerts per minute on correct footage, after debounce | ≤ 1 in 5 min | — | — |
-| Fix success | After a `fix`, the wearer's next check passes | Observed in each demo rehearsal | — | — |
-| Q&A grounding | In-lesson questions answered with chef content / out-of-lesson handled honestly | ≥ 8 of 10 / all | — | — |
+| Metric | Definition | TARGET |
+|---|---|---|
+| False approvals (`/check`) | Label `fix`, model says `pass` | 0 on held-out |
+| False rejections (`/check`) | Label `pass`, model says `fix` | ≤ 2 in 20 |
+| Appropriate `unsure` | Label `unsure`, model says `unsure` | ≥ 80 % |
+| Watcher false alerts | Alerts per minute on correct footage, after debounce | ≤ 1 in 5 min |
+| Q&A grounding | `ai/eval/qa.csv`: 10 questions the chef's narration answers, 5 it doesn't | ≥ 8 of 10 answered with the chef's content; all 5 handled honestly |
 
-**Ablation for the Gemini judges** (same held-out set, three configurations):
+**Ablation:** the runner already supports three configurations on the same set:
+- `--config full`: reference image + criteria + mistakes. This is what ships.
+- `--config no-ref`: criteria text only.
+- `--config generic`: "is this step done correctly?"
 
-| Configuration | False approvals | False rejections | `unsure` | Note |
-|---|---|---|---|---|
-| A. Full: reference image + criteria + mistakes | — | — | — | What we ship |
-| B. No reference image (criteria text only) | — | — | — | Shows what the chef's frame adds |
-| C. Generic prompt ("is this sandwich step done correctly?") | — | — | — | Shows what grounding adds |
+This will show what the chef's reference frame and the written criteria add. If a simpler configuration does as well, we will say so.
 
-If B or C performs as well as A, say so and simplify the product. Do not hide it.
+### What prompt tuning showed (unlabelled dev material, not accuracy)
 
-**Reporting rules.** Report counts ("17 of 20"), never a bare percentage. State the recipe, the number of steps covered, the set size, and that it was the team's own footage. Never report an aggregate that hides a false approval. Do not write a number into the deck before it appears in this table.
+Over three prompt rounds we tuned on 9 unlabelled stock frames of unfinished work (`ai/STATUS.md`). By the third round, the default check model approved 1–2 of the 9 frames. The changes that helped were:
+- recording evidence per criterion before the verdict
+- the rule "unfinished work is never a pass"
+- judging margins in proportion to the whole
 
-## 5. Observed user sessions
+`gemini-3.8-flash` approved none of the 9, but its p50 was 2.5–5.1 s and it hit one timeout in 27 calls. Choosing between speed and strictness is a configuration switch (`ECHO_MODEL_CHECK`). Labelled frames are needed to settle it.
 
-Template for each session, kept in `web/pitch/user-notes.md`:
+## 3. Rules for reporting
 
-```
-Date/time · Who (role, cooking experience; no names without permission) · Device used
-Task given · Completed unaided? · Where they hesitated · What they said, verbatim
-Did the fix instruction make sense first time? · Would they use it again, and for what?
-```
+- Report counts ("17 of 20"), not bare percentages, and state the recipe, the number of steps, the set size, and that it was the team's own footage.
+- Never hide a false approval inside an aggregate.
+- Don't put a number in the deck or video unless it appears on this page.
 
-## 6. Recovery tests
+## Recovery tests
 
-Trigger each one deliberately before G4 and record what happened in `ios/STATUS.md` (device) or `backend/STATUS.md` (server). Expected behaviour is defined in [ARCHITECTURE.md §6](ARCHITECTURE.md#6-failure-behaviour).
+The failure behaviour is defined in [ARCHITECTURE.md §6](ARCHITECTURE.md#6-failure-behaviour). It is covered by unit tests on iOS (mock API and test clock) and by backend tests with fault injection. The deliberate device run below has **not been done yet**:
 
 - [ ] Deny camera permission, then grant it
-- [ ] Glasses out of range / hinges closed mid-step, then back
-- [ ] Airplane mode for 20 s during a step, then back
+- [ ] Glasses out of range mid-step, then back
+- [ ] Airplane mode for 20 s during a step (done on the iPhone with fake AI: steps and images kept working)
 - [ ] Backend stopped during a check
-- [ ] Forced model timeout (`CHECK_BUDGET_S=0.01`)
-- [ ] Forced quota error (fake mode switch or a deliberately throttled key)
-- [ ] Pinch "check" five times fast
-- [ ] Change step while a check is pending
-- [ ] Cover the camera with a hand and check → `unsure`
-- [ ] Kill and restart the app mid-session
-- [ ] Live session dropped (toggle Wi-Fi) while asking a question
+- [ ] Forced model timeout / quota error (`FAULT_INJECT` + `X-Fault: 1`)
+- [ ] Five fast "check" inputs
+- [ ] Step changed while a check is pending
+- [ ] Camera covered, then check → `unsure`
+- [ ] Live session dropped while asking a question
 - [ ] Display unavailable → audio-only mode
-
-## 7. Reproducing
-
-```
-cd ai
-python -m echo_ai.eval --split heldout --config full      # writes ai/eval/results/<timestamp>-full.json
-python -m echo_ai.eval --split heldout --config no-ref
-python -m echo_ai.eval --split heldout --config generic
-```
-
-These commands are specified in AI-07 and do not exist until that batch is done.

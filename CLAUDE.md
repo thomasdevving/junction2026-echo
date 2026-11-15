@@ -4,7 +4,7 @@ Junction 2026 hackathon project. Four people work in parallel on four laptops, o
 
 ## Read before doing anything
 
-1. [README.md](README.md) — what the project is and where everything lives.
+1. [README.md](README.md) — what the product is; [docs/TEAM.md](docs/TEAM.md) — how the team works (tracks, batches, where status lives).
 2. [docs/API-CONTRACT.md](docs/API-CONTRACT.md) — every interface between tracks. This wins over any other description.
 3. The `README.md` of the track you are working in (`ios/`, `backend/`, `ai/`, or `web/`), then the task batch you were asked to run in `<track>/tasks/`.
 

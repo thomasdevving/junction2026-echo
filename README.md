@@ -1,107 +1,123 @@
 # Echo
 
-**A chef records a recipe once through smart glasses. Anyone wearing the glasses can then cook it hands-free while Gemini compares what they are doing with the chef's own point-of-view footage, corrects mistakes as they happen, and answers questions in the chef's method.**
+**A chef records a recipe once through Meta AI glasses. Anyone wearing the glasses can then cook it hands-free. Gemini compares what the cook's camera sees with the chef's own point-of-view footage, flags mistakes as they happen, and answers questions using the chef's own words.**
 
-Built at **Junction 2026** (13–15 November, Espoo) for two challenges: **Meta — AI Glasses for Everyone, Everyday** (main) and **Google DeepMind — Best Use of Gemini API** (technology).
+Built at **Junction 2026** (Espoo, 13–15 Nov) for **Meta — AI Glasses for Everyone, Everyday** and **Google DeepMind — Best Use of Gemini API**.
 
-> **Status, Friday 13 November 2026, 23:00:** planning complete, **no code yet**. Nothing described in this repository has been built, run on glasses, or measured. Live state is in each track's `STATUS.md`.
+- **Demo video:** https://www.youtube.com/watch?v=3_NyVYkBLWI
+- **Live web app:** https://statai-production.up.railway.app/app/ (the home page is public; the review page, monitor and simulator load data only after sign-in with the team's access code)
+- **Presentation:** [docs/echo-pitch.pdf](docs/echo-pitch.pdf)
+- **Repository:** https://github.com/thomasdevving/junction2026-echo
+- **Licence:** [MIT](LICENSE)
 
-## Start here
+## The problem
 
-Four people, four laptops, four folders. You work in exactly one folder, so nobody's changes collide.
+Learning a hands-on technique from a video breaks at the moment it matters:
 
-| Owner | Track | Open | Machine | First batch |
-|---|---|---|---|---|
-| **Thomas** | Web tools and the iPhone / glasses app | [web/README.md](web/README.md) · [ios/README.md](ios/README.md) | Any for web; **the Mac** + an iPhone for iOS | [WEB-01](web/tasks/01-foundation-and-simulator.md) · [IOS-01](ios/tasks/01-project-foundation.md) |
-| **Stylianos** | The API, storage, deployment | [backend/README.md](backend/README.md) | Any | [BE-01](backend/tasks/01-skeleton-and-mock-api.md) |
-| **Aleksandr** | Prompts, Gemini calls, evaluation | [ai/README.md](ai/README.md) | Any | [AI-01](ai/tasks/01-package-skeleton-and-fixture.md) |
-| **Türker** | The iPhone / glasses app (with Thomas) | [ios/README.md](ios/README.md) | **The Mac** + an iPhone | [IOS-01](ios/tasks/01-project-foundation.md) |
+- Your hands are busy, so you can't pause or scroll.
+- The video can't see your board, so you find out the filling was all in the middle when the sandwich falls apart.
 
-Track sizes and the hand-over rule: [docs/PLAN.md §2](docs/PLAN.md#2-four-tracks-four-folders-four-laptops).
+A teacher fixes this with one glance and one sentence, but that doesn't scale. Echo gives every learner that glance, grounded in a specific chef's method rather than generic cooking advice.
 
-### On your laptop
+**Why glasses:** the chef's reference was filmed from eye level looking down at the board, and the learner's camera sits in the same place. Comparing like with like is what makes "does mine look like the chef's?" answerable, while the learner's hands stay on the food.
+
+## How it works
+
+**1. The chef records once** (iPhone app, Chef mode)
+- The chef cooks wearing the glasses and talks through it, pinching to mark each new step.
+- The take uploads to the backend.
+- **Gemini** watches the video and turns it into steps. Each step gets a reference frame, the chef's own words, visible success criteria, and the common mistakes to watch for.
+
+**2. The chef reviews** (web review page)
+- Fix the wording, re-pick any reference frame, publish.
+
+**3. Anyone cooks along** (iPhone app, Cook mode)
+- Each step appears in the lens as an icon, two short lines and the chef's reference still.
+- **Check:** pinch or say "check". Gemini compares the cook's frame with the chef's reference against that step's criteria and answers *pass*, *fix* plus one instruction, or *can't tell* plus how to give a better view. It never guesses.
+- **Watch:** every ~2.5 s a low-res frame is checked against the step's known mistakes only. The cook is warned after two consecutive hits, before they know to ask. A "● watching" indicator shows whenever frames are being sent.
+- **Ask:** hold to talk. Gemini Live answers from the chef's transcript. Voice commands ("next", "check", "show me") run the same code as gestures.
+
+```
+ Meta glasses ⇄ iPhone app ──HTTPS──► FastAPI backend ──► echo_ai ──► Gemini API
+   (DAT SDK)       │                    │      ▲
+                   │                    │      └── web: review page · audience monitor · simulator
+                   │                    ▼
+                   │                Supabase (Postgres + private Storage)
+                   └── WebSocket (ephemeral token) ──► Gemini Live
+```
+
+## Technology
+
+| | What we use it for |
+|---|---|
+| **Meta Device Access Toolkit** (iOS SDK 1.0.1) | Glasses camera stream for recording and checking, lens display cards, glasses inputs (select / swipe / back) mapped to Check / Next / Back / Dismiss |
+| **Gemini: video understanding** (`gemini-3.5-flash`) | Chef video becomes structured steps with timestamps, criteria, mistakes and transcript (Files API + JSON schema) |
+| **Gemini: multi-image vision** (`gemini-3.5-flash-lite`) | Cook's frame vs. chef's reference frame becomes pass / fix / unsure, with evidence recorded per criterion before the verdict |
+| **Gemini: fast vision** (`gemini-3.5-flash-lite`) | Proactive watcher: one low-res frame vs. the step's known mistakes, enum-constrained output |
+| **Gemini Live** (`gemini-3.8-live`) | Spoken Q&A grounded in the chef's transcript, with function calling for voice commands. The phone opens the session with a single-use **ephemeral token**, so no key ever reaches the device |
+| **ElevenLabs** | Pre-rendered voice lines for results, and an optional TTS token endpoint |
+| **FastAPI + Supabase**, on Railway | Keys stay server-side, plus ingestion with ffmpeg, sessions, events and latency logging |
+
+Control logic is ordinary code, not the model: debounce, stale-answer rejection, the confidence floor that turns weak verdicts into *unsure*, and the pause rules.
+
+## What works today
+
+We only list what the code does and what the team recorded in the `STATUS.md` files.
+
+| | Status |
+|---|---|
+| Chef take recorded **on real Meta glasses**, processed by Gemini on production into a recipe, published | Done once (14 Nov). A 2 min 14 s take became 5 steps with stills, clips, chef quotes and a watched mistake in ~33 s. The demo recipe uses its transcript and stills |
+| Backend with real Gemini and Supabase on Railway | Running. Smoke and load tests passed (14 Nov) |
+| Cook-along loop (check, watcher, warnings, fix, re-check, pass) on the iPhone | Done, but only with the backend in fake-AI mode |
+| Gemini Live voice | Implemented. Real token minted and first-audio latency measured from a laptop. Not yet confirmed on the phone |
+| Cook mode **on real glasses**, end to end | Not yet verified. Glasses features pass on Meta's MockDeviceKit |
+| Web review page, audience monitor, browser simulator | Done. Verified locally |
+| Accuracy on labelled frames | **Not measured.** The evaluation set and ablation runner exist, but no labelled frames yet |
+
+**Measured latency** (14 Nov, real Gemini; end-to-end on venue Wi-Fi was slower, see [EVALUATION.md](docs/EVALUATION.md)):
+
+| Call | Where it was measured | p50 | max |
+|---|---|---|---|
+| `/check` model time, production load run (n=18) | Railway logs | 1.03 s | 1.46 s |
+| `/watch` model time, same run (n=85) | Railway logs | 0.73 s | 1.19 s |
+| Gemini Live: question to first audio (n=5) | laptop | 0.59 s | 0.70 s |
+
+Known limit: on unlabelled dev frames, the fast check model approved 1–2 of 9 clearly unfinished frames. A larger model approved none, but took about 2.5 s at p50. Which model ships is a configuration switch (`ECHO_MODEL_CHECK`), and labelled frames are needed before we can claim an accuracy figure.
+
+## Run it locally
+
+Without keys, using the memory store and fake AI:
 
 ```bash
-git clone https://github.com/thomasdevving/junction2026-echo
+cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -e ../ai && pip install -e ".[dev]"
+cp .env.example .env
+uvicorn app.main:app --port 8000
+# open http://localhost:8000/app/  (review page, monitor, simulator)
 ```
 
-```bash
-cd junction2026-echo
-```
+For real Gemini, set `ECHO_AI_FAKE=0`, `GEMINI_API_KEY` and a private `DEMO_API_KEY` in `backend/.env`. The iPhone app needs a Mac with Xcode; see [ios/README.md](ios/README.md).
 
-Open Claude Code **in the repository root** (so [CLAUDE.md](CLAUDE.md) loads) and start one batch with:
+## Repository
 
-```
-I own the <track> track. Read CLAUDE.md, README.md, docs/API-CONTRACT.md and <track>/README.md,
-then carry out <track>/tasks/<NN-name>.md completely. Work only inside <track>/.
-Run the batch's verification commands. When every acceptance criterion passes, update
-<track>/STATUS.md and stop. If something outside <track>/ blocks you, write it under
-"Needs from other tracks" in STATUS.md and tell me instead of working around it.
-```
-
-Review what it did, commit with your track's prefix (`[ios]`, `[backend]`, `[ai]`, `[web]`), then `git pull --rebase origin main` and push. Start a fresh Claude session for the next batch. Use Opus 5.5 unless the batch file says a smaller model is enough.
-
-### Tonight, before anything else
-
-1. **Preliminary submission** is listed for 23:55 tonight on the event platform → [WEB-05 task 1](web/tasks/05-demo-ops-and-submission.md).
-2. **Ask the Meta booth** about borrowing a Display pair and who supports the iOS SDK → questions in [IOS-02](ios/tasks/02-dat-glasses-spike.md#before-coding-human-at-the-meta-booth--do-this-tonight).
-3. **Get a Gemini API key** → [AI-02 task 1](ai/tasks/02-gemini-access-and-models.md).
-4. Push **AI-01**, then **BE-01**: the other two tracks build against them.
-
-## How the pieces fit
-
-```
- Meta glasses ⇄ ios/ (iPhone app) ──HTTPS──► backend/ (FastAPI) ──imports──► ai/ (echo_ai) ──► Gemini API
-                     │                            │        ▲
-                     └──WebSocket──► Gemini Live   │        └── web/ (simulator · review page · demo monitor)
-                                                   ▼
-                                               Supabase
-```
-
-| Folder | What it is | Batches |
-|---|---|---|
-| [`ios/`](ios/README.md) | Swift app, two modes: **Chef** (record through the glasses, pinch = step mark, upload) and **Cook** (frames from the glasses, cards in the lens, watcher loop, voice) | 8 |
-| [`backend/`](backend/README.md) | FastAPI: recipes, `/check`, `/watch`, sessions, live tokens, ffmpeg, deploy | 7 |
-| [`ai/`](ai/README.md) | Python package with every prompt and Gemini call; fixture recipe; evaluation | 7 |
-| [`web/`](web/README.md) | Browser simulator, review page (review / edit / publish + dev MP4 upload), demo monitor; pitch pack and submission | 5 |
-| [`docs/`](docs/) | Shared, slow-changing documents (below) | — |
-
-Each track folder has a `README.md` (setup, design, rules), a `STATUS.md` (what is actually done and measured), and `tasks/` — one markdown file per batch of tasks, each with concrete acceptance criteria.
-
-## Documents
-
-| Document | Read it for |
+| Folder | What it is |
 |---|---|
-| [docs/TECH-SPEC.md](docs/TECH-SPEC.md) | **The team's concept**: summary, stack, flows, display spec, scope. The starting point for everything else |
-| [docs/API-CONTRACT.md](docs/API-CONTRACT.md) | **Every interface between tracks**: HTTP API, data model, the `echo_ai` package, client rules. Wins over any other description |
-| [docs/PLAN.md](docs/PLAN.md) | Tracks and owners, batch dependencies, gates G0–G5, cut order, how to work with Claude |
-| [docs/PRODUCT.md](docs/PRODUCT.md) | Problem, audience, why glasses, trust and accessibility, pilot path, what we may claim |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Components, technology roles, device and API assumptions with their status, failure behaviour, security |
-| [docs/EVALUATION.md](docs/EVALUATION.md) | Judging criteria → evidence, the evaluation set, targets vs. measured results, recovery tests |
-| [docs/DEMO-AND-SUBMISSION.md](docs/DEMO-AND-SUBMISSION.md) | Demo script, what the audience sees, failure playbook, deck outline, submission checklist |
-| [docs/DECISIONS-AND-RISKS.md](docs/DECISIONS-AND-RISKS.md) | Settled decisions, risks with owners, open questions |
-| [docs/EVENT-CONTEXT.md](docs/EVENT-CONTEXT.md) | Schedule, challenge briefs and rubric, judging, technical facts checked on 13 Nov |
-| [docs/research/JUNCTION_2026_CONTEXT.md](docs/research/JUNCTION_2026_CONTEXT.md) | The full background research with sources |
-| [CLAUDE.md](CLAUDE.md) | Short rules every Claude session in this repository follows |
+| [`ios/`](ios/README.md) | SwiftUI app for iPhone and Meta glasses: Chef and Cook modes, watcher, Gemini Live client |
+| [`backend/`](backend/README.md) | FastAPI API: recipes, ingestion with ffmpeg, `/check`, `/watch`, sessions, Live tokens, deployment |
+| [`ai/`](ai/README.md) | `echo_ai`: every prompt and Gemini call, the demo recipe fixture, the evaluation runner |
+| [`web/`](web/README.md) | Review page, audience monitor, browser simulator, public site, demo film source |
 
-## Where to see what is real
-
-| Question | Look at |
+| Document | Content |
 |---|---|
-| Which batches are done? | `ios/STATUS.md`, `backend/STATUS.md`, `ai/STATUS.md`, `web/STATUS.md` |
-| What works on the glasses? | [ios/STATUS.md](ios/STATUS.md) → Device facts, End-to-end runs |
-| Where is the API running? | [backend/STATUS.md](backend/STATUS.md) → Where the API is |
-| Which Gemini models, what limits, what accuracy? | [ai/STATUS.md](ai/STATUS.md) |
-| Is it submitted? | [web/STATUS.md](web/STATUS.md) → Submission |
+| [docs/PRODUCT.md](docs/PRODUCT.md) | Audience, user journeys, what "correct" means, trust and accessibility |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Components, flows, failure behaviour, security |
+| [docs/API-CONTRACT.md](docs/API-CONTRACT.md) | HTTP API, data model, `echo_ai` interface, client rules |
+| [docs/EVALUATION.md](docs/EVALUATION.md) | Evaluation method, measured results, what remains to measure |
+| [docs/TEAM.md](docs/TEAM.md) | How the team worked: tracks, task batches, planning documents |
 
-## Ground rules
+Each folder's `STATUS.md` is the dated build log. Nothing is marked done there unless someone ran it and saw the result.
 
-- One folder per person. Shared documents change deliberately, in their own commit.
-- Change an interface in [docs/API-CONTRACT.md](docs/API-CONTRACT.md) first, then in code.
-- Write down only what you ran and saw. Targets and results are kept apart.
-- The repository is public: no keys, tokens, faces, or raw footage. One exception: `ai/footage/chef-take-sandwich.mp4`, the real sandwich lesson recorded through the glasses, published by its chef (Thomas, 2026-11-15) because the video tests in `backend/`, `ai/` and `ios/` use it. Any other footage needs the agreement of everyone on camera or audible.
-- When time runs out, cut from the top of the [cut order](docs/PLAN.md#6-cut-order), never the core loop.
+## Team
 
-## Licence
-
-To be added before submission. The event FAQ states MIT-licensed submissions; the team confirms the requirement first ([WEB-05](web/tasks/05-demo-ops-and-submission.md)).
+Thomas, Stelios, Aleksandr, Türker.
