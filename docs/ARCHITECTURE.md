@@ -127,7 +127,7 @@ Browsers only grant camera access on `https://` or `localhost`. The web simulato
 | Registration, camera stream, image + text card, stream and display together, inputs | Pass on MockDeviceKit; not yet on real glasses | `ios/STATUS.md` → Device facts |
 | Cook-mode loop on the glasses, audio routing through the glasses | Not verified | `ios/STATUS.md` |
 | Cook-mode loop on the iPhone (watcher → warning → fix → re-check → pass; offline behaviour) | Verified with the backend in fake-AI mode | `ios/STATUS.md` |
-| Gemini models: video `gemini-3.5-flash`, check/watch `gemini-3.5-flash-lite`, Live `gemini-3.8-live` | Verified callable with the team's key | `ai/STATUS.md` |
+| Gemini models: video `gemini-3.5-flash`, check `gemini-3.8-flash` (since 2026-11-15), watch `gemini-3.5-flash-lite`, Live `gemini-3.8-live` | Verified callable with the team's key; defaults in `ai/src/echo_ai/config.py`, overridable with `ECHO_MODEL_*` | `ai/STATUS.md`, `backend/STATUS.md` |
 | Ephemeral Live token, locked to model, prompt and tools | Verified on production (`/live-token` 200) | `backend/STATUS.md`, `ai/STATUS.md` |
 | Production backend on Railway with real Gemini and Supabase | Verified (smoke and two-session load run) | `backend/STATUS.md` |
 | Ingestion of a real chef take on production | Verified once: 5 steps with stills and clips in ~33 s | `ios/STATUS.md` → Chef takes |

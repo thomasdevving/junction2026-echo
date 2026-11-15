@@ -4,13 +4,15 @@ This page covers what we measured, how we measured it, and what has not been mea
 
 ## 1. Latency (measured)
 
-All runs used real Gemini, on 14 Nov 2026.
+All runs used real Gemini, on 14 Nov 2026 unless the row says otherwise. The 14 Nov `/check` rows used `gemini-3.5-flash-lite`; since 15 Nov check runs on `gemini-3.8-flash` (see §2), which is slower.
 
 | Call | Conditions | n | p50 | max | Source |
 |---|---|---|---|---|---|
-| `/check` model time | Production (Railway + Supabase), two-session load run, Railway call logs | 18 | 1032 ms | 1455 ms | `backend/STATUS.md` |
+| `/check` model time, `gemini-3.5-flash-lite` (no longer shipped) | Production (Railway + Supabase), two-session load run, Railway call logs | 18 | 1032 ms | 1455 ms | `backend/STATUS.md` |
 | `/watch` model time | Same run | 85 | 728 ms | 1188 ms | `backend/STATUS.md` |
-| `check_frame`, 1280 px | Laptop at the venue, warm process | 9 | 1017 ms | 1931 ms | `ai/STATUS.md` |
+| `/check`, `gemini-3.8-flash` (shipped) | Production smoke, 15 Nov, deployment `e3f81bc3`, two runs | 2 + 2 | 3358 / 4838 ms | 4768 / 5047 ms | `backend/STATUS.md` |
+| `/check`, `gemini-3.8-flash` (shipped) | Production, 15 Nov, 20 real frames from the chef take, 1 run each | 20 | — | 2 × 504 `model_timeout` (9.7 s, 10.5 s), one 200 after 12.3 s | `backend/STATUS.md` |
+| `check_frame`, 1280 px, `gemini-3.5-flash-lite` | Laptop at the venue, warm process | 9 | 1017 ms | 1931 ms | `ai/STATUS.md` |
 | `watch_frame`, 512 px | Laptop at the venue, warm process | 9 | 902 ms | 1518 ms | `ai/STATUS.md` |
 | Live token mint | Laptop, warm process | 4 | 295 ms | 636 ms | `ai/STATUS.md` |
 | Live: question to first audio | Laptop, raw WebSocket using the ephemeral token | 5 | 594 ms | 697 ms | `ai/STATUS.md` |
@@ -20,7 +22,7 @@ All runs used real Gemini, on 14 Nov 2026.
 
 | Metric | TARGET | Measured (model time) |
 |---|---|---|
-| `/check` p50 | ≤ 2000 ms | 1032 ms |
+| `/check` p50 | ≤ 2000 ms | **Missed on the shipped model:** 3358–4838 ms (`gemini-3.8-flash`, production smoke, n=2 per run). Met by `gemini-3.5-flash-lite` (1032 ms), which we stopped shipping because it passed unfinished work |
 | `/watch` p50 | ≤ 1500 ms | 728 ms |
 
 **End-to-end latency is worse than model time.** In the same load run, the client saw `/watch` p50 1473 ms and p90 5012 ms, with one timeout. Railway's proxy logged gaps in which neither session sent anything. A ping test on the venue Wi-Fi straight afterwards averaged 1020 ms with 1.7 % loss, so the network was the likely cause, but that is not proven. The run had no 429s and no 5xx errors at two concurrent sessions.
@@ -57,7 +59,7 @@ Over three prompt rounds we tuned on 9 unlabelled stock frames of unfinished wor
 
 `gemini-3.8-flash` approved none of the 9, but its p50 was 2.5–5.1 s and it hit one timeout in 27 calls. Choosing between speed and strictness is a configuration switch (`ECHO_MODEL_CHECK`).
 
-**2026-11-15, decided:** check runs on `gemini-3.8-flash`. On 21 frames from the real chef take, labelled by eye (dev observations, not accuracy numbers), it wrongly passed 2 of 28 unfinished frames against 12 of 28 for lite, and said "can't tell" when hands covered the food; checks take ~3–5 s (up to ~9 s) instead of ~1 s. Details in `ai/STATUS.md`. A labelled held-out set is still needed for real numbers.
+**2026-11-15, decided:** check runs on `gemini-3.8-flash`. On 21 frames from the real chef take, labelled by eye (dev observations, not accuracy numbers), it wrongly passed 2 of 28 unfinished frames against 12 of 28 for lite, and said "can't tell" when hands covered the food; checks take ~3–5 s (up to ~9 s) instead of ~1 s. Details in `ai/STATUS.md`. After the success criteria were tightened and production was re-seeded (15 Nov, `backend/STATUS.md`), 20 frames from the take, labelled by eye and run once each, gave 16 of 20 as expected and 0 wrong passes on 13 unfinished frames; 3 of the 20 took longer than the clients' 10 s check timeout. Also dev observations, not accuracy. A labelled held-out set is still needed for real numbers.
 
 ## 3. Rules for reporting
 

@@ -72,17 +72,17 @@ We only list what the code does and what the team recorded in the `STATUS.md` fi
 | Gemini Live voice | Implemented. Real token minted and first-audio latency measured from a laptop. Not yet confirmed on the phone |
 | Cook mode **on real glasses**, end to end | Not yet verified. Glasses features pass on Meta's MockDeviceKit |
 | Web review page, audience monitor, browser simulator | Done. Verified locally |
-| Accuracy on labelled frames | **Not measured.** The evaluation set and ablation runner exist, but no labelled frames yet |
+| Accuracy on labelled frames | **Not measured.** The evaluation set and ablation runner exist, but no held-out labelled set yet. Dev observation on production (15 Nov): 20 frames from the chef's own take, labelled by eye, gave 16 of 20 as expected and 0 wrong passes on 13 unfinished frames. These are not accuracy numbers |
 
-**Measured latency** (14 Nov, real Gemini; end-to-end on venue Wi-Fi was slower, see [EVALUATION.md](docs/EVALUATION.md)):
+**Measured latency** (real Gemini; end-to-end on venue Wi-Fi was slower, see [EVALUATION.md](docs/EVALUATION.md)):
 
 | Call | Where it was measured | p50 | max |
 |---|---|---|---|
-| `/check` model time, production load run (n=18) | Railway logs | 1.03 s | 1.46 s |
-| `/watch` model time, same run (n=85) | Railway logs | 0.73 s | 1.19 s |
-| Gemini Live: question to first audio (n=5) | laptop | 0.59 s | 0.70 s |
+| `/check` on the shipped model `gemini-3.8-flash`, production smoke runs (15 Nov, n=2 each) | `backend/STATUS.md` | 3.4–4.8 s | 5.0 s |
+| `/watch` model time, production load run (14 Nov, n=85) | Railway logs | 0.73 s | 1.19 s |
+| Gemini Live: question to first audio (14 Nov, n=5) | laptop | 0.59 s | 0.70 s |
 
-Known limit: on unlabelled dev frames, the fast check model approved 1–2 of 9 clearly unfinished frames. A larger model approved none, but took about 2.5 s at p50. Which model ships is a configuration switch (`ECHO_MODEL_CHECK`), and labelled frames are needed before we can claim an accuracy figure.
+Known limit: check is slow. On 14 Nov the faster `gemini-3.5-flash-lite` checked in about 1.0 s at p50 (production, n=18), but it passed unfinished work too often. On 21 frames from the real chef take, labelled by eye (dev observations, not accuracy), it wrongly passed 12 of 28 unfinished frames; `gemini-3.8-flash` wrongly passed 2 of 28 and said "can't tell" when hands covered the food. On 15 Nov we chose strictness: check runs on `gemini-3.8-flash` and usually takes about 2.4–8 s. Some checks exceed the server's 8 s budget and return `model_timeout`, which the app shows as "Can't check right now". The model is a configuration switch (`ECHO_MODEL_CHECK`). A labelled held-out set is still needed before we can claim an accuracy figure.
 
 ## Run it locally
 
