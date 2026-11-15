@@ -1,7 +1,7 @@
 # Echo — Technical Spec
 
 > Junction 2026 · Meta track (Meta Ray-Ban Display) · Google AI / Gemini track
-> Companion to [CONCEPT.md](CONCEPT.md). Decisions agreed 2026-11-13.
+> Companion to [PRODUCT.md](PRODUCT.md). Decisions agreed 2026-11-13; what was actually built is in the [README](../README.md) and each folder's `STATUS.md`.
 
 ## Summary
 
