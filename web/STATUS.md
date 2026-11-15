@@ -126,7 +126,7 @@ WEB-04 is blocked on those final inputs. No demo, recording, fabricated metrics 
 |---|---|---|---|
 | Preliminary submission (Fri night) | Not missed (per Türker, 2026-11-14) | ⟨fill: time and who submitted⟩ | Text kept in `pitch/submission-draft.md` |
 | Challenges selected on the platform: Meta main + Gemini technology | NOT DONE | | |
-| Final submission | NOT DONE | | |
+| Final submission | NOT DONE | | Links ready (2026-11-15): video https://www.youtube.com/watch?v=3_NyVYkBLWI · repo https://github.com/thomasdevving/junction2026-echo · live web app https://statai-production.up.railway.app/app/ · deck `docs/echo-pitch.pdf` |
 | Confirmation saved | NOT DONE | | |
 
 ## Open questions for organizers and partners
@@ -146,10 +146,11 @@ WEB-04 is blocked on those final inputs. No demo, recording, fabricated metrics 
 
 | Item | Have it? | Who brings it |
 |---|---|---|
-| Cooked sushi rice (enough for ~15 attempts) | — | |
-| Nori (20+ sheets) | — | |
-| Bamboo mats ×2, cling film | — | |
-| Filling (cucumber sticks), bowl of water | — | |
+| Sliced bread (enough for ~15 attempts) | — | |
+| Spread (mayonnaise or butter), knife | — | |
+| Lettuce leaves | — | |
+| Sliced ham and cheese (kept cool) | — | |
+| Board, plates | — | |
 | Dark matte surface, small light | — | |
 | Wet wipes, paper towels, gloves | — | |
 | Tripod / second phone for recording | — | |
