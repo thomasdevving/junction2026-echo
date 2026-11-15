@@ -61,7 +61,7 @@ Cross-track dependencies (everything else is internal to a track):
 | BE-01 | AI-01 | Imports `echo_ai` in fake mode and seeds from the fixture |
 | IOS-01, WEB-01 | BE-01 running anywhere reachable | A mock API with every endpoint in contract shape. Both can start on bundled fixtures before it is up |
 | BE-03 | AI-04 | Real `check_frame` / `watch_frame` |
-| BE-02 (seed with real stills) | AI-03 footage | Until then it seeds placeholder images |
+| BE-02 (seed with real stills) | AI-03 footage | Done 2026-11-15: seeds real stills and clips from the glasses take (`scripts/seed.py --video`) |
 | BE-05 | AI-05 | Live config and token minting |
 | IOS-05 | BE-05 | A real `/live-token` |
 | BE-06 | AI-06 | Real `extract_recipe` |

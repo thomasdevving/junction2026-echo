@@ -72,6 +72,7 @@ Decide in advance; do not debug in front of judges.
 |---|---|---|
 | Venue Wi-Fi unusable | Phone and laptop onto the hotspot | Nothing |
 | Production backend down | Switch the app's base URL to the emergency laptop | Nothing |
+| Check says "try again" (server timeout; checks take ~3–5 s since the switch to `gemini-3.8-flash`, about 1 in 10 hit the 8 s limit) | Pinch / say "check" once more | "It takes a second look." |
 | Watcher silent after 15 s | Wearer says "check" (beat 5 does the catch) | "Let's ask it." |
 | Watcher false alarm | Dismiss; carry on | "It's cautious. Two hits in a row are needed, and you just saw the second." |
 | Voice not responding (noise) | Skip beat 6, or use push-to-talk | "It's loud here; the answer is also on the lens." |

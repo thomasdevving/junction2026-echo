@@ -55,7 +55,9 @@ Over three prompt rounds we tuned on 9 unlabelled stock frames of unfinished wor
 - the rule "unfinished work is never a pass"
 - judging margins in proportion to the whole
 
-`gemini-3.8-flash` approved none of the 9, but its p50 was 2.5–5.1 s and it hit one timeout in 27 calls. Choosing between speed and strictness is a configuration switch (`ECHO_MODEL_CHECK`). Labelled frames are needed to settle it.
+`gemini-3.8-flash` approved none of the 9, but its p50 was 2.5–5.1 s and it hit one timeout in 27 calls. Choosing between speed and strictness is a configuration switch (`ECHO_MODEL_CHECK`).
+
+**2026-11-15, decided:** check runs on `gemini-3.8-flash`. On 21 frames from the real chef take, labelled by eye (dev observations, not accuracy numbers), it wrongly passed 2 of 28 unfinished frames against 12 of 28 for lite, and said "can't tell" when hands covered the food; checks take ~3–5 s (up to ~9 s) instead of ~1 s. Details in `ai/STATUS.md`. A labelled held-out set is still needed for real numbers.
 
 ## 3. Rules for reporting
 
