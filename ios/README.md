@@ -1,119 +1,88 @@
-# Track: `ios/` — the app on the iPhone and the glasses
+# `ios/`: the Echo app for iPhone and Meta glasses
 
-**Owners: Thomas and Türker**
+A SwiftUI app for iPhone that drives Meta AI glasses through Meta's **Device Access Toolkit (DAT)**. It has two modes:
 
-You own everything the wearer experiences: frames from the glasses, the cards in the lens, gestures and voice, the watcher loop, and how the app behaves when something drops. This track **must run on the Mac** (Xcode) with a physical iPhone, and it carries the project's highest risk: integration with borrowed glasses. Prove the device path early (IOS-02), before polishing anything.
+- **Chef** records a recipe through the glasses camera.
+- **Cook** guides someone through that recipe hands-free. Step cards appear in the lens, the glasses camera checks the work against the chef's footage, and you can ask questions out loud.
 
-New here? Read [../README.md](../README.md), then [../docs/API-CONTRACT.md](../docs/API-CONTRACT.md) §1–§5 (the API you call and the client rules you must implement), [../docs/TECH-SPEC.md](../docs/TECH-SPEC.md) "Display spec", then this file.
+## What it does
 
-## What you deliver
+**Chef mode** (`Echo/Chef/`, `Echo/UI/ChefRecordView.swift`)
+1. Asks for consent, then records video and audio from the glasses camera. The phone camera exists only as a labelled development fallback.
+2. Records a step mark each time the chef pinches (glasses *select*), taps a lens button, or taps "New step".
+3. Names the take, re-encodes it on the phone if it is over 45 MB (`TakeShrinker`), and uploads it straight to Supabase Storage through a signed URL (TUS or a single `PUT`).
+4. Hands off to the web review page (`<API base>/app/review/`), where Gemini's extracted steps are checked and published.
 
-| Deliverable | Notes |
-|---|---|
-| iOS app `Echo` (SwiftUI, iOS 17.2+) | **One app, two modes.** Cook: recipe library → prefetch → cook-along → done. Chef: record through the glasses with pinch step marks → upload → processing (IOS-08) |
-| A swappable **frame source** | iPhone camera now, glasses stream later; everything downstream sees "a JPEG" |
-| A **lens model** rendered two ways | On the phone screen (preview) and on the glasses display |
-| Watcher loop with the contract's debounce and pause rules | Identical behaviour to the web simulator |
-| Voice: Gemini Live over WebSocket with an ephemeral token; on-device speech for results | |
-| Device facts written down | What actually works on the borrowed glasses, in [STATUS.md](STATUS.md) |
+**Cook mode** (`Echo/Session/`, `Echo/Watcher/`, `Echo/UI/CookView.swift`)
+1. Pick a published recipe. Every reference image and clip downloads before cooking starts, so only the checks need the network.
+2. Each step shows a lens card: icon, heading, up to two lines of text, the chef's reference still and a meta line.
+3. **Check:** pinch, say "check", or tap. One frame goes to `POST /check`, and the answer is *pass*, *fix* (with one instruction) or *unsure* (with how to get a better view).
+4. **Watcher:** about every 2.5 s, a low-resolution frame goes to `POST /watch`. A warning appears only after two consecutive hits for the same known mistake. A "● watching" indicator is shown whenever frames are being sent.
+5. **Voice:** hold to ask a question. Gemini Live answers from the chef's transcript, and voice commands (`check_my_work`, `next_step`, `previous_step`, `show_me`, `repeat_instruction`) run the same code paths as gestures.
+6. A Done screen summarises how many steps passed first try and how many fixes were caught.
 
-You do not write prompts, call Gemini's REST API, or talk to Supabase tables. Everything goes through the backend except the Live WebSocket and Chef mode's one video upload, which goes straight to Supabase Storage through the signed URL the backend returns.
+**Glasses input** (`Glasses/GlassesInputAdapter.swift`): select = Check, right = Next, left = Back, back = Dismiss, up = Show me. The lens also has Check / Next / Dismiss buttons.
 
-## Prerequisites
+**Accessibility:** every lens state has a spoken form, and an audio-only mode serves glasses without a display. The DAT display only offers primary and secondary text colours, so pass and fix are told apart by icon and wording, never by colour alone.
 
-| Need | Detail |
-|---|---|
-| Mac with a current Xcode | The DAT SDK requires **iOS 17.2+** as a deployment target (since SDK 0.9.0). Use the newest Xcode the Mac can run |
-| iPhone on iOS 17.2+ with a cable | A real device is required for camera, Bluetooth, and the glasses. The simulator is fine for unit tests and the phone lens preview |
-| Apple ID added in Xcode | A free personal team is enough to install on your own phone |
-| XcodeGen | `brew install xcodegen`. The `.xcodeproj` is generated from `project.yml` and is **not committed** |
-| Meta AI app on the iPhone | Pairs the glasses; **Developer Mode** is enabled through it |
-| Wearables Developer Center account | `https://wearables.developer.meta.com/` — register, create a project and a release channel. Ask the Meta booth whether the event provides one |
-| The glasses | **Not booked.** Ten Display and ten Gen 2 pairs are shared across teams. Ask the booth first thing |
+## How it is built
 
-### Meta's agent tooling for the DAT SDK (install before IOS-02)
+| Piece | Where | Role |
+|---|---|---|
+| `FrameSource` | `Frames/` | One protocol, three implementations: glasses (`DATFrameSource`), phone camera, still image (tests). Switchable at runtime |
+| `LensScreen` | `Session/LensScreen.swift` | One enum describes exactly what the lens shows. Renderers only draw it, so the phone preview and the glasses can never disagree |
+| `CookSession` | `Session/` | `@MainActor @Observable` state machine with injected API, frame source, speech and clock. Unit-tested without a device |
+| `WatchDebouncer`, `WatcherLoop` | `Watcher/` | Debounce, pause rules, stale-answer rejection |
+| `GlassesManager`, `GlassesCards` | `Glasses/` | DAT session, camera stream, display cards, inputs |
+| `LiveClient` | `Voice/` | Raw WebSocket to Gemini Live (`BidiGenerateContentConstrained`) using an ephemeral token from the backend. 16 kHz up, 24 kHz down |
+| Speech | `Voice/` | On-device speech for results. Pre-rendered ElevenLabs lines are used when they are bundled |
 
-Meta publishes a Claude Code plugin with SDK knowledge and a documentation MCP server. Use them instead of trusting remembered API names: the SDK is a developer preview and renamed things in almost every release.
+**SDK:** `meta-wearables-dat-ios` pinned to **exactly 1.0.1** (`project.yml`). The app uses MWDATCore, MWDATCamera, MWDATDisplay, MWDATInputs, and MWDATMockDevice (for development without hardware).
 
-```bash
-claude plugin marketplace add facebook/meta-wearables-dat-ios
-claude plugin install mwdat-ios@mwdat-ios-marketplace
-claude mcp add --transport http dat-docs https://mcp.developer.meta.com/wearables
-```
+**Keys:** the phone holds no Gemini or Supabase key. It sends the shared `X-Demo-Key` to the backend, receives a short-lived Live token, and gets a single signed upload URL for a Chef take. The Live model is chosen by the backend's token response, not hard-coded.
 
-The first two commands are from the SDK README (checked 2026-11-13). The third registers the docs server the README names (`search_dat_docs` tool, no authentication); adjust the syntax to your Claude Code version if it differs. Reference: SDK repository `https://github.com/facebook/meta-wearables-dat-ios` (samples in `samples/`, changes in `CHANGELOG.md`), docs `https://wearables.developer.meta.com/docs/develop/`.
+## What has been verified
 
-## Setup
+From [STATUS.md](STATUS.md), which has dates and details:
+
+- **On real Meta glasses (borrowed pair, 14 Nov):** one Chef-mode take, 2 min 14 s at 720×1280. The phone upload failed with HTTP 413 (above Supabase's 50 MiB limit). A shrunk copy was then processed by the backend into a 5-step recipe and published. The demo recipe is built from that take.
+- **On the iPhone, with the backend in fake-AI mode:** the full cook-along loop (warning, fix, re-check, pass) and offline behaviour in airplane mode.
+- **On MockDeviceKit (simulator):** registration, camera stream (720×1280, 24 fps mock feed), image plus text in one lens card, stream and display running together for 60 s, and glasses inputs arriving in the app.
+- **Not yet verified on real glasses:** the Cook-mode loop end to end, audio routing through the glasses, and the recovery tests. Real-Gemini verdicts on the device have not been measured.
+
+## Run it
+
+You need:
+- a Mac with Xcode
+- an iPhone on iOS 17.2+ (a real device is needed for the camera and the glasses)
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
+- the Meta AI app with **Developer Mode** turned on, to pair the glasses
 
 ```bash
 cd ios
-cp Config/Secrets.example.xcconfig Config/Secrets.xcconfig     # then edit: backend URL + demo key
-swift scripts/make-mock-feed.swift      # MockDeviceKit camera feed for the simulator (mp4s are git-ignored)
-scripts/render-voice.sh                 # optional: ElevenLabs voice lines (needs Config/ElevenLabs.xcconfig; git-ignored)
+cp Config/Secrets.example.xcconfig Config/Secrets.xcconfig   # API_BASE_URL, DEMO_API_KEY, signing team
+swift scripts/make-mock-feed.swift                           # MockDeviceKit camera feed (git-ignored)
+scripts/render-voice.sh                                      # optional: ElevenLabs voice lines
 xcodegen generate
 open Echo.xcodeproj
 ```
 
-Works after IOS-01 has created `project.yml` and `Config/`. The backend URL and key can also be changed at runtime in the app's Settings screen.
+The backend URL and key can also be changed at runtime in Settings. The data source can be the backend or the bundled fixture recipe. Tests use Swift Testing and run on the `Echo` scheme (`xcodebuild … test` with a simulator destination).
 
-## Target layout
+## Layout
 
 ```
 ios/
-  project.yml                      XcodeGen spec (targets, packages, Info.plist keys)
-  Config/
-    Config.xcconfig                committed; includes Secrets.xcconfig if present
-    Secrets.example.xcconfig       committed template
-    Secrets.xcconfig               untracked
+  project.yml            XcodeGen spec (targets, DAT package, Info.plist keys)
+  Config/                Config.xcconfig, *.example.xcconfig templates (secrets untracked)
   Echo/
-    App/          EchoApp.swift, AppEnvironment.swift (dependency container)
-    Models/       Codable types mirroring API-CONTRACT (Recipe, Step, WatchFor, CheckResponse, …)
-    Networking/   APIClient, APIError, multipart encoding
-    Frames/       FrameSource protocol, PhoneCameraFrameSource, DATFrameSource (IOS-06)
-    Session/      CookSession (state machine), LensScreen (lens model), CookInput, ImageCache
-    Watcher/      WatchDebouncer (pure), WatcherLoop
-    Lens/         PhoneLensView (preview renderer), GlassesLensRenderer (IOS-06)
-    Voice/        SpeechOutput (on-device TTS), LiveClient (WebSocket), AudioIO
-    Glasses/      GlassesManager (DAT), GlassesLabView (IOS-02 spike)
-    Chef/         ChefRecorder (DAT/phone → MP4 + step marks), ChefUploader (TUS / PUT)   (IOS-08)
-    UI/           ModePickerView, RecipeListView, CookView, ChefRecordView, SettingsView, DoneView
-    Resources/    Fixtures/sushi_recipe.json (copy of ai/fixtures; the sandwich lesson since D-19, file name kept until after the demo), assets, chime
-  EchoTests/
-  README.md  STATUS.md  tasks/
+    App/ Models/ Networking/      app shell, contract types, API client
+    Frames/ Glasses/              frame sources, DAT session, lens cards, input mapping
+    Session/ Watcher/ Lens/       cook state machine, lens model, watcher, phone preview
+    Voice/ Chef/ UI/ Resources/   Live client, speech, recording + upload, screens, fixtures
+  EchoTests/             unit tests (Swift Testing)
+  scripts/               mock feed, voice rendering, take shrinker, fixture sync
+  STATUS.md  tasks/      build log and the team's task batches
 ```
 
-## Core design (decided; build to this)
-
-- **`FrameSource`** — `protocol FrameSource { var isAvailable: Bool { get }; func start() async throws; func stop(); func latestJPEG(maxLongEdge: Int, quality: CGFloat) async -> Data? }`. The phone camera and the glasses stream both implement it. The active source is chosen in Settings and can be switched at runtime.
-- **`LensScreen`** — one enum value describes exactly what the lens shows (`recipePick`, `step`, `checking`, `pass`, `fix`, `unsure`, `talking`, `showMe`, `timer`, `done`, `notice`). `CookSession` produces it; **renderers only draw it**. The phone preview and the glasses display can never disagree, and the audio-only mode is a third "renderer" that speaks it.
-- **`CookInput`** — one enum for every way the user acts (`primary`, `next`, `previous`, `showMe`, `dismiss`, `repeatInstruction`). Phone buttons, glasses inputs, and Gemini Live function calls all produce the same values. (Named `CookInput` to avoid clashing with the SDK's own `InputEvent`.)
-- **`CookSession`** — a `@MainActor @Observable` state machine. All dependencies (`APIClient`, `FrameSource`, `SpeechOutput`, a clock) are injected as protocols so it is unit-testable without a device.
-- **Contract rules are code, with tests:** stale-result rule (§3.4), watcher interval / debounce / pause / mute (§3.3), who-speaks-what (§5.3).
-
-## Batches
-
-One Claude session per batch. Kickoff prompt: [../docs/PLAN.md §7](../docs/PLAN.md#7-working-with-claude-on-each-laptop).
-
-| # | Batch | Gate | Needs | A human must |
-|---|---|---|---|---|
-| 01 | [Project foundation](tasks/01-project-foundation.md) | G0 | Fixture from AI-01; BE-01 for live data | Sign the app, run on the phone |
-| 02 | [DAT glasses spike](tasks/02-dat-glasses-spike.md) | G1 | 01; a pair of glasses (or MockDeviceKit to start) | Get glasses, pair, test, ask the booth |
-| 03 | [Cook-along core](tasks/03-cook-along-core.md) | G2 | 01; BE-01 (BE-03 for real verdicts) | Try it on a real sandwich |
-| 04 | [Proactive watcher](tasks/04-proactive-watcher.md) | G2 | 03 | Try it on a real sandwich |
-| 05 | [Gemini Live voice](tasks/05-gemini-live-voice.md) | G3 | 03; BE-05; AI-05 protocol notes | Talk to it |
-| 06 | [Glasses integration](tasks/06-glasses-integration.md) | G3 | 02 result, 03 (04 if done); glasses in hand | Wear them |
-| 07 | [Resilience and demo mode](tasks/07-resilience-and-demo-mode.md) | G4 | 03–06, 08 | Run the recovery tests, rehearse |
-| 08 | [Chef mode recording](tasks/08-chef-mode-recording.md) | G3 | 01, 02 (proof h); BE-01 to build, BE-06 for real ingestion; glasses for the real take | Record the real take wearing the glasses |
-
-**Order is flexible after 04:** if glasses are in hand, do 06 before 05. The Meta challenge is the main one; a working loop on the glasses outranks voice. Run 08 before 07, once 06 has the glasses stream working; it can start earlier on the phone camera. The real chef take (IOS-08.5) can become the demo recipe's source footage, so agree its timing with the AI owner.
-
-**IOS-02 runs as early as hardware allows**, in parallel with 03 if a second person can sit at the Mac. Its result decides the display and input mapping for 06.
-
-## Rules for this track
-
-- **Never claim a device capability from documentation.** A row in `STATUS.md` → "Device facts" is `PASS` only after you saw it on the borrowed glasses, with the glasses model, firmware, SDK version, and date.
-- **The phone path always works.** Every feature must run with the iPhone camera and the on-screen lens preview. This is the development path and the fallback; it is never presented as the Meta deliverable.
-- **Pin the DAT SDK version** in `project.yml` (exact version) and record it. Do not float.
-- **Unit-test the pure logic** (models decoding, debouncer, state machine, stale rule). UI and device code are verified by hand and written up.
-- Build must stay green: `xcodegen generate && xcodebuild … build` before every push.
-- Do not edit other tracks' folders. API problems go in `STATUS.md` → "Needs from other tracks" and to the backend owner.
+The interfaces this app calls are in [../docs/API-CONTRACT.md](../docs/API-CONTRACT.md).
