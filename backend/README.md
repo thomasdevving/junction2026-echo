@@ -69,7 +69,7 @@ Storage sits behind a `Store` protocol with two implementations. `MemoryStore` k
 
 From [STATUS.md](STATUS.md), all dated 14 Nov 2026:
 
-- **Production** runs on Railway with real Gemini and Supabase (`https://statai-production.up.railway.app`, deployment `f5850324` = commit `280f664`). Smoke runs against it passed, and `/live-token` returned a real locked `gemini-3.8-live` token.
+- **Production** runs on Railway with real Gemini and Supabase (`https://statai-production.up.railway.app`; latest deploy `0d14bf05` = commit `018b7c8`, 15 Nov, smoke test passed). Smoke runs against it passed, and `/live-token` returned a real locked `gemini-3.8-live` token.
 - **Two-session load run on production** (103 calls, server-measured model time): `/check` p50 1032 ms, max 1455 ms. `/watch` p50 728 ms, max 1188 ms. On the client side, Railway's proxy added occasional multi-second stalls (one client timeout, p90 `/watch` 5.0 s), so treat the server numbers as model time, not end-to-end.
 - **The ingestion pipeline on production with a real chef take** (recorded on the glasses, recorded in [../ios/STATUS.md](../ios/STATUS.md)): the take was uploaded, processed, and became a 5-step recipe with stills and clips in about 33 s, then was published. The pipeline's automated tests run on fake AI with generated videos.
 - **The demo recipe** is the curated six-step fixture (real transcript and stills from that take), seeded with `scripts/seed.py --publish --replace`.
