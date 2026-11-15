@@ -24,7 +24,7 @@ Status words: `DONE`, `DONE (fake)`, `PARTIAL`, `BLOCKED`, `NOT STARTED` (define
 | Project tier | **Tier 3**, key marked **paid**, billing account `…7F15` | AI Studio API keys page |
 | Data-use / retention setting of this account | Not stated on the pages read. AI Studio labels the event key "paid"; check the terms for paid use before quoting any policy | AI Studio API keys page |
 | Model for `video` (extract_recipe) | `gemini-3.5-flash` | Video test PASS (below) |
-| Model for `check` | `gemini-3.5-flash-lite` (kept by AI-04; **open team decision**, see R-02 note below) | Meets the 2 s p50 target (~0.9–1.0 s warm). `gemini-3.8-flash` judged the dev material better but took 2.0–7.2 s with one 8 s timeout in 27 calls (AI-04). Switch without code changes: `ECHO_MODEL_CHECK=gemini-3.8-flash` |
+| Model for `check` | `gemini-3.8-flash` (**since 2026-11-15**, owner's decision on R-02; code default and Railway `ECHO_MODEL_CHECK`) | Chosen for correctness over speed, see "Check model switch" below: on the real take it wrongly passed 2 of 28 unfinished frames (lite: 12 of 28) but takes ~4 s p50, up to ~9 s, so some calls hit the 8 s budget (504, retryable). Misses the 2 s target. Back to lite without code changes: `ECHO_MODEL_CHECK=gemini-3.5-flash-lite` |
 | Model for `watch` | `gemini-3.5-flash-lite` | Image tests PASS, ~0.9 s |
 | Model for `live` | `gemini-3.8-live` | Live audio + function call + locked token PASS |
 | Rate limits for the watch model (RPM / TPM / RPD) | Event project, Gemini 3.5 Flash Lite: 30K / 30M / unlimited | AI Studio rate-limit page, 2026-11-14 |
@@ -324,6 +324,23 @@ Source: the original 97 MB glasses take (Echo Chef mode, 2026-11-14, 2:14, 720x1
 - `scripts/smoke_models.py`: the text-reading check renders its own card in memory, since step-3.jpg no longer has printed text.
 - Verified here: `pytest -q` 197 passed, `ruff check` clean. The eval set is still unlabelled (no labels invented).
 
+## Real-take measurements, prompt fixes and check model switch (2026-11-15, event key)
+
+Dev observations on frames from the chef's own take, labelled by eye (Claude, from looking at each frame; "not pass" = fix or unsure both accepted). 21 frames, 2 runs each = 42 calls. **Not accuracy numbers**: one person, one kitchen, one take, and the chef makes no mistake on camera, so no real "filling piled in the middle" frame exists (the beat-3 watcher catch is untested on real frames).
+
+| Setup | Correct | Wrong pass on unfinished (of 28) | Hands covering (105 s) | Latency p50 / max |
+|---|---|---|---|---|
+| lite, old prompt and criteria | 24/42 | 12 | fix `filling_piled_center` ×2 | ~1.1 s (production) |
+| lite, new prompt and criteria | 23/42 | 11 | pass ×2 | ~1.1 s |
+| flash, old prompt and criteria | 34/42 | 6 | pass, unsure | 2780 / 5455 ms |
+| **flash, new prompt and criteria (shipped)** | 32/42 (3 timeouts at 15 s) | **2** | **unsure ×2** | 4299 / 9095 ms |
+
+- **Check prompt** (`prompts/check.md`): new "look at the hands and tools" block: a hand holding food or a tool touching it means in progress, never pass; pieces missing / separate / not cut through are not a pass; food under hands is "hidden", never "not met", and never a reason to name a watch_for. A "fix" needs the problem visible in uncovered food.
+- **Fixture success criteria** (titles, key_lines, watch_fors unchanged): step 1 "neither is lifted up in a hand"; step 2 "thin layer of mayo over most of their surface" / "no large bare patch" (the old "reaches the crust on all four sides" cannot be seen top-down on white bread; flash now says unsure on finished spread frames instead of fix); step 4 "ham and a slice of cheese, the cheese on top" / "cheese reaches the edges instead of sitting in the middle"; step 5 "one stacked sandwich, not two separate slices"; step 6 "knife has gone all the way through: two separate halves". Step 1 re-run after the last wording change: 0 of 6 wrong passes, finished frame at 20 s → unsure ×3.
+- Remaining errors with flash: finished spread (58 s, 62 s) → unsure; cheese held in both hands over the sandwich (101 s) → pass ×2.
+- **Voice** (`prompts/live_system.md`): out-of-lesson answers must start with exactly "The chef doesn't cover that in this lesson."; no "not medical advice" disclaimers. `scripts/live_smoke.py --attempts 4`: **every row 4/4**, including "boil an egg → not covered" (was 2/4 just before: two answers gave egg times plus a "not medical advice" line) and the demo question (4/4, "The chef says the cheese should reach the edges of the bread, not sit in the middle.").
+- Watch (lite, unchanged): 3 real frames, no false alarm; did not warn on the half-spread frame.
+
 ## Needs from other tracks
 
 - **iOS owner (Thomas) — AI-05.4 acceptance:** read "Live facts for `ios/`" above and confirm in chat that it is enough to start IOS-05. Two rules there are not in API-CONTRACT §5 yet and the phone must follow them: (1) send `[CONTEXT]` lines with `"turnComplete": false`; (2) reply to `check_my_work`, `next_step`, `previous_step`, `show_me` with `"scheduling": "SILENT"` beside `response` (not for `repeat_instruction`). Also: server frames are **binary** JSON; ignore the `turnComplete` that follows a `toolCall`; send `sessionResumption: {}` in the setup.
@@ -331,7 +348,7 @@ Source: the original 97 MB glasses take (Echo Chef mode, 2026-11-14, 2:14, 720x1
 - **Backend owner (Stelios) — BE-05:** `api_version` comes from `echo_ai.live.LIVE_API_VERSION`; see "For other tracks" for the reconnect rule (same token resumes; new token only after 30 min or a restart).
 - **Real chef transcript:** done 2026-11-15 (see "Real chef take in the fixture"). Someone should re-run `scripts/live_smoke.py` against Gemini on the new demo question and record `footage/live-smoke/question-cheese-16k.wav`.
 
-- **Team decision at the next sync (R-02, from AI-04):** the check model. `gemini-3.5-flash-lite` meets the 2 s target but still passes some clearly unfinished frames; `gemini-3.8-flash` judged the dev material better but took 2–7 s with one timeout. The default stays on lite until decided.
+- **Check model (R-02):** decided 2026-11-15 by the owner: `gemini-3.8-flash` (see "Check model switch"). Watch stays on lite.
 - **Labelled frames (AI-03, team decision "no cooking"):** AI-04.3's "mistake frame → `warn` with the right id" and AI-04.5's confusion tables cannot be done without at least a few labelled dev frames, including mistakes. A non-cooking option is listed under "Footage and evaluation set".
 
 - **Contract wording (docs owner, no rush):** API-CONTRACT §7 says the package reads only `GEMINI_API_KEY` and the four `ECHO_MODEL_*` variables, but the package also reads `ECHO_AI_FAKE`, `ECHO_AI_FAKE_DELAY` and `ECHO_FIXTURE_DIR` (all specified by AI-01 and referenced by the backend tasks), plus `ECHO_PROVIDER`, `ECHO_MAX_CALLS` and `OPENAI_API_KEY` for the unused OpenAI stand-in (`config.py`, `client.py`). Suggest listing all six in §7 as an additive change; the backend must never set `ECHO_PROVIDER=openai`. Nothing is blocked.

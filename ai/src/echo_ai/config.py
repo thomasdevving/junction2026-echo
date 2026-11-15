@@ -20,11 +20,12 @@ def load_env() -> None:
     load_dotenv(AI_DIR / ".env", override=False)
 
 # Gemini: chosen by the AI-02 smoke tests on 2026-11-14 with the team's key (ai/STATUS.md).
-# check uses the fast lite model for now: gemini-3.8-flash was overloaded (503) during the test
-# and gemini-3.6-flash took ~11 s. AI-04 revisits check with real frames.
+# check: gemini-3.8-flash since 2026-11-15 (owner's decision, R-02): on frames from the real chef
+# take it wrongly passed 2 of 28 unfinished frames vs 12 of 28 for lite, at ~4 s instead of ~1 s.
+# watch stays on lite (no false alarms, needs to be fast).
 _GEMINI_MODELS = {
     "video": "gemini-3.5-flash",
-    "check": "gemini-3.5-flash-lite",
+    "check": "gemini-3.8-flash",
     "watch": "gemini-3.5-flash-lite",
     "live": "gemini-3.8-live",
 }

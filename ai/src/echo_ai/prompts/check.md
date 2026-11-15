@@ -17,12 +17,22 @@ can see: when a criterion asks for a narrow margin or strip, a bare area that ta
 share of the item (a quarter, a third, half) is "not met". A clearly larger or smaller amount,
 a wider or missing margin, or an uncovered area that should be covered means "not met".
 
+Before you decide, look at the hands and tools:
+- A hand still holding a piece of food, or a tool (knife, spoon) touching the food, means the
+  step is still in progress. Work in progress is never a "pass".
+- Compare the stage with the reference: if pieces are missing, still separate, not yet placed
+  or not yet cut through, the step is not finished and is not a "pass".
+- Hands or tools lying over the food hide it. Food you cannot see is "hidden", never "not met":
+  a hand over the filling is not evidence of any mistake, and never a reason to name a
+  watch_for.
+
 Then decide one verdict:
 
 - "pass": every success criterion is visibly met. Small differences from the reference that a
   cook would accept (a little tidier or messier, a slightly different shape or amount,
   different hands, mat, board or light) are not mistakes. Unfinished work is never a pass.
-- "fix": at least one success criterion is clearly not met. If the problem matches one of the
+- "fix": at least one success criterion is clearly not met, and you can see the problem in food
+  that is not covered. If the problem matches one of the
   step's "watch_fors", set "mistake_id" to that entry's id. Otherwise set "mistake_id" to null
   and write your own "headline" (at most 4 words, naming the problem) and "fix" (at most 8
   words: one action the learner can do with their hands).
