@@ -113,6 +113,10 @@ Looking down at a board: is the work in frame? —
 
 `scripts/sync-fixture.sh` re-run after the ai fixture moved to the real glasses take: real narration, real step stills (720x1280), same six step titles and `watch_fors` strings; step 3 `key_line` now "Two leaves, torn to fit". `VoiceLabView` default question and `scripts/voice-latency.swift` questions changed to ones the real chef answers ("Where should the cheese go?" is the new demo question; the old "Why spread it to the edges?" is not answered by the chef). **Not built or tested:** edited on Linux, no Xcode. Strings and bundled resources only; run the test suite on the Mac before the next build.
 
+## Fixture sync: tighter success criteria (2026-11-15)
+
+Re-synced after the ai fixture's success criteria for steps 1, 2, 4, 5 and 6 were made concrete for the check model (titles, key_lines and watch_fors unchanged). Check model is now `gemini-3.8-flash` (~4 s per check, up to ~9 s; still inside the app's 10 s check timeout). Not built here (Linux).
+
 ## Rename to Echo (2026-11-14, built and tested on the Mac 19:28)
 
 - Target/folders `GhostChef` → `Echo`, `GhostChefTests` → `EchoTests`, `GhostChefAPI` → `EchoAPI`, `GhostChefApp` → `EchoApp`, URL scheme `ghostchef://` → `echoapp://`, `GHOSTCHEF_BUNDLE_ID` → `ECHO_BUNDLE_ID` (default `com.echo.app`).

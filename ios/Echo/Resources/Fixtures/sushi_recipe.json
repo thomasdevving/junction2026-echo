@@ -12,7 +12,7 @@
       "clip_start_s": 17.0,
       "clip_end_s": 22.0,
       "success_criteria": [
-        "Two slices of bread lie flat on the board",
+        "Both slices lie flat on the table; neither is lifted up in a hand",
         "The slices sit side by side without overlapping"
       ],
       "watch_fors": [
@@ -36,8 +36,8 @@
       "clip_start_s": 44.0,
       "clip_end_s": 49.0,
       "success_criteria": [
-        "Mayo covers both slices in a thin, even layer",
-        "No blank points: mayo reaches the crust on all four sides of each slice"
+        "Both slices have a thin layer of mayo over most of their surface",
+        "Neither slice has a large bare patch without mayo"
       ],
       "watch_fors": [
         {
@@ -76,8 +76,8 @@
       "clip_start_s": 96.0,
       "clip_end_s": 101.0,
       "success_criteria": [
-        "Ham and cheese cover the slice in one even layer, reaching the edges",
-        "No bare bread or lettuce shows around the edge of the filling"
+        "Ham and a slice of cheese are both on the bread, the cheese on top",
+        "The cheese reaches the edges of the bread instead of sitting in the middle"
       ],
       "watch_fors": [
         {
@@ -100,7 +100,7 @@
       "clip_start_s": 112.0,
       "clip_end_s": 117.0,
       "success_criteria": [
-        "The top slice covers the bottom slice completely",
+        "The second slice sits on top: one stacked sandwich, not two separate slices",
         "The edges of the two slices line up"
       ],
       "watch_fors": [
@@ -124,7 +124,7 @@
       "clip_start_s": 123.0,
       "clip_end_s": 128.0,
       "success_criteria": [
-        "The sandwich is cut into two triangles of similar size",
+        "The knife has gone all the way through: two separate halves",
         "The cut runs from one corner to the opposite corner"
       ],
       "watch_fors": [],
