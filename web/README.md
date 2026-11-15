@@ -46,7 +46,7 @@ Tests: `node --test "web/tests/*.test.mjs"` runs 5 files covering debounce, moni
 ## What has been verified
 
 - The pages were verified locally against the backend in fake-AI and memory mode on 14 Nov. Details are in [STATUS.md](STATUS.md).
-- No web page has a recorded check against the deployed production URL.
+- On production (15 Nov) every page is served (HTTP 200) and the API behind it passed the smoke test; a visual walk-through of each page there is not recorded.
 - The review flow has not yet been run by the chef on the real chef take.
 
 ## Layout
