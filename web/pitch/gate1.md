@@ -34,7 +34,7 @@ Status: **allowed** = a source in the repo backs it today · **not yet** = allow
 | C8 | "Warns only after two confident hits in a row" | slide 6 (trust) | `ios/STATUS.md:12` (WatchDebouncer tests), API-CONTRACT §3.3 | allowed |
 | C9 | "Gemini Live answers spoken questions; check and next work by voice" | VO how, slide 4 | `ai/STATUS.md:13, 150-163` | allowed (protocol runs with real tokens); on the phone `ios/STATUS.md:13` has not run on a device, so do not say "on the glasses" |
 | C10 | "Answers come from the chef's own narration" | caption beat 4, VO how | `ai/STATUS.md:280` (placeholder narration) | **not yet** in this strong form: the narration is placeholder text, not a chef recording. Allowed wording now: "answers from the recipe's narration" |
-| C11 | Model names: `gemini-3.5-flash-lite` (check, watch), `gemini-3.5-flash` (video), `gemini-3.8-live` (voice) | slide 4 small print | `ai/STATUS.md:26-29` | allowed |
+| C11 | Model names: `gemini-3.8-flash` (check), `gemini-3.5-flash-lite` (watch), `gemini-3.5-flash` (video), `gemini-3.8-live` (voice) | slide 4 small print | `ai/STATUS.md:26-29` | allowed |
 | C12 | "Shows '● watching' whenever frames are sent" | VO trust, slide 6 | `ios/STATUS.md:12` (04.4 dot) | allowed (built; seen in simulator) |
 | C13 | "The chef agrees before recording" | VO trust, slide 6 | `ios/STATUS.md:16` (consent required per take; not run on device) | allowed as a built feature; not shown as footage unless filmed |
 | C14 | "Deleting a recipe deletes its video and everything derived from it" | VO trust, slide 6 | `backend/STATUS.md:35, 124`; `docs/ARCHITECTURE.md:192` | allowed |
