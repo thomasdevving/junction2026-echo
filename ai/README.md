@@ -1,107 +1,88 @@
-# Track: `ai/` — Gemini package, fixture recipe, evaluation
+# `ai/`: the `echo_ai` package (every Gemini call)
 
-**Owner: Aleksandr**
+A Python package that holds every prompt and every Gemini call in Echo. The backend imports it. It has no HTTP, database or ffmpeg code of its own.
 
-You own **every prompt and every Gemini call** in Echo, the fixture recipe everyone develops against, and the evaluation that produces the numbers for the pitch. Your code is a Python package, `echo_ai`, that the backend imports. You never write HTTP endpoints, database code, or ffmpeg calls.
+## Public functions
 
-New here? Read [../README.md](../README.md), then [../docs/API-CONTRACT.md](../docs/API-CONTRACT.md) §7 and §8 (your public interface), then this file.
+From `src/echo_ai/__init__.py`. Each one switches to a deterministic fake when `ECHO_AI_FAKE=1`.
 
-## What you deliver
+| Function | Gemini model (default) | What it does |
+|---|---|---|
+| `extract_recipe(video_path, title_hint=, step_marks_s=)` | `gemini-3.5-flash` | Uploads the chef's MP4 through the Files API. One structured call returns a `RecipeDraft`: title, transcript and up to 10 steps, each with an instruction, the chef's own words, a reference timestamp, a clip window, visible **success criteria** and known mistakes (`watch_fors`). The chef's pinch marks are hints. Invalid output is repaired, then retried once. The upload is always deleted |
+| `check_frame(frame, step, ref_image)` | `gemini-3.5-flash-lite` | Sends two labelled images, **REFERENCE (chef)** and **LEARNER (now)**, plus the step's criteria. The model records evidence per criterion, then returns `pass`, `fix` or `unsure`. Code then applies rules: unknown mistake IDs are dropped, chef-written fix text replaces model text, and any verdict under 0.5 confidence becomes `unsure` |
+| `watch_frame(frame, step)` | `gemini-3.5-flash-lite` | Sends one low-resolution frame against the step's known mistakes only. It returns `ok`, or `warn` with a mistake ID and confidence. The model writes no free text. Steps without `watch_fors` make no call |
+| `build_live_config(...)` | — | Builds the Gemini Live setup from the chef's transcript and steps, with 5 voice functions (`check_my_work`, `next_step`, `previous_step`, `show_me`, `repeat_instruction`) and session resumption |
+| `mint_live_token(cfg)` | `gemini-3.8-live` | Mints a single-use **ephemeral token** (`v1beta`, 30 min) locked to the model, system instruction and tools, so the phone can open Live without holding a key |
 
-| Deliverable | Consumer |
-|---|---|
-| `echo_ai` package with the exact public surface in API-CONTRACT §7 | `backend/` |
-| Fake mode (`ECHO_AI_FAKE=1`) | `backend/` tests, early `ios/` and `web/` work |
-| `fixtures/sushi_recipe.json` + `fixtures/images/step-N.jpg` | `backend/` seed, client fixtures |
-| Verified model IDs, rate limits, Live protocol facts in [STATUS.md](STATUS.md) | everyone |
-| Chef footage and a labelled evaluation set | yourself, the pitch |
-| Measured results | `web/` (deck), [../docs/EVALUATION.md](../docs/EVALUATION.md) |
+**Gemini features used:**
+- video understanding (Files API)
+- structured output (`response_json_schema`, with a mistake-ID enum built per step)
+- multi-image input
+- `media_resolution` (MEDIUM for check, LOW for watch)
+- minimal thinking, temperature 0
+- Live API with function calling and transcription
+- ephemeral tokens
 
-## Setup
+The SDK is `google-genai==3.3.0`. Model IDs are in `config.py` and can be overridden per call type with `ECHO_MODEL_VIDEO|CHECK|WATCH|LIVE`. Prompts are plain files in `src/echo_ai/prompts/`.
 
-Requires Python 3.11 or newer. No ffmpeg needed for the package itself (AI-03 uses ffmpeg in a helper script).
+## Measured so far
+
+From [STATUS.md](STATUS.md). All runs were on 14 Nov from a laptop at the venue (network not recorded), on warm processes:
+
+| Call | n | p50 | max |
+|---|---|---|---|
+| `check_frame`, 1280 px | 9 | 1017 ms | 1931 ms |
+| `watch_frame`, 512 px | 9 | 902 ms | 1518 ms |
+| `mint_live_token` | 4 | 295 ms | 636 ms |
+| Live: first audio after a question | 5 | 594 ms | 697 ms |
+| `extract_recipe` (21.6 s stock clip) | 1 | 9.4 s upload + 4.5 s generate | — |
+
+**Not measured yet: accuracy.** The labelled evaluation set (`eval/cases.csv`) is still empty, so there are no false-approval or detection numbers. Prompt tuning used 9 unlabelled stock frames, and on those the lite check model approved 1–2 of 9 clearly unfinished frames. `gemini-3.8-flash` approved none of them but had p50 2.5 s. Picking between them is an open decision (`ECHO_MODEL_CHECK` switches models without a code change). `eval/qa.csv` holds 15 voice Q&A cases built from the real transcript (10 answerable from the lesson, 5 not). They have not been scored yet.
+
+## Run it
+
+Python 3.11+.
 
 ```bash
 cd ai
-python -m venv .venv
-source .venv/bin/activate            # Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-cp .env.example .env                 # then put your GEMINI_API_KEY in .env
+cp .env.example .env          # fake mode by default; set GEMINI_API_KEY and ECHO_AI_FAKE=0 for real calls
 pytest
 ```
 
-These commands work after AI-01 has created `pyproject.toml` and `.env.example`.
-
-## Target layout
-
-```
-ai/
-  pyproject.toml
-  .env.example
-  README.md  STATUS.md
-  src/echo_ai/
-    __init__.py        public surface, dispatches to fake or real
-    schemas.py         pydantic models (API-CONTRACT §7)
-    errors.py          AIError and subclasses
-    config.py          env, model ids, is_fake()
-    client.py          google-genai client, error mapping, timeouts      (AI-02)
-    fake.py            deterministic fake implementations                 (AI-01)
-    check.py           check_frame                                        (AI-04)
-    watch.py           watch_frame                                        (AI-04)
-    live.py            build_live_config, mint_live_token                 (AI-05)
-    ingest.py          extract_recipe                                     (AI-06)
-    eval.py            evaluation runner (python -m echo_ai.eval)    (AI-07)
-    cli.py / __main__.py   command line
-    prompts/           prompt text as .md or .py constants, one per call
-  fixtures/
-    sushi_recipe.json
-    images/step-1.jpg …
-  eval/
-    cases.csv          labelled frames (AI-03)
-    qa.csv             voice Q&A cases (AI-05)
-    frames/            committed, downscaled eval frames
-    results/           one JSON + one markdown per run (AI-07)
-  footage/             raw video — gitignored, shared outside git
-  scripts/             helpers (placeholders, frame extraction, smoke tests)
-  tests/
-```
-
-## Batches
-
-Run them in order. One Claude session per batch. The kickoff prompt is in [../docs/PLAN.md §7](../docs/PLAN.md#7-working-with-claude-on-each-laptop).
-
-| # | Batch | Gate | Needs | Unblocks | A human must |
-|---|---|---|---|---|---|
-| 01 | [Package skeleton, fake mode, fixture](tasks/01-package-skeleton-and-fixture.md) | G0 | — | BE-01, IOS-01, WEB-01 | — |
-| 02 | [Gemini access and model selection](tasks/02-gemini-access-and-models.md) | G0→G1 | 01, an API key | 04, 05, 06 | Get the key; read limits in AI Studio |
-| 03 | [Chef footage and evaluation set](tasks/03-footage-and-eval-set.md) | G1 | ingredients, a camera | 04, 06, 07, BE-02 | Cook, film, label |
-| 04 | [Check and watch](tasks/04-check-and-watch-prompts.md) | G1 | 02, some frames from 03 | BE-03 | Judge prompt outputs |
-| 05 | [Live voice config and token](tasks/05-live-voice-config-and-token.md) | G2→G3 | 02 | BE-05, IOS-05 | Listen to answers |
-| 06 | [Recipe extraction from video](tasks/06-recipe-extraction.md) | G3 | 02, chef video from 03 | BE-06 | Review extracted steps |
-| 07 | [Evaluation and tuning](tasks/07-evaluation-and-tuning.md) | G3→G4 | 03, 04, deployed backend | pitch evidence | Sign off the numbers |
-
-03 is physical work (cooking and filming) and runs in parallel with 02 and 04. Start it as early as ingredients allow: every other batch gets better with real footage.
-
-## Rules for this track
-
-- **The public surface is frozen.** Function names, signatures, and model fields in API-CONTRACT §7 change only through the contract's change protocol. Add private helpers freely.
-- **Fake mode must keep working forever.** Every later batch keeps `ECHO_AI_FAKE=1` passing its tests. The backend's test suite depends on it.
-- **Prompts are code.** Keep each prompt in `prompts/`, one file per call, and commit prompt changes with the dev-set result that motivated them.
-- **Model IDs come from the account, not from memory.** AI-02 verifies them and writes them to STATUS.md. Until then the defaults in `config.py` are placeholders.
-- **Look at `dev` frames only** while writing prompts. `heldout` frames are run once, at the end, in AI-07.
-- **Never write a result you did not measure.** STATUS.md and `eval/results/` hold measured values with the date, the model ID, and the set size. Targets live in [../docs/EVALUATION.md](../docs/EVALUATION.md).
-- **No footage of people's faces, no bystanders, no raw video in git.** The repository is public.
-- Verify SDK parameter names (structured output, thinking configuration, media resolution, Live setup) against the current documentation at `https://aistudio.google.com/docs/` before using them. The SDK has changed across Gemini generations.
-
-## Command line (available from AI-01, real from AI-04 onward)
+Command line:
 
 ```bash
 python -m echo_ai models
-python -m echo_ai check --step 4 --frame path/to/frame.jpg --ref fixtures/images/step-4.jpg
-python -m echo_ai watch --step 4 --frame path/to/frame.jpg
-python -m echo_ai extract path/to/chef.mp4 -o out.json
+python -m echo_ai check --step 4 --frame frame.jpg --ref fixtures/images/step-4.jpg   # --no-ref, -v
+python -m echo_ai watch --step 4 --frame frame.jpg
+python -m echo_ai extract chef.mp4 -o out.json
 python -m echo_ai live-config
-python -m echo_ai.eval --split dev --config full
+python -m echo_ai.eval --split dev --config full|no-ref|generic                       # ablation runner
 ```
 
-`--step N` loads step N from `fixtures/sushi_recipe.json` unless `--recipe other.json` is given. `check --no-ref` sends no reference image; `-v` (real mode) also prints latency and the raw model answer (with `evidence`) to stderr. For several frames at two sizes, use `python scripts/dev_eval.py` (AI-04.5; dev rows only).
+`--step N` reads `fixtures/sushi_recipe.json`. Despite the file name, it now holds the six-step ham-and-cheese sandwich lesson from the real chef take. Its reference stills in `fixtures/images/` are frames from that take.
+
+**Fake mode** (`ECHO_AI_FAKE=1`) needs no network or key:
+- extraction returns the fixture
+- `check` returns `unsure` for tiny frames, otherwise `fix`/`pass` alternately
+- `watch` cycles 3 `ok`, then 3 `warn`
+
+The backend's tests and early client work run on fake mode.
+
+## Layout
+
+```
+ai/
+  src/echo_ai/   __init__ (public surface) · check · watch · ingest · live · client · config · schemas · fake · eval · cli
+    prompts/     extract.md · check.md · watch.md · live_system.md · generic_check.md
+  fixtures/      the demo recipe (JSON) and its reference stills
+  footage/       chef-take-sandwich.mp4: the real chef take the demo recipe was extracted from
+  eval/          cases.csv (labelled frames, empty) · clips.csv · qa.csv · frames/
+  scripts/       smoke tests, frame extraction, dev evaluation, side-by-side tools
+  tests/
+  STATUS.md  tasks/   build log and the team's task batches
+```
+
+`ECHO_PROVIDER=openai` selects a stand-in that was used before the Gemini key arrived. It is unused now and kept only for emergencies. Gemini is the default and the product.
