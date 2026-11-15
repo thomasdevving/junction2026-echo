@@ -5,7 +5,7 @@
 Built at **Junction 2026** (Espoo, 13–15 Nov) for **Meta — AI Glasses for Everyone, Everyday** and **Google DeepMind — Best Use of Gemini API**.
 
 - **Demo video:** https://www.youtube.com/watch?v=3_NyVYkBLWI
-- **Live web app:** https://statai-production.up.railway.app/app/ (the home page is public; the review page, monitor and simulator load data only after sign-in with the team's access code)
+- **Live web app:** https://statai-production.up.railway.app/app/ (the home and technology pages are public; the review page, monitor and simulator load data only after sign-in with the team's access code)
 - **Presentation:** [docs/echo-pitch.pdf](docs/echo-pitch.pdf)
 - **Repository:** https://github.com/thomasdevving/junction2026-echo
 - **Licence:** [MIT](LICENSE)
