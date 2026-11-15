@@ -52,7 +52,7 @@ A teacher fixes this with one glance and one sentence, but that doesn't scale. E
 |---|---|
 | **Meta Device Access Toolkit** (iOS SDK 1.0.1) | Glasses camera stream for recording and checking, lens display cards, glasses inputs (select / swipe / back) mapped to Check / Next / Back / Dismiss |
 | **Gemini: video understanding** (`gemini-3.5-flash`) | Chef video becomes structured steps with timestamps, criteria, mistakes and transcript (Files API + JSON schema) |
-| **Gemini: multi-image vision** (`gemini-3.5-flash-lite`) | Cook's frame vs. chef's reference frame becomes pass / fix / unsure, with evidence recorded per criterion before the verdict |
+| **Gemini: multi-image vision** (`gemini-3.8-flash`) | Cook's frame vs. chef's reference frame becomes pass / fix / unsure, with evidence recorded per criterion before the verdict |
 | **Gemini: fast vision** (`gemini-3.5-flash-lite`) | Proactive watcher: one low-res frame vs. the step's known mistakes, enum-constrained output |
 | **Gemini Live** (`gemini-3.8-live`) | Spoken Q&A grounded in the chef's transcript, with function calling for voice commands. The phone opens the session with a single-use **ephemeral token**, so no key ever reaches the device |
 | **ElevenLabs** | Pre-rendered voice lines for results, and an optional TTS token endpoint |
