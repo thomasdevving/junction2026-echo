@@ -69,7 +69,7 @@ Record each beat **at least 3 times**. Each take runs well past the beat's lengt
 
 | | |
 |---|---|
-| Action | Ask aloud, clearly: **"Why spread it to the edges?"** (the demo question; it is answered by the recipe's narration, `ai/STATUS.md:280`). Wait for the spoken answer |
+| Action | Ask aloud, clearly: **"Where should the cheese go?"** (the demo question since 2026-11-15; the real chef narration answers it: "don't put it in the middle like this, it should reach the edges"). Wait for the spoken answer |
 | Must be visible / audible | The mic or "listening" state; the question; the full spoken answer |
 | Rungs | 0/1 (audio matters most), 2, 3 |
 | Room | Quiet. If the room is noisy, use push-to-talk (Settings) and say so in the log |
