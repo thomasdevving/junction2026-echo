@@ -1,81 +1,116 @@
-# Track: `backend/` — API, storage, media, deployment, integration
+# `backend/`: the Echo API
 
-**Owner: Stylianos**
+A FastAPI service that sits between every client (the iPhone app and the web tools) and everything that needs a secret: Gemini, Supabase and ElevenLabs. It stores recipes and sessions, runs the video ingestion job with ffmpeg, answers the cook's `/check` and `/watch` frames through the [`echo_ai`](../ai/README.md) package, mints short-lived Gemini Live tokens for the phone, and serves the [web app](../web/README.md) at `/app/`.
 
-You own the FastAPI service every client talks to, the database and file storage, ffmpeg, deployment, and the end-to-end smoke test. You are also the **integration hub**: when two tracks disagree about an interface, [../docs/API-CONTRACT.md](../docs/API-CONTRACT.md) decides and you implement it. After `ios/`, this is the largest track.
+## Endpoints
 
-New here? Read [../README.md](../README.md), then the whole of [../docs/API-CONTRACT.md](../docs/API-CONTRACT.md), then this file.
+The full specification is [../docs/API-CONTRACT.md](../docs/API-CONTRACT.md) (contract v2.2), and the generated schema is in `openapi.json`. Interactive `/docs` is turned off in the running service.
 
-## What you deliver
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/health` | Status: `contract_version`, `ai_mode` (`gemini` / `fake`), `storage`, `ffmpeg` |
+| POST | `/recipes` | Create a recipe from a chef take. Returns a signed Supabase upload URL (TUS and `PUT`) and `upload_max_bytes` |
+| POST | `/recipes/{id}/process` | Start ingestion (202) |
+| GET / PATCH / DELETE | `/recipes`, `/recipes/{id}` | List (filter by `status`), read, edit, purge |
+| POST | `/recipes/{id}/publish` | `review` to `published`. Every step must have a reference image |
+| PATCH | `/steps/{id}` | Edit a step. A new `timestamp_s` re-cuts the reference still from the source video |
+| POST | `/check` | Multipart frame. Compares it with the step's reference (`check_frame`) and returns `pass` / `fix` / `unsure` plus `latency_ms` |
+| POST | `/watch` | Multipart low-res frame. Checks it against the step's known mistakes (`watch_frame`) and returns `ok` / `warn` |
+| POST / GET | `/sessions`, `/sessions/{id}`, `/sessions/{id}/events` | Cook-along sessions, event log, end-of-session summary |
+| GET | `/sessions/{id}/monitor`, `/sessions/{id}/latest-frame.jpg` | Live data for the audience monitor |
+| GET | `/live-token` | Single-use ephemeral Gemini Live token plus the Live config for a published recipe |
+| GET | `/tts-token` | Single-use ElevenLabs TTS token (503 if not configured) |
+| POST / GET | `/app/auth/login`, `/app/auth/session`, `/app/auth/logout` | Browser sign-in with an access code, exchanged for a cookie |
 
-| Deliverable | Consumer |
-|---|---|
-| Every endpoint in API-CONTRACT §2–§5, exactly as specified | `ios/`, `web/` |
-| A server reachable on the LAN from the first hours (memory store + fake AI) | `ios/`, `web/` |
-| Supabase schema, private buckets, seed of the demo recipe | everyone |
-| A deployed HTTPS URL | the demo |
-| `scripts/smoke.py` — one command that exercises the whole API and prints latency | everyone, after every push |
-| An emergency way to run the same server from a laptop on a hotspot | the demo |
+Every endpoint except `/health`, the sign-in routes and the per-session monitor frame requires the `X-Demo-Key` header or a valid browser session cookie.
 
-You do **not** write prompts or call Gemini directly: that is the `echo_ai` package in `ai/`, which you import. You do not write client UI: `web/` is served by you as static files but owned by its track.
+## How a chef take becomes a recipe
+
+`app/jobs/ingest.py`:
+
+1. `POST /recipes` returns a signed upload URL. The phone uploads the MP4 **straight to Supabase Storage**, never through FastAPI.
+2. `POST /recipes/{id}/process` starts one background job at a time.
+3. The job downloads the video in chunks with a size cap, then `ffprobe` validates it.
+4. `echo_ai.extract_recipe(video, title_hint, step_marks_s)` returns steps, timestamps, success criteria, known mistakes and the transcript.
+5. Timestamps are clamped to the video length. ffmpeg cuts a JPEG reference still (≤1280 px) and an optional silent clip (≤720 px, ≤6 s) per step. ffmpeg is called with argument lists, never a shell, and only the mp4 demuxer and file protocol are allowed.
+6. Status becomes `review` and the web review page takes over. Any failure sets `failed` with a fixed message.
+
+Stuck jobs are swept on startup: `processing` recipes older than 15 min and `uploading` ones older than 2 h become `failed`.
+
+## Data
+
+Postgres tables (`migrations/001_init.sql`):
+
+- `recipes`: status `uploading | processing | review | published | failed`, step marks, consent time
+- `steps`: instruction, success criteria, `watch_fors`, reference image, clip window, timer
+- `sessions`
+- `session_events`
+
+Row Level Security is on with no policies, so only the service role can read or write and clients never touch tables.
+
+There are three private buckets:
+
+- `videos`: chef takes. 50 MiB per file in practice, the Supabase Free-plan cap
+- `media`: reference stills and clips
+- `frames`: cook frames from `/check` and `/watch`, written after the response
+
+Storage sits behind a `Store` protocol with two implementations. `MemoryStore` keeps local files and is used for tests and emergency mode. `SupabaseStore` is used in production.
+
+## Security
+
+- Gemini, Supabase and ElevenLabs keys exist only on the server.
+- The phone gets ephemeral Live tokens (at most 1 per session every 3 s, never cached or logged), signed download URLs and one signed upload URL per take.
+- The demo key is compared in constant time. The server refuses to start with an empty or `dev-key` demo key on Railway, or anywhere it runs with Supabase plus real Gemini.
+- **Browser sign-in:** an opaque HttpOnly, SameSite=Strict cookie (`__Host-` prefix over HTTPS). It requires `X-Echo-Browser: 1` and an exact same-origin `Origin`. Attempts are rate limited at 8 per client and 120 overall per window. Sessions are kept in memory, capped at 256.
+- **Body caps:** 64 KB JSON, 2 MB frames, 4 KB login.
+- **`/watch`:** one request in flight per session. After a Gemini quota error it pauses for 10 s.
+
+## What has been verified
+
+From [STATUS.md](STATUS.md), all dated 14 Nov 2026:
+
+- **Production** runs on Railway with real Gemini and Supabase (`https://statai-production.up.railway.app`, deployment `f5850324` = commit `280f664`). Smoke runs against it passed, and `/live-token` returned a real locked `gemini-3.8-live` token.
+- **Two-session load run on production** (103 calls, server-measured model time): `/check` p50 1032 ms, max 1455 ms. `/watch` p50 728 ms, max 1188 ms. On the client side, Railway's proxy added occasional multi-second stalls (one client timeout, p90 `/watch` 5.0 s), so treat the server numbers as model time, not end-to-end.
+- **The ingestion pipeline on production with a real chef take** (recorded on the glasses, recorded in [../ios/STATUS.md](../ios/STATUS.md)): the take was uploaded, processed, and became a 5-step recipe with stills and clips in about 33 s, then was published. The pipeline's automated tests run on fake AI with generated videos.
+- **The demo recipe** is the curated six-step fixture (real transcript and stills from that take), seeded with `scripts/seed.py --publish --replace`.
+- **Tests:** `pytest -q` gives 307 passed, 5 skipped (fake AI, memory store, no network).
 
 ## Setup
 
-Requires Python 3.11+, and `ffmpeg` + `ffprobe` on the PATH from BE-06 onward (`winget install ffmpeg`, `brew install ffmpeg`, `apt install ffmpeg`).
+Requires Python 3.11+ and `ffmpeg` + `ffprobe` on the PATH.
 
 ```bash
 cd backend
 python -m venv .venv
 source .venv/bin/activate            # Windows PowerShell: .venv\Scripts\Activate.ps1
-pip install -e ../ai                 # the echo_ai package (needs AI-01 on main)
+pip install -e ../ai                 # the echo_ai package
 pip install -e ".[dev]"
-cp .env.example .env
+cp .env.example .env                 # defaults: memory store + fake AI, no keys needed
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+pytest -q
+python scripts/smoke.py --base http://localhost:8000 --key dev-key
 ```
 
-`--host 0.0.0.0` matters: the iPhone and the other laptops reach you over the LAN. Find your address with `ipconfig` (Windows) or `ipconfig getifaddr en0` (macOS) and post `http://<ip>:8000` in the team chat. On Windows, allow Python through the firewall for private networks when prompted.
+Open `http://localhost:8000/app/` for the web tools. Live Supabase tests are opt-in: `RUN_SUPABASE_TESTS=1 pytest -q tests/test_supabase_integration.py`.
 
-These commands work after BE-01 has created `pyproject.toml` and `.env.example`.
-
-## Target layout
+## Layout
 
 ```
 backend/
-  pyproject.toml   .env.example   Dockerfile   Dockerfile.dockerignore   railway.json
-  README.md  STATUS.md
   app/
-    main.py          create_app(): routers, CORS, error handlers, static mount of ../web
-    config.py        Settings (pydantic-settings), one place for every env var
-    auth.py          X-Demo-Key dependency
-    errors.py        ApiError, the error envelope, AIError → HTTP mapping
-    schemas.py       request / response models (API-CONTRACT §2–§5)
-    deps.py          get_store(), get_settings()
-    metrics.py       per-session latency ring buffers
-    routers/         health.py recipes.py steps.py check.py watch.py sessions.py live.py
-                     local.py (memory mode only: /local-files, /local-upload)
-    store/
-      base.py        Store protocol + record types
-      memory.py      MemoryStore (+ local files under DATA_DIR)
-      supabase_store.py   SupabaseStore                               (BE-02)
-    media/
-      images.py      JPEG validation and downscaling                   (BE-03)
-      ffmpeg.py      probe, still, clip (asyncio subprocess)           (BE-06)
-      videocache.py  10-minute local copy of a source video for re-picks (BE-06)
-    jobs/ingest.py   ingestion job: download, probe, Gemini, stills, clips (BE-06)
-  migrations/001_init.sql                                              (BE-02)
-  scripts/seed.py  scripts/smoke.py
+    main.py config.py auth.py guard.py browser_sessions.py errors.py schemas.py views.py
+    ai.py            imports echo_ai; reports ai_mode
+    routers/         health recipes steps frames (/check, /watch) sessions live tts latest_frame browser_auth local
+    store/           Store protocol, MemoryStore, SupabaseStore
+    media/           JPEG handling, ffmpeg probe / still / clip, source-video cache
+    jobs/ingest.py   ingestion job
+    faults.py metrics.py refcache.py logs.py seed.py
+  migrations/001_init.sql
+  scripts/         seed smoke load_watch cleanup upload_limit_probe emergency.sh/.ps1
   tests/
+  Dockerfile  railway.json  openapi.json
+  STATUS.md  tasks/   build log and the team's task batches
 ```
-
-### Ingestion (BE-06)
-
-`POST /recipes` returns the signed upload URL plus `upload_max_bytes` (contract 2.2) = `MAX_VIDEO_MB` × 1,048,576. **Real limit: 52,428,800 bytes (50 MiB).** Supabase's project-wide upload limit on the Free plan caps every bucket, whatever the `videos` bucket's own 500 MB setting says; above it Supabase refuses the upload itself (TUS create `413 Maximum size exceeded`, simple `PUT` `400` with body `"statusCode":"413"`, `EntityTooLarge`), so FastAPI never sees it. Keep `MAX_VIDEO_MB` at 50 unless the Supabase plan and its global limit are raised first. `scripts/upload_limit_probe.py` checks the real limit end to end.
-
-`POST /recipes/{id}/process` starts one background job (one at a time; the others wait as `processing`): download `videos/<id>/source.mp4` in chunks (`video larger than <N> MiB` past `MAX_VIDEO_MB`), `ffprobe` it (`not a readable MP4`), call `extract_recipe`, clamp timestamps and clip windows into the video's duration, then ffmpeg cuts a 1280-px JPEG still (`media/<id>/steps/<idx>/ref.jpg`) and an optional 720-px clip of at most 6 s (`clip.mp4`) per step. Stills and clips are never upscaled. A failed still leaves the step without a reference image (publish answers `409` until the chef re-picks the frame); a failed clip is skipped. On startup, `processing` recipes older than 15 minutes become `failed` and `uploading` ones older than 2 hours become `failed` (also checked on every `GET /recipes`).
-
-`PATCH /steps/{id}` with a changed `timestamp_s` re-extracts the still from the source video (cached on local disk for 10 minutes, at most 2 videos), allowed in `review` and `published`. A recipe with no source video (the seeded demo) just stores the value. `timestamp_s` beyond the video's end is `422`. `DELETE /recipes/{id}` on the seeded demo recipe is `409` unless `?force=true`.
-
-`/health` gains `"ffmpeg": true|false`. Tests that need ffmpeg generate a `testsrc` video and are skipped when it is not installed.
 
 ## Configuration
 
@@ -84,6 +119,9 @@ Every variable is read in `app/config.py` and listed in `.env.example`.
 | Variable | Default | Meaning |
 |---|---|---|
 | `DEMO_API_KEY` | `dev-key` | Value clients send in `X-Demo-Key`. Use a long random string in production |
+| `WEB_LOGIN_CODE`, `WEB_SESSION_TTL_S` | — | Browser sign-in code and cookie lifetime (see [Browser sign-in](#browser-sign-in)) |
+| `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `ELEVENLABS_MODEL` | — | Optional: enables `/tts-token` |
+| `ECHO_MODEL_VIDEO` / `_CHECK` / `_WATCH` / `_LIVE` | from `echo_ai` | Gemini model overrides (read by `echo_ai`) |
 | `STORAGE` | `memory` | `memory` or `supabase` |
 | `DATA_DIR` | `.data` | Local file root for the memory store |
 | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | — | Required when `STORAGE=supabase` |
@@ -100,15 +138,15 @@ Every variable is read in `app/config.py` and listed in `.env.example`.
 
 ### Startup refusals
 
-The server refuses to start (`check_deploy_settings`) with `DEMO_API_KEY` unset or `dev-key` on Railway, and also with `STORAGE=supabase` and the real AI (`ECHO_AI_FAKE=0`) anywhere.
+The server refuses to start (`check_deploy_settings`) when `DEMO_API_KEY` is unset or `dev-key` and it is either on Railway or running with `STORAGE=supabase` and the real AI (`ECHO_AI_FAKE=0`).
 
-### Quota cool-down (BE-07.2)
+### Quota cool-down
 
 When the model answers `/watch` with a quota error, the process stops calling the model for `/watch` for 10 s: every `/watch` in that window answers `429 quota_exhausted` (`retryable: true`, the client's `request_id`) immediately, with `"cooldown": true` in its call log line. The check runs after `request_id` / `step_id` parsing (so a malformed request still gets `422`) and before the in-flight claim, the frame and the model. Only a quota error from `/watch` starts it; `/check` is never blocked by it and a quota error from `/check` does not start it. The state is per process (one worker), kept in `app/faults.py` (`WATCH_COOLDOWN_S`).
 
 ### Rehearsing failures (fault injection)
 
-With `FAULT_INJECT=timeout|quota|unavailable` **and** `FAULT_INJECT_ENABLED=1`, a `/check`, `/watch` or `/live-token` request that carries the header `X-Fault: 1` fails with that error instead of calling the model: `504 model_timeout`, `429 quota_exhausted` (on `/watch` this also starts the cool-down) or `503 model_unavailable`. Requests without the header are untouched. Without `FAULT_INJECT_ENABLED=1` the header is ignored. The server logs a WARNING at startup when it is enabled. `X-Fault` is in the CORS allowed headers so the web app can send it. It is deliberately **not** blocked on Railway (the recovery tests in BE-07.4 are run against the deployed server): switch it on for the test, remove both variables afterwards, and never during the demo.
+With `FAULT_INJECT=timeout|quota|unavailable` **and** `FAULT_INJECT_ENABLED=1`, a `/check`, `/watch` or `/live-token` request that carries the header `X-Fault: 1` fails with that error instead of calling the model: `504 model_timeout`, `429 quota_exhausted` (on `/watch` this also starts the cool-down) or `503 model_unavailable`. Requests without the header are untouched. Without `FAULT_INJECT_ENABLED=1` the header is ignored. The server logs a WARNING at startup when it is enabled. `X-Fault` is in the CORS allowed headers so the web app can send it. It is deliberately **not** blocked on Railway (recovery tests run against the deployed server): switch it on for the test, remove both variables afterwards, and never during the demo.
 
 ```bash
 FAULT_INJECT=quota FAULT_INJECT_ENABLED=1 uvicorn app.main:app
@@ -119,10 +157,10 @@ curl -H 'X-Demo-Key: dev-key' -H 'X-Fault: 1' -F step_id=... -F request_id=$(uui
 
 | Script | Purpose |
 |---|---|
-| `scripts/seed.py` | Seed the demo recipe (see above) |
+| `scripts/seed.py` | Seed the demo recipe (`--publish --replace`, optionally `--video <take.mp4>`) |
 | `scripts/smoke.py` | End-to-end smoke test of every endpoint |
-| `scripts/load_watch.py` | Watcher-cadence load check (BE-07.1): `--sessions 2 --minutes 3 --frame x.jpg`. Per session: a `/watch` on a fixed 2.5 s grid (a tick is skipped and counted if the previous `/watch` of that session is still running), a `/check` every 20 s, then `session_end`. Prints status counts, error codes, p50 / p90 / max client latency, 429s and skipped ticks; exits 1 on any 5xx or transport error. It sends real frames: against production with real Gemini it spends quota, run it once and not right before the demo |
-| `scripts/cleanup.py` | Data hygiene (BE-07.5): `--hours 6` (default), dry run unless `--yes`. Deletes sessions older than N hours with their events and `frames/<session>/` blobs, and `failed` recipes (blobs first). Never deletes the seeded recipe; its old sessions are cleaned. With `STORAGE=supabase` it works on the real project (put the service key in `backend/.env`). With `STORAGE=memory` the rows live only inside the running server, so the script can only remove stale `DATA_DIR/frames/<session>` folders and says so |
+| `scripts/load_watch.py` | Watcher-cadence load check: `--sessions 2 --minutes 3 --frame x.jpg`. Per session: a `/watch` on a fixed 2.5 s grid (a tick is skipped and counted if the previous `/watch` of that session is still running), a `/check` every 20 s, then `session_end`. Prints status counts, error codes, p50 / p90 / max client latency, 429s and skipped ticks; exits 1 on any 5xx or transport error. It sends real frames: against production with real Gemini it spends quota, run it once and not right before the demo |
+| `scripts/cleanup.py` | Data hygiene: `--hours 6` (default), dry run unless `--yes`. Deletes sessions older than N hours with their events and `frames/<session>/` blobs, and `failed` recipes (blobs first). Never deletes the seeded recipe; its old sessions are cleaned. With `STORAGE=supabase` it works on the real project (put the service key in `backend/.env`). With `STORAGE=memory` the rows live only inside the running server, so the script can only remove stale `DATA_DIR/frames/<session>` folders and says so |
 
 ## Docker image
 
@@ -174,11 +212,11 @@ docker run -p 8000:8000 -e DEMO_API_KEY=dev-key echo-backend         # memory + 
    Then open `https://<domain>/app/` on a phone.
 7. **Share the URL and the new demo key privately** with the team, never in the repo. Record the URL and the smoke run in `STATUS.md`.
 
-Supabase needs no seeding for production if `scripts/seed.py --publish --replace` has already run against the same project (BE-02). Run it again whenever AI announces a new fixture.
+Supabase needs no seeding for production if `scripts/seed.py --publish --replace` has already run against the same project. Run it again whenever the fixture changes.
 
 ### Keeping production current
 
-Production deploys are **manual** (decided in BE-04.5, see `STATUS.md`). After step 1, turn off automatic deploys for `main` in the service settings ("Disable"). To release:
+Production deploys are **manual**. After step 1, turn off automatic deploys for `main` in the service settings ("Disable"). To release:
 
 1. Run `pytest -q` and the local smoke script on the commit.
 2. In the Railway dashboard, press `Cmd/Ctrl + K` → **Deploy Latest Commit**.
@@ -214,36 +252,9 @@ backend\scripts\emergency.ps1           # Windows         (-Fake, -Port 8001)
 
 **Limits:**
 - **Plain HTTP on a LAN address.** Browsers allow the camera only on HTTPS or `localhost`. The web simulator's camera therefore works only on the laptop itself (`http://localhost:8000/app/`), not from a phone or another laptop. Photo upload still works.
-- **The iOS app** needs local-network permission and an App Transport Security exception to reach an `http://` address (task IOS-01.2, iOS owner).
+- **The iOS app** needs local-network permission and an App Transport Security exception to reach an `http://` address.
 - **Memory store.** Recipes recorded in production are not here, only the seeded fixture recipe. Everything is lost when the process stops.
 - On Windows, allow Python through the firewall for private networks.
-
-## Batches
-
-Run in order. One Claude session per batch. Kickoff prompt: [../docs/PLAN.md §7](../docs/PLAN.md#7-working-with-claude-on-each-laptop).
-
-| # | Batch | Gate | Needs | Unblocks | A human must |
-|---|---|---|---|---|---|
-| 01 | [Skeleton and full API on memory + fake AI](tasks/01-skeleton-and-mock-api.md) | G0 | AI-01 | IOS-01, WEB-01, everything | Share the LAN URL |
-| 02 | [Supabase schema, storage, seed](tasks/02-supabase-data-and-seed.md) | G1→G2 | 01 | 04 | Create the Supabase project |
-| 03 | [Check and watch, production-grade](tasks/03-check-and-watch.md) | G1 | 01, AI-04 | G1, IOS-03/04 | — |
-| 04 | [Deploy to Railway + emergency mode](tasks/04-deploy-railway.md) | G2 | 02, 03 | The demo, AI-07.5 | Create the Railway project, set secrets |
-| 05 | [Live token, monitor, session summary](tasks/05-live-token-and-monitor.md) | G2→G3 | 01, AI-05 | IOS-05, WEB-03 | — |
-| 06 | [Ingestion pipeline with ffmpeg](tasks/06-ingestion-pipeline.md) | G3 | 02, AI-06 | WEB-02 | — |
-| 07 | [Hardening and end-to-end](tasks/07-hardening-and-e2e.md) | G4 | all above | Demo readiness | Run the recovery tests |
-
-G1 only needs one thing from you beyond BE-01: run with `ECHO_AI_FAKE=0` as soon as AI-04 is on `main`.
-
-## Rules for this track
-
-- **The contract is the spec.** Field names, status codes, and error codes come from API-CONTRACT. If something is missing or wrong there, change the contract through its §9 protocol first, then the code.
-- **Both stores always work.** `STORAGE=memory` is the test default and the emergency fallback; never let it rot.
-- **Tests run with fake AI and the memory store**, need no network, and pass before every push: `pytest -q`.
-- **Run the smoke script after every push** against whatever the clients are using: `python scripts/smoke.py --base http://localhost:8000 --key dev-key`.
-- **Secrets** live in `.env` (untracked) and in Railway's variables. Never log a key, a token, or a signed URL's signature.
-- **Measure, don't guess.** `latency_ms` is measured around the AI call with a monotonic clock and reported in every response.
-- Do not edit `ai/` or `web/`. If `echo_ai` misbehaves, write it in [STATUS.md](STATUS.md) under "Needs from other tracks" and tell the AI owner.
-- Deploying, creating cloud projects, and setting secrets are done by **you, the human owner**, in the provider's dashboard or CLI. Claude prepares the files and tells you the exact steps.
 
 ## Browser sign-in
 
